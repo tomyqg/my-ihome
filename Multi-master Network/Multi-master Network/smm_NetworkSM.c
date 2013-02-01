@@ -2,8 +2,11 @@
 Serial Multi-Master Network State Machine
 */
 
+#include <avr/io.h>
 #include "fifo/fifo.h"
 #include "smm_NetworkSM.h"
+#include "board_config.h"
+#include "tc_driver.h"
 
 /**
  * \brief Buffer to associate with receiving FIFO buffer
@@ -61,7 +64,7 @@ volatile uint8_t u8sm_PreviousState;
 uint8_t gNetworkError;
 
 /* Bitmasked flags that describe what event has occurred */
-volatile uint16_t gEvents = 0;
+extern volatile uint16_t gSystemEvents;
 
 /* Lookup table containing a pointer to the function to call in each state */
 void (*SM_stateTable[])(void) =
@@ -88,7 +91,8 @@ void fsm_InitializeStateMachine(void)
 	fifo_init(&fifo_receive_buffer_desc, &fifo_receive_buffer[0], FIFO_RECEIVE_BUFFER_SIZE);
 	fifo_init(&fifo_send_buffer_desc,	 &fifo_send_buffer[0],	  FIFO_SEND_BUFFER_SIZE);
 	
-	/* TODO: reset hardware  - hardware cleanup */		
+	/* TODO: reset hardware  - hardware cleanup */
+	
 	
 }
 
@@ -99,7 +103,7 @@ void fsm_Idle(void)
 	uint16_t u16EventFlags;
 	
 	// Atomic interrupt safe read of global variable storing event flags
-	u16EventFlags = gEvents;
+	u16EventFlags = gSystemEvents;
 	
 	// Check for receiving and sending data events. Receiving has higher priority than sending.
 	// Go for receiving check first.
@@ -121,13 +125,14 @@ void fsm_Idle(void)
 
 void fsm_Receive(void)
 {
-	// We have received the data. It means that the line is or was in use. To avoid collision start or restart busy line timer if already running.
+	// We have received the data. It means that the line currently is or was in use.
+	// To avoid collision start or restart busy line timer if already running.
 	
-	// Mark the line as busy
+	// Mark the bus line as busy
 	gBusyLine = BUSY;
-
-
-
+	
+	// Force Restart of busy line timer
+	xmega_tc_restart(&TIMER_BUSY_LINE);
 
 	// If received data was error free than move to processing the data
 	gNSMCurrentState = eSM_ProcessData;
@@ -210,7 +215,7 @@ void fsm_WaitForResponse(void)
 	uint16_t u16EventFlags;
 	
 	// Atomic interrupt safe read of global variable storing event flags
-	u16EventFlags = gEvents;
+	u16EventFlags = gSystemEvents;
 	
 	// If data was received in this state than collect the data. Should be acknowledge frame.
 	if (u16EventFlags & EVENT_DATA_READY_TO_SEND_bm)
@@ -219,7 +224,7 @@ void fsm_WaitForResponse(void)
 	}
 	
 	// Waiting for response timer timed out. Go to retransmission state.
-	if (u16EventFlags & EVENT_WAIT_FOR_RESPONSE_bm)
+	if (u16EventFlags & EVENT_WAIT_FOR_RESPONSE_TIMEOUT_bm)
 	{
 		gNSMCurrentState = eSM_Retransmission;
 		
