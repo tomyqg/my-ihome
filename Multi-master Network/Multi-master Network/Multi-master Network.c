@@ -94,8 +94,8 @@ static inline void usartCommTerminalInit(void)
 	xmega_set_usart_mode(&USART_TERMINAL, USART_CMODE_ASYNCHRONOUS_gc);
 	
 	/* Set interrupts level */
-	xmega_set_usart_rx_interrupt_level(&USART_TERMINAL, USART_RXCINTLVL_LO_gc);
-	xmega_set_usart_tx_interrupt_level(&USART_TERMINAL, USART_TXCINTLVL_LO_gc);
+	// xmega_set_usart_rx_interrupt_level(&USART_TERMINAL, USART_RXCINTLVL_LO_gc);
+	// xmega_set_usart_tx_interrupt_level(&USART_TERMINAL, USART_TXCINTLVL_LO_gc);
 	
 	/* Enable transmitter and receiver */
 	xmega_enable_usart_tx(&USART_TERMINAL);
@@ -144,7 +144,7 @@ void xmega_set_cpu_clock_to_32MHz(void)
 }
 
 // CRC-16(CRC-CCITT) Polynom x^16 + x^12 + x^5 + 1 --> 0x1021
-uint16_t calculate_crc16_checksum(uint8_t *a_pData, uint8_t count)
+uint16_t xmega_calculate_checksum_crc16(uint8_t *a_pData, uint8_t count)
 {
 	uint8_t i = 0;
 	uint16_t crc16_checksum = 0;
@@ -182,14 +182,34 @@ uint16_t calculate_crc16_checksum(uint8_t *a_pData, uint8_t count)
 	return crc16_checksum;
 }
 
+/********************************************//**
+* Busy Line timer configuration section
+***********************************************/
+static inline void xmega_timer_config(TC0_t *a_pTimer, TC_CLKSEL_t a_clockSelect, uint16_t a_timerPeriod )
+{
+	/*
+	 * Enable the timer, and set it to count up.
+	 * When it overflows, it triggers the message to the Host.
+	 * 0.25Hz tick.
+	 */
+	a_pTimer->CTRLB = (a_pTimer->CTRLB & ~TC0_WGMODE_gm) | TC_WGMODE_NORMAL_gc;
+	a_pTimer->CTRLFSET	= 0;																// set UP direction
+	a_pTimer->PER		= a_timerPeriod;													// set defined period
+	a_pTimer->INTCTRLA	= a_pTimer->INTCTRLA & ~TC0_OVFINTLVL_gm;							// set overflow interrupt
+	a_pTimer->INTCTRLA	= a_pTimer->INTCTRLA | (TC_OVFINTLVL_LO_gc << TC0_OVFINTLVL_gp);	// set low-level overflow interrupt
+	a_pTimer->CTRLA		= (a_pTimer->CTRLA & ~TC0_CLKSEL_gm) | a_clockSelect;	
+};
+
+
+
 /* *********************************************************************** */
 /* ******************** INTERRUPT EVENT DEFINITIONS ********************** */
 /* *********************************************************************** */
-#define EVENT_BUSYLINE_TIMER_bm		(1 << 0)
-#define EVENT_NORESPONSE_TIMER_bm	(1 << 1)
+// #define EVENT_BUSYLINE_TIMER_bm		(1 << 0)
+// #define EVENT_NORESPONSE_TIMER_bm	(1 << 1)
 
 // Bitmasked flags that describe what interrupt has occurred
-volatile uint16_t gInterruptEvents = 0;
+volatile uint16_t gSystemEvents = 0;
 
 /*! \brief Busy line timer overflow interrupt service routine.
  *
@@ -199,7 +219,7 @@ volatile uint16_t gInterruptEvents = 0;
 ISR(TCD0_OVF_vect)
 {	
 	// Signal busy line timer expiration
-	gInterruptEvents |= EVENT_BUSYLINE_TIMER_bm;
+	gSystemEvents |= EVENT_BUSY_LINE_TIMEOUT_bm;
 }
 
 /*! \brief No response timer overflow interrupt service routine.
@@ -210,7 +230,7 @@ ISR(TCD0_OVF_vect)
 ISR(TCE0_OVF_vect)
 {	
 	// Signal no response timer expiration
-	gInterruptEvents |= EVENT_NORESPONSE_TIMER_bm;
+	gSystemEvents |= EVENT_WAIT_FOR_RESPONSE_TIMEOUT_bm;
 }
 
 //! Storage for serial number
@@ -249,32 +269,15 @@ int main(void)
 	// Initially go LOW to enable receiver - start listening
 	rs485_receiver_enable();
 
-	/********************************************//**
-	 * Busy Line timer configuration section
-	 ***********************************************/
+	/*******************************//**
+	 * Busy Line timer configuration
+	 ***********************************/
+	xmega_timer_config(&TIMER_BUSY_LINE, TC_CLKSEL_DIV256_gc, TIMER_BUSY_LINE_PERIOD);
 	
-	/*
-	 * Enable the timer, and set it to count up.
-	 * When it overflows, it triggers the message to the Host.
-	 * 0.25Hz tick.
-	 */
-	
-	TIMER_BUSY_LINE.CTRLB		= (TIMER_BUSY_LINE.CTRLB & ~TC0_WGMODE_gm) | TC_WGMODE_NORMAL_gc;
-	TIMER_BUSY_LINE.CTRLFSET	= 0;																	// set UP direction
-	TIMER_BUSY_LINE.PER			= TIMER_BUSY_LINE_PERIOD;												// set defined period
-	TIMER_BUSY_LINE.INTCTRLA	= TIMER_BUSY_LINE.INTCTRLA & ~TC0_OVFINTLVL_gm;							// set overflow interrupt
-	TIMER_BUSY_LINE.INTCTRLA	= TIMER_BUSY_LINE.INTCTRLA | (TC_OVFINTLVL_LO_gc << TC0_OVFINTLVL_gp);	// set low-level overflow interrupt
-	TIMER_BUSY_LINE.CTRLA		= (TIMER_BUSY_LINE.CTRLA & ~TC0_CLKSEL_gm) | TC_CLKSEL_DIV256_gc;
-	
-	/********************************************//**
-	 * No response timer configuration section
-	 ***********************************************/
-	TIMER_NO_RESPONSE.CTRLB		= (TIMER_NO_RESPONSE.CTRLB & ~TC0_WGMODE_gm) | TC_WGMODE_NORMAL_gc;
-	TIMER_NO_RESPONSE.CTRLFSET	= 0;																	// set UP direction
-	TIMER_NO_RESPONSE.PER		= TIMER_NO_RESPONSE_PERIOD;												// set defined period
-	TIMER_NO_RESPONSE.INTCTRLA	= TIMER_NO_RESPONSE.INTCTRLA & ~TC0_OVFINTLVL_gm;							// set overflow interrupt
-	TIMER_NO_RESPONSE.INTCTRLA	= TIMER_NO_RESPONSE.INTCTRLA | (TC_OVFINTLVL_LO_gc << TC0_OVFINTLVL_gp);	// set low-level overflow interrupt
-	TIMER_NO_RESPONSE.CTRLA		= (TIMER_NO_RESPONSE.CTRLA & ~TC0_CLKSEL_gm) | TC_CLKSEL_DIV1024_gc;
+	/*********************************//**
+	 * No response timer configuration
+	 *************************************/
+	xmega_timer_config(&TIMER_NO_RESPONSE, TC_CLKSEL_DIV1024_gc, TIMER_NO_RESPONSE_PERIOD);
 	
 	// Read device serial number
 	nvm_read_device_serial(&xmegaSerialNumber);
@@ -297,7 +300,7 @@ int main(void)
 	printf("SNum crc-16: 0x%04x\n", g_u32crc16_checksum); */
 	
 	// Calculate CRC-16 (CRC-CCITT) using XMEGA hardware CRC peripheral
-	g_u16crc16_checksum = calculate_crc16_checksum(&xmegaSerialNumber.u8DataArray[0], 11);
+	g_u16crc16_checksum = xmega_calculate_checksum_crc16(&xmegaSerialNumber.u8DataArray[0], 11);
 	printf("crc-16: 0x%04x\n", g_u16crc16_checksum);
 
 	// CRC-16 calculation using AVR-GCC library. xmodem version */
@@ -311,40 +314,40 @@ int main(void)
 	for(;;)
     {
 		// Atomic interrupt safe read of global variable storing event flags
-        u16EventFlags = gInterruptEvents;
+        u16EventFlags = gSystemEvents;
         
         while (u16EventFlags)
         {
 	        // Note: Each handler will clear the relevant bit in global variable gInterruptEvents
 	        
-			if (u16EventFlags & EVENT_BUSYLINE_TIMER_bm)
+			if (u16EventFlags & EVENT_BUSY_LINE_TIMEOUT_bm)
 	        {
 		        // Busy line timer interrupt fired up
 		        // HandleUSARTD0RXC();
 				printf("BusyLine timer expired\n");
 				
 				// Clear corresponding event flag
-				gInterruptEvents &= ~EVENT_BUSYLINE_TIMER_bm;
+				gSystemEvents &= ~EVENT_BUSY_LINE_TIMEOUT_bm;
 	        }
 	        
-	        if (u16EventFlags & EVENT_NORESPONSE_TIMER_bm)
+	        if (u16EventFlags & EVENT_WAIT_FOR_RESPONSE_TIMEOUT_bm)
 	        {
 		        // No response timer overflow interrupt fired up
 		        // HandleHeartbeatTimer();
 				printf("NoResponse timer expired\n");
 				
 				// Clear corresponding event flag
-				gInterruptEvents &= ~EVENT_NORESPONSE_TIMER_bm;
+				gSystemEvents &= ~EVENT_WAIT_FOR_RESPONSE_TIMEOUT_bm;
 	        }
 	        
-	        u16EventFlags = gInterruptEvents;
+	        u16EventFlags = gSystemEvents;
         }
         
         // Read the event register again without allowing any new interrupts
         // cpu_irq_disable();
 		cli();
 		
-        if (0 == gInterruptEvents)
+        if (0 == gSystemEvents)
         {
 	        // cpu_irq_enable();
 			sei();
