@@ -5,18 +5,24 @@ Serial Multi-Master Network State Machine
 #ifndef SMM_NETWORKSM_H_
 #define SMM_NETWORKSM_H_
 
-/* Event definitions */
-#define EVENT_RECEIVED_DATA_bm			(1 << 0)
-#define EVENT_DATA_READY_TO_SEND_bm		(1 << 1)
-#define EVENT_BUSY_LINE_TIMEOUT_bm		(1 << 2)
-#define EVENT_DATA_REG_EMPTY_bm			(1 << 3)
-#define EVENT_WAIT_FOR_RESPONSE_bm		(1 << 4)
+/** EVENT definitions */
+
+//! Received data from RS-485 bus
+#define EVENT_RECEIVED_DATA_bm				(1 << 0)
+//! Data is ready to be sent
+#define EVENT_DATA_READY_TO_SEND_bm			(1 << 1)
+//! Busy line timer time out
+#define EVENT_BUSY_LINE_TIMEOUT_bm			(1 << 2)
+//! Data register empty??
+#define EVENT_DATA_REG_EMPTY_bm				(1 << 3)
+//! Waiting for response timer time out
+#define EVENT_WAIT_FOR_RESPONSE_TIMEOUT_bm	(1 << 4)
 
 /* Error types */
 typedef enum eNetworkError
 {
 	eNE_None = 0,
-	eNE_MaximumRetries,d.
+	eNE_MaximumRetries,
 	
 	eNE_MAX
 } eNetworkError_Type;
