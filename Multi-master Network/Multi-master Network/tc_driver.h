@@ -9,6 +9,22 @@
 #ifndef TC_DRIVER_H_
 #define TC_DRIVER_H_
 
+/* The CMD[1:0] bits in CTRLFSET are used to issue special commands to the TC */
+/* Force Update
+The "Force update" command is used to force an UPDATE condition. Buffer registers
+are copied to their destination when the  UPDATE conditions are met. Issuing this
+command forces an UPDATE condition regardless of the counter value. This can be
+used to update both the period and compare registers at the exact same time. In input
+capture mode, the "Force update" command only has effect on the PERBUF/PER
+registers. */
+
+/* The "Force restart" command clears the CNT[H:L] registers and the direction bit to its
+reset value. */
+
+/* The "Force hard reset" command puts all registers in that TC instance back to their
+reset state. For safety reasons, the TC clock selection must be set to OFF for this
+command to have any effect. */
+
 /**
  * \brief Macro to configure timer/counter clock source
  *
