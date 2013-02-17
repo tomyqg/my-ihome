@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <avr/sleep.h>
 #include <avr/interrupt.h>
+#include <util/atomic.h>
 #include "utils.h"
 #include "board_config.h"
 #include "usart_driver/usart_driver.h"
@@ -200,16 +201,26 @@ static inline void xmega_timer_config(TC0_t *a_pTimer, TC_CLKSEL_t a_clockSelect
 	a_pTimer->CTRLA		= (a_pTimer->CTRLA & ~TC0_CLKSEL_gm) | a_clockSelect;	
 };
 
-
-
-/* *********************************************************************** */
-/* ******************** INTERRUPT EVENT DEFINITIONS ********************** */
-/* *********************************************************************** */
-// #define EVENT_BUSYLINE_TIMER_bm		(1 << 0)
-// #define EVENT_NORESPONSE_TIMER_bm	(1 << 1)
-
-// Bitmasked flags that describe what interrupt has occurred
+// Global bitmasked flags that describe what interrupt has occurred
 volatile uint16_t gSystemEvents = 0;
+
+// Variable to store current event flag
+uint16_t u16EventFlags;
+
+/* Flag to indicate that the line is busy */
+extern volatile uint8_t gBusyLine;
+
+/* Current state of Network State Machine */
+extern volatile eSM_StateType gNSM_CurrentState;
+
+/* Previous state of Network State Machine */
+extern volatile eSM_StateType gNSM_PreviousState;
+
+// Lookup table containing a pointer to the FSM handlers
+extern void (*SM_stateTable[])(void);
+
+// Own network address
+uint16_t u16OwnNetworkAddress;
 
 /*! \brief Busy line timer overflow interrupt service routine.
  *
@@ -219,7 +230,7 @@ volatile uint16_t gSystemEvents = 0;
 ISR(TCD0_OVF_vect)
 {	
 	// Signal busy line timer expiration
-	gSystemEvents |= EVENT_BUSY_LINE_TIMEOUT_bm;
+	gSystemEvents |= EVENT_IRQ_BUSY_LINE_TIMEOUT_bm;
 }
 
 /*! \brief No response timer overflow interrupt service routine.
@@ -229,8 +240,37 @@ ISR(TCD0_OVF_vect)
  */
 ISR(TCE0_OVF_vect)
 {	
-	// Signal no response timer expiration
-	gSystemEvents |= EVENT_WAIT_FOR_RESPONSE_TIMEOUT_bm;
+	// Notify that no response timer expired
+	gSystemEvents |= EVENT_IRQ_WAIT_FOR_RESPONSE_TIMEOUT_bm;
+}
+
+/*! \brief Reception Complete Interrupt interrupt service routine.
+ *
+ *  USART data receive interrupt handler.
+ *  Be as quick as possible and only set the flag of corresponding event.
+ */
+ISR(USARTD1_RXC_vect, ISR_BLOCK)
+{
+	// Notify that new data arrived on the bus
+	gSystemEvents |= EVENT_IRQ_RECEIVE_COMPLETE_bm;
+}
+
+/* Data Register Empty Interrupt */
+ISR(USARTD1_DRE_vect, ISR_BLOCK)
+{
+	// Set Data Register Empty event
+	gSystemEvents |= EVENT_IRQ_DATA_REGISTER_EMPTY_bm;
+	
+	/* DREIF is cleared by writing DATA.
+	   Disable DRE interrupt because DATA is read in corresponding FSM handler.
+       Otherwise new interrupt will occur directly after the return from IRQ handler. */
+	xmega_set_usart_dre_interrupt_level (&USART_COMMUNICATION_BUS, USART_DREINTLVL_OFF_gc);
+}
+
+/* Transmit Complete Interrupt */
+ISR(USARTD1_TXC_vect, ISR_BLOCK)
+{
+	gSystemEvents |= EVENT_IRQ_TRANSMIT_COMPLETE_bm;
 }
 
 //! Storage for serial number
@@ -241,10 +281,9 @@ uint16_t g_u16crc16_checksum;
 
 int main(void)
 {
-	// Variable to read interrupt event flags
-	uint16_t u16EventFlags;
+
  
-    // Configure cpu and peripherals clock
+    // Configure CPU and peripherals clock
 	xmega_set_cpu_clock_to_32MHz();
 	
 	// Enable interrupts
@@ -252,7 +291,7 @@ int main(void)
 	
 	// Power management - configure sleep mode to IDLE
 	set_sleep_mode(SLEEP_SMODE_IDLE_gc);
-	// Enable sleep
+	// Enable sleep mode
 	sleep_enable();
 	
 	// Initialize serial communication terminal
@@ -313,43 +352,34 @@ int main(void)
 	// Start infinite main loop, go to sleep and wait for interruption
 	for(;;)
     {
-		// Atomic interrupt safe read of global variable storing event flags
-        u16EventFlags = gSystemEvents;
-        
+		// Force the state of the SREG register on exit, enabling the Global Interrupt Status flag bit.
+        ATOMIC_BLOCK(ATOMIC_FORCEON)
+		{
+			// Atomic interrupt safe read of global variable storing event flags
+			u16EventFlags = gSystemEvents;
+		}
+		
         while (u16EventFlags)
         {
-	        // Note: Each handler will clear the relevant bit in global variable gInterruptEvents
-	        
-			if (u16EventFlags & EVENT_BUSY_LINE_TIMEOUT_bm)
-	        {
-		        // Busy line timer interrupt fired up
-		        // HandleUSARTD0RXC();
-				printf("BusyLine timer expired\n");
-				
-				// Clear corresponding event flag
-				gSystemEvents &= ~EVENT_BUSY_LINE_TIMEOUT_bm;
-	        }
-	        
-	        if (u16EventFlags & EVENT_WAIT_FOR_RESPONSE_TIMEOUT_bm)
-	        {
-		        // No response timer overflow interrupt fired up
-		        // HandleHeartbeatTimer();
-				printf("NoResponse timer expired\n");
-				
-				// Clear corresponding event flag
-				gSystemEvents &= ~EVENT_WAIT_FOR_RESPONSE_TIMEOUT_bm;
-	        }
-	        
-	        u16EventFlags = gSystemEvents;
-        }
+	        // Note: Each handler will clear the relevant bit in global variable gSystemEvents
+			// Corresponding event flag will be cleared in FSM handler
+			
+			// Call corresponding state machine handler
+			SM_stateTable[gNSM_CurrentState]();
+			
+			// Read the flags again after handler return
+			ATOMIC_BLOCK(ATOMIC_FORCEON)
+			{
+				// Atomic interrupt safe read of global variable storing event flags
+				u16EventFlags = gSystemEvents;
+			}
+        }	// while(...)
         
         // Read the event register again without allowing any new interrupts
-        // cpu_irq_disable();
 		cli();
 		
         if (0 == gSystemEvents)
         {
-	        // cpu_irq_enable();
 			sei();
 			
 	        // Go to sleep, everything is handled by interrupts.
@@ -357,6 +387,7 @@ int main(void)
 	        sleep_cpu();
         };
         
+		// Set Global Interrupt Status flag
         sei();
     };
 }
