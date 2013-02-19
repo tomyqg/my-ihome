@@ -88,7 +88,7 @@ mmsn_comm_data_frame_t gCommDataFrameTransmit;
 volatile uint8_t gDataTransmitCounter;
 
 // Transmitted message type
-eTransmitMessageType gTxMsgType;
+eTransmitMessageType_t gTxMsgType;
 
 /* Lookup table containing a pointer to the function to call in each state */
 void (*SM_stateTable[])(void) =
@@ -576,13 +576,13 @@ void fsm_WaitForResponse(void)
 	u16EventFlags = gSystemEvents;
 	
 	// If data was received in this state than collect the data. Should be acknowledge frame.
-	if (u16EventFlags & EVENT_DATA_READY_TO_SEND_bm)
+	if (u16EventFlags & EVENT_SW_DATA_READY_TO_SEND_bm)
 	{
 		// We have new data
 	}
 	
 	// Waiting for response timer timed out. Go to retransmission state.
-	if (u16EventFlags & EVENT_WAIT_FOR_RESPONSE_TIMEOUT_bm)
+	if (u16EventFlags & EVENT_IRQ_WAIT_FOR_RESPONSE_TIMEOUT_bm)
 	{
 		gNSM_CurrentState = eSM_Retransmission;
 		
