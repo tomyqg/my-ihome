@@ -101,7 +101,12 @@ struct mmsn_comm_data_frame {
 
 typedef struct mmsn_comm_data_frame mmsn_comm_data_frame_t;
 
-enum eTransmitMessageType {NORMAL = 0, ACK, NACK};
+typedef enum eTransmitMessageType
+{
+	NORMAL = 0,
+	ACK,
+	NACK
+} eTransmitMessageType_t;
 
 typedef enum eSM_State
 {
