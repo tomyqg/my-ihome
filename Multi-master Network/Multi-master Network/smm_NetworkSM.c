@@ -5,6 +5,7 @@ Serial Multi-Master Network State Machine
 #include <avr/io.h>
 #include <util/atomic.h>
 #include <string.h>
+#include <stdbool.h>
 #include "fifo/fifo.h"
 #include "smm_NetworkSM.h"
 #include "board_config.h"
@@ -133,11 +134,16 @@ static inline void fsm_ClearBusyLine(void)
 void mmsn_Copy_Comm_Frame(fifo_desc_t *a_pFifoDesc, mmsn_comm_data_frame_t *a_pDstDataFrame)
 {
 	uint8_t __attribute__((unused)) u8FifoStatus;
+	uint16_t u16FirstTwoBytes;
 	
-	// Pull out destination address
-	u8FifoStatus = fifo_pull_uint16(a_pFifoDesc, &(a_pDstDataFrame->u16DstAddress));
-	// Pull out source address
-	u8FifoStatus = fifo_pull_uint16(a_pFifoDesc, &(a_pDstDataFrame->u16SrcAddress));
+	// Pull out first two bytes with packed Address and Control Field
+	u8FifoStatus = fifo_pull_uint16(a_pFifoDesc, &u16FirstTwoBytes);
+	
+	// Unpack all bit fields resides in first two bytes
+	a_pDstDataFrame->nDeviceType = ((u16FirstTwoBytes & 0xF000) >> 12);
+	a_pDstDataFrame->nDeviceNumber_SystemCommand = ((u16FirstTwoBytes & 0x0FE0) >> 5);
+	a_pDstDataFrame->nRTR = ((u16FirstTwoBytes & 0x0010) >> 4);
+	a_pDstDataFrame->nControlField = (u16FirstTwoBytes & 0x000F);
 	
 	// Pull out all data bytes
 	for (uint8_t u8Idx = 0; u8Idx < MMSN_DATA_LENGTH; u8Idx++)
@@ -151,6 +157,12 @@ void mmsn_Copy_Comm_Frame(fifo_desc_t *a_pFifoDesc, mmsn_comm_data_frame_t *a_pD
 } // mmsn_Copy_Comm_Frame()
 
 extern uint16_t xmega_calculate_checksum_crc16(uint8_t *a_pData, uint8_t count);
+
+bool mmsn_IsCommandSupported(uint8_t a_u8Command)
+{
+	return true;
+};
+
 
 /************************************************************************/
 /* FINITE STATE MACHINE HANDLERS                                        */
@@ -266,7 +278,7 @@ void fsm_Receive(void)
 		} 
 		else
 		{
-			// If data was erroneous than discard the data.
+			// If data was erroneous at hardware level than discard the data.
 		
 			// Save error
 			gNetworkError = eNE_USART_Receiver_Error;
@@ -322,21 +334,22 @@ void fsm_ProcessData(void)
 		// Set corresponding state and event
 		if (MMSN_COMM_FRAME_SIZE == u8FifoSize)
 		{
-			// Complete frame received.
+			// Complete frame was received.
 			
 			// Make a working copy of received data frame
 			mmsn_Copy_Comm_Frame(&fifo_receive_buffer_desc, &gCommDataFrameReceive);
 			
 			// Calculate CRC-16 (CRC-CCITT) using XMEGA hardware CRC peripheral
+			// Get all data bytes without last 2 CRC bytes
 			g_u16crc16_checksum = xmega_calculate_checksum_crc16(&gCommDataFrameReceive.u8CommFrameArray[0], MMSN_FRAME_NOCRC_LENGTH);
 			
-			// Check integration of the received data
+			// Check data integrity
 			if (g_u16crc16_checksum == gCommDataFrameReceive.u16CRC16)
 			{
 				// CRC-16 OK continue processing
 				
-				// Check if data is intended for this device. Compare own and DST address.
-				if (u16OwnNetworkAddress == gCommDataFrameReceive.u16DstAddress)
+				// Check if command should be handled by this device
+				if(true == mmsn_IsCommandSupported((uint8_t)gCommDataFrameReceive.nDeviceNumber_SystemCommand))
 				{
 					//Go to \ref eSM_ExecuteCommand state.
 					gNSM_CurrentState = eSM_ExecuteCommand;
@@ -360,7 +373,7 @@ void fsm_ProcessData(void)
 			}
 			else
 			{
-				// Save CRC check error. 
+				// Save CRC integrity error.
 				gNetworkError = eNE_Frame_CRC;
 				
 				// Go to \ref eSM_Error state

@@ -61,26 +61,30 @@ enum eBusyLine {FREE = 0, BUSY = 1};
 
 /* Communication staff temporarily here */
 
-// [2B] [2B] [8B]  [2B]
-// [DST][SRC][DATA][CRC-16]
-#define MMSN_COMM_FRAME_SIZE	(14)
+// DATA FRAME
+// [12b]	[4b]		   [8B]  [2B]
+// [Address][Control Field][DATA][CRC-16]
+// [Address] = [12bits] = [DeviceType, 4bits][DeviceNumber/SystemCommand, 7bits][RemoteTransmissionRequest (RTR), 1bit]
+#define MMSN_COMM_FRAME_SIZE	(12)
 
 // Default network address identifier. Every device has default address after startup.
 #define DEFAULT_NETWORK_ADDRESS	(0xFFFF)
 
 // Multi-Master Serial Network Destination Address offset
-#define MMSN_DST_ADDRESS_OFFSET	(0)
+//#define MMSN_DST_ADDRESS_OFFSET	(0)
 // Multi-Master Serial Network Source Address offset
-#define MMSN_SRC_ADDRESS_OFFSET	(2)
+//#define MMSN_SRC_ADDRESS_OFFSET	(2)
 // Multi-Master Serial Network data start offset
-#define MMSN_DATA_OFFSET		(4)
+//#define MMSN_DATA_OFFSET		(4)
 // Multi-Master Serial Network CRC-16 value offset
-#define MMSN_CRC16_OFFSET		(12)
+//#define MMSN_CRC16_OFFSET		(12)
 
 // Multi-Master Serial Network data length
 #define MMSN_DATA_LENGTH		(8)
+// CRC-16 data length
+#define MMSN_CRC_LENGTH			(2)
 // Multi-Master Serial Network frame without CRC-16 value length
-#define MMSN_FRAME_NOCRC_LENGTH	(12)
+#define MMSN_FRAME_NOCRC_LENGTH	(MMSN_COMM_FRAME_SIZE - MMSN_CRC_LENGTH)
 
 /**
  * \brief Structure containing the Multi-Master Serial Network Communication Data Frame
@@ -90,8 +94,10 @@ enum eBusyLine {FREE = 0, BUSY = 1};
 struct mmsn_comm_data_frame {
 	union {
 		struct {
-			uint16_t u16DstAddress;
-			uint16_t u16SrcAddress;
+			uint16_t nDeviceType				 : 4;
+			uint16_t nDeviceNumber_SystemCommand : 7;
+			uint16_t nRTR						 : 1;
+			uint16_t nControlField				 : 4;
 			uint8_t	 u8DataArray[8];
 			uint16_t u16CRC16;
 		};

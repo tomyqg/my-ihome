@@ -281,8 +281,6 @@ uint16_t g_u16crc16_checksum;
 
 int main(void)
 {
-
- 
     // Configure CPU and peripherals clock
 	xmega_set_cpu_clock_to_32MHz();
 	
