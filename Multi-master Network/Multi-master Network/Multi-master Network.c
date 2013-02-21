@@ -279,9 +279,29 @@ struct nvm_device_serial xmegaSerialNumber;
 // CRC-16 checksum
 uint16_t g_u16crc16_checksum;
 
+uint16_t id, adres, cf;
+uint8_t devtype, rtr, devnum;
+
 int main(void)
 {
-    // Configure CPU and peripherals clock
+    
+	id = 0b1110111100110101;
+	
+	get_MMSN_Address(id, adres);
+	get_MMSN_DeviceType(id, devtype);
+	get_MMSN_DeviceNumber(id, devnum);
+	get_MMSN_RTR(id, rtr);
+	get_MMSN_CTRLF(id, cf);
+	
+	id = 0xffff;
+	
+	set_MMSN_Address(0b0000101000001111, id);
+	set_MMSN_DeviceType(0b1100, id);
+	set_MMSN_DeviceNumber(0b01001100, id);
+	set_MMSN_RTR(0, id);
+	set_MMSN_CTRLF(1111, id);
+	
+	// Configure CPU and peripherals clock
 	xmega_set_cpu_clock_to_32MHz();
 	
 	// Enable interrupts
