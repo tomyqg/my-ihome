@@ -94,11 +94,8 @@ enum eBusyLine {FREE = 0, BUSY = 1};
 struct mmsn_comm_data_frame {
 	union {
 		struct {
-			uint16_t nDeviceType				 : 4;
-			uint16_t nDeviceNumber_SystemCommand : 7;
-			uint16_t nRTR						 : 1;
-			uint16_t nControlField				 : 4;
-			uint8_t	 u8DataArray[8];
+			uint16_t u16Identifier;
+			uint8_t	 u8DataArray[MMSN_DATA_LENGTH];
 			uint16_t u16CRC16;
 		};
 		uint8_t u8CommFrameArray[MMSN_COMM_FRAME_SIZE];
@@ -106,6 +103,49 @@ struct mmsn_comm_data_frame {
 };
 
 typedef struct mmsn_comm_data_frame mmsn_comm_data_frame_t;
+
+#define MMSN_ADDRESS_bm	0xFFF0	/* Multi-Master Serial Network Address bit mask */
+#define MMSN_ADDRESS_bp	4		/* Multi-Master Serial Network Address bit position */
+#define MMSN_DEVTYPE_bm	0xF000	/* Multi-Master Serial Network Device Type bit mask */
+#define MMSN_DEVTYPE_bp	12		/* Multi-Master Serial Network Device Type bit position */
+#define MMSN_DEVNUM_bm  0x0FE0	/* Multi-Master Serial Network Device Number bit mask */
+#define MMSN_DEVNUM_bp  5		/* Multi-Master Serial Network Device Number bit position */
+#define MMSN_RTR_bm		0x0010	/* Multi-Master Serial Network Remote Transmission Request bit mask */
+#define MMSN_RTR_bp		4		/* Multi-Master Serial Network Remote Transmission Request bit position */
+#define MMSN_CTRLF_bm	0x000F	/* Multi-Master Serial Network Control Field bit mask */
+#define MMSN_CTRLF_bp	0		/* Multi-Master Serial Network Control Field bit position */
+
+/* Macros to compose and decode frame */
+#define get_MMSN_Address(_u16Identifier, _u16Address)	\
+	_u16Address = ((_u16Identifier & MMSN_ADDRESS_bm) >> MMSN_ADDRESS_bp)
+
+#define set_MMSN_Address(_u16Address, _u16Identifier)	\
+	_u16Identifier = (_u16Identifier & (~MMSN_ADDRESS_bm)) | (_u16Address << MMSN_ADDRESS_bp)
+
+#define get_MMSN_DeviceType(_u16Identifier, _u8DeviceType)	\
+	_u8DeviceType = ((_u16Identifier & MMSN_DEVTYPE_bm) >> MMSN_DEVTYPE_bp)
+	
+#define set_MMSN_DeviceType(_u8DeviceType, _u16Identifier)	\
+	_u16Identifier = (_u16Identifier & (~MMSN_DEVTYPE_bm)) | (_u8DeviceType << MMSN_DEVTYPE_bp)
+	
+#define get_MMSN_DeviceNumber(_u16Identifier, _u8DeviceNum)	\
+	_u8DeviceNum = ((_u16Identifier & MMSN_DEVNUM_bm) >> MMSN_DEVNUM_bp)
+
+#define set_MMSN_DeviceNumber(_u8DeviceNum, _u16Identifier)	\
+	_u16Identifier = (_u16Identifier & (~MMSN_DEVNUM_bm)) | (_u8DeviceNum << MMSN_DEVNUM_bp)
+	
+#define get_MMSN_RTR(_u16Identifier, _u8RTR)	\
+	_u8RTR = ((_u16Identifier & MMSN_RTR_bm) >> MMSN_RTR_bp)
+
+#define set_MMSN_RTR(_u8RTR, _u16Identifier)	\
+	_u16Identifier = (_u16Identifier & (~MMSN_RTR_bm)) | (_u8RTR << MMSN_RTR_bp)
+
+#define get_MMSN_CTRLF(_u16Identifier, _u8CtrlF)	\
+	_u8CtrlF = ((_u16Identifier & MMSN_CTRLF_bm) >> MMSN_CTRLF_bp)
+
+#define set_MMSN_CTRLF(_u8CtrlF, _u16Identifier)	\
+	_u16Identifier = (_u16Identifier & (~MMSN_CTRLF_bm)) | (_u8CtrlF << MMSN_CTRLF_bp)
+
 
 typedef enum eTransmitMessageType
 {
