@@ -140,10 +140,10 @@ void mmsn_Copy_Comm_Frame(fifo_desc_t *a_pFifoDesc, mmsn_comm_data_frame_t *a_pD
 	u8FifoStatus = fifo_pull_uint16(a_pFifoDesc, &u16FirstTwoBytes);
 	
 	// Unpack all bit fields resides in first two bytes
-	a_pDstDataFrame->nDeviceType = ((u16FirstTwoBytes & 0xF000) >> 12);
+	/* a_pDstDataFrame->nDeviceType = ((u16FirstTwoBytes & 0xF000) >> 12);
 	a_pDstDataFrame->nDeviceNumber_SystemCommand = ((u16FirstTwoBytes & 0x0FE0) >> 5);
 	a_pDstDataFrame->nRTR = ((u16FirstTwoBytes & 0x0010) >> 4);
-	a_pDstDataFrame->nControlField = (u16FirstTwoBytes & 0x000F);
+	a_pDstDataFrame->nControlField = (u16FirstTwoBytes & 0x000F); */
 	
 	// Pull out all data bytes
 	for (uint8_t u8Idx = 0; u8Idx < MMSN_DATA_LENGTH; u8Idx++)
@@ -349,7 +349,8 @@ void fsm_ProcessData(void)
 				// CRC-16 OK continue processing
 				
 				// Check if command should be handled by this device
-				if(true == mmsn_IsCommandSupported((uint8_t)gCommDataFrameReceive.nDeviceNumber_SystemCommand))
+				//if(true == mmsn_IsCommandSupported((uint8_t)gCommDataFrameReceive.nDeviceNumber_SystemCommand))
+				if(0)
 				{
 					//Go to \ref eSM_ExecuteCommand state.
 					gNSM_CurrentState = eSM_ExecuteCommand;
