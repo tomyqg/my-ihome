@@ -146,6 +146,18 @@ typedef struct mmsn_comm_data_frame mmsn_comm_data_frame_t;
 #define set_MMSN_CTRLF(_u8CtrlF, _u16Identifier)	\
 	_u16Identifier = (_u16Identifier & (~MMSN_CTRLF_bm)) | (_u8CtrlF << MMSN_CTRLF_bp)
 
+// Processing routines prototypes
+void processCommand_Status(void);
+
+// Establish table of pointers to processing functions
+void (* processingFunctions[])(void) = { processCommand_Status };
+
+void processCommand_Status(void)
+{
+	// TODO: handle status message
+	
+	return;
+};
 
 typedef enum eTransmitMessageType
 {

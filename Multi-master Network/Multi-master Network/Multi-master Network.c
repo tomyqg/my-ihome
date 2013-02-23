@@ -144,23 +144,22 @@ void xmega_set_cpu_clock_to_32MHz(void)
 	CLK.CTRL = u8ClockControl;
 }
 
-// CRC-16(CRC-CCITT) Polynom x^16 + x^12 + x^5 + 1 --> 0x1021
+// CRC-16(CRC-CCITT) Polynomial x^16 + x^12 + x^5 + 1 --> 0x1021
 uint16_t xmega_calculate_checksum_crc16(uint8_t *a_pData, uint8_t count)
 {
 	uint8_t i = 0;
 	uint16_t crc16_checksum = 0;
 	
-	// Die 4 Checksum Register auf 0x00 zurücksetzen
+	// Reset all 4 checksum register to 0x00
 	CRC_CTRL |= CRC_RESET_RESET0_gc;
 	
 	// The CRC registers will be reset one peripheral clock cycle after the RESET[1] bit is set
-	// asm("nop");
 	_NOP();
 	
-	// Den CRC-Kern auf CRC16 konfigurieren
+	// Configure xmega CRC engine to CRC-16 computation
 	CRC_CTRL &= ~CRC_CRC32_bm;
 	
-	// IO als Quelle für den CRC-Kern auswhählen
+	// Set IO as a CRC source
 	CRC_CTRL = (CRC_CTRL & (~CRC_SOURCE_gm)) | CRC_SOURCE_IO_gc;
 	
 	for(i = 0; i < count; i++)
@@ -177,7 +176,7 @@ uint16_t xmega_calculate_checksum_crc16(uint8_t *a_pData, uint8_t count)
 	crc16_checksum = ((uint16_t)CRC_CHECKSUM0 & 0x00FF);
 	crc16_checksum |= (((uint16_t)CRC_CHECKSUM1 << 8) & 0xFF00);
 	
-	// Den CRC-Kern anhalten, indem keine Quellec angegeben wird
+	// Stop engine by disabling the source
 	CRC_CTRL = (CRC_CTRL & (~CRC_SOURCE_gm)) | CRC_SOURCE_DISABLE_gc;
 	
 	return crc16_checksum;
@@ -279,27 +278,8 @@ struct nvm_device_serial xmegaSerialNumber;
 // CRC-16 checksum
 uint16_t g_u16crc16_checksum;
 
-uint16_t id, adres, cf;
-uint8_t devtype, rtr, devnum;
-
 int main(void)
 {
-    
-	id = 0b1110111100110101;
-	
-	get_MMSN_Address(id, adres);
-	get_MMSN_DeviceType(id, devtype);
-	get_MMSN_DeviceNumber(id, devnum);
-	get_MMSN_RTR(id, rtr);
-	get_MMSN_CTRLF(id, cf);
-	
-	id = 0xffff;
-	
-	set_MMSN_Address(0b0000101000001111, id);
-	set_MMSN_DeviceType(0b1100, id);
-	set_MMSN_DeviceNumber(0b01001100, id);
-	set_MMSN_RTR(0, id);
-	set_MMSN_CTRLF(1111, id);
 	
 	// Configure CPU and peripherals clock
 	xmega_set_cpu_clock_to_32MHz();

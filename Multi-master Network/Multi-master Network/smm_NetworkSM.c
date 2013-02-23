@@ -134,17 +134,10 @@ static inline void fsm_ClearBusyLine(void)
 void mmsn_Copy_Comm_Frame(fifo_desc_t *a_pFifoDesc, mmsn_comm_data_frame_t *a_pDstDataFrame)
 {
 	uint8_t __attribute__((unused)) u8FifoStatus;
-	uint16_t u16FirstTwoBytes;
 	
 	// Pull out first two bytes with packed Address and Control Field
-	u8FifoStatus = fifo_pull_uint16(a_pFifoDesc, &u16FirstTwoBytes);
-	
-	// Unpack all bit fields resides in first two bytes
-	/* a_pDstDataFrame->nDeviceType = ((u16FirstTwoBytes & 0xF000) >> 12);
-	a_pDstDataFrame->nDeviceNumber_SystemCommand = ((u16FirstTwoBytes & 0x0FE0) >> 5);
-	a_pDstDataFrame->nRTR = ((u16FirstTwoBytes & 0x0010) >> 4);
-	a_pDstDataFrame->nControlField = (u16FirstTwoBytes & 0x000F); */
-	
+	u8FifoStatus = fifo_pull_uint16(a_pFifoDesc, &(a_pDstDataFrame->u16Identifier));
+
 	// Pull out all data bytes
 	for (uint8_t u8Idx = 0; u8Idx < MMSN_DATA_LENGTH; u8Idx++)
 	{
