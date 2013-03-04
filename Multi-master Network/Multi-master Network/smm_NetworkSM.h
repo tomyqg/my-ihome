@@ -20,23 +20,24 @@ Serial Multi-Master Network State Machine
 #define EVENT_IRQ_BUSY_LINE_TIMEOUT_bm			(1 << 4)
 //! Waiting for response timer time out
 #define EVENT_IRQ_WAIT_FOR_RESPONSE_TIMEOUT_bm	(1 << 5)
+//! System heartbeat timer time out
+#define EVENT_IRQ_HEARTBEAT_TIMEOUT_bm			(1 << 6)
 
 //! Software events
 //! Received data is error free
-#define EVENT_SW_RECEIVE_DATA_NO_ERROR_bm		(1 << 6)
+#define EVENT_SW_RECEIVE_DATA_NO_ERROR_bm		(1 << 7)
 //! Received data is erroneous
-#define EVENT_SW_RECEIVE_DATA_ERROR_bm			(1 << 7)
+#define EVENT_SW_RECEIVE_DATA_ERROR_bm			(1 << 8)
 //! Communication frame data integrity error
-#define EVENT_SW_COMM_FRAME_CRC_ERROR_bm		(1 << 8)
+#define EVENT_SW_COMM_FRAME_CRC_ERROR_bm		(1 << 9)
 //! Communication frame complete
-#define EVENT_SW_COMM_FRAME_COMPLETE_bm			(1 << 9)
+#define EVENT_SW_COMM_FRAME_COMPLETE_bm			(1 << 10)
 //! Communication frame incomplete
-#define EVENT_SW_COMM_FRAME_INCOMPLETE_bm		(1 << 10)
+#define EVENT_SW_COMM_FRAME_INCOMPLETE_bm		(1 << 11)
 //! Communication frame without processing
-#define EVENT_SW_COMM_FRAME_NO_PROCESSING_bm	(1 << 11)
+#define EVENT_SW_COMM_FRAME_NO_PROCESSING_bm	(1 << 12)
 //! Communication frame without processing
-#define EVENT_SW_UNEXPECTED_EVENT_RECEIVED_bm	(1 << 12)
-
+#define EVENT_SW_UNEXPECTED_EVENT_RECEIVED_bm	(1 << 13)
 
 /* Error types */
 typedef enum eNetworkError
@@ -67,8 +68,8 @@ enum eBusyLine {FREE = 0, BUSY = 1};
 // [Address] = [12bits] = [DeviceType, 4bits][DeviceNumber/SystemCommand, 7bits][RemoteTransmissionRequest (RTR), 1bit]
 #define MMSN_COMM_FRAME_SIZE	(12)
 
-// Default network address identifier. Every device has default address after startup.
-#define DEFAULT_NETWORK_ADDRESS	(0xFFFF)
+// Default device address in the network (DeviceNumber, 7bit value). Every device has default address after startup.
+#define MMSN_DEFAULT_NETWORK_ADDRESS	(0xFF)
 
 // Multi-Master Serial Network Destination Address offset
 //#define MMSN_DST_ADDRESS_OFFSET	(0)
@@ -146,18 +147,58 @@ typedef struct mmsn_comm_data_frame mmsn_comm_data_frame_t;
 #define set_MMSN_CTRLF(_u8CtrlF, _u16Identifier)	\
 	_u16Identifier = (_u16Identifier & (~MMSN_CTRLF_bm)) | (_u8CtrlF << MMSN_CTRLF_bp)
 
+#define	MMSN_ConfigurationUnit	(0x00)
+#define	MMSN_SupervisorUnit		(0x01)
+#define	MMSN_ButtonUnit			(0x02)
+#define	MMSN_RelayUnit			(0x03)
+#define	MMSN_InfraRedUnit		(0x04)
+#define	MMSN_WiFiUnit			(0x05)
+#define	MMSN_TemperatureUnit	(0x06)
+#define	MMSN_DimmerUnit			(0x07)
+#define	MMSN_BlindDriverUnit	(0x08)
+#define	MMSN_InputUnit			(0x09)
+#define	MMSN_InterfaceUnit		(0x0A)
+#define	MMSN_Reserved_1			(0x0B)
+#define MMSN_Reserved_2			(0x0C)
+#define	MMSN_Reserved_3			(0x0D)
+#define	MMSN_Reserved_4			(0x0E)
+#define	MMSN_Reserved_5			(0x0F)
+#define	MMSN_Reserved_6			(0x10)
+
+enum eRemoteTransmissionRequest
+{
+	eRTR_DataFrame = 0,
+	eRTR_RemoteFrame = 1
+};
+
+// Device types definitions of Multi-Master Serial Network
+/*
+enum eMMSN_DeviceType
+{
+	eMMSN_ConfigurationUnit = 0x00,
+	eMMSN_SupervisorUnit	= 0x01,
+	eMMSN_ButtonUnit		= 0x02,
+	eMMSN_RelayUnit			= 0x03,
+	eMMSN_InfraRedUnit		= 0x04,
+	eMMSN_WiFiUnit			= 0x05,
+	eMMSN_TemperatureUnit	= 0x06,
+	eMMSN_DimmerUnit		= 0x07,
+	eMMSN_BlindDriverUnit	= 0x08,
+	eMMSN_InputUnit			= 0x09,
+	eMMSN_InterfaceUnit		= 0x0A,
+	eMMSN_Reserved_1		= 0x0B,
+	eMMSN_Reserved_2		= 0x0C,
+	eMMSN_Reserved_3		= 0x0D,
+	eMMSN_Reserved_4		= 0x0E,
+	eMMSN_Reserved_5		= 0x0F,
+	eMMSN_Reserved_6		= 0x10,
+}; */
+
 // Processing routines prototypes
 void processCommand_Status(void);
 
 // Establish table of pointers to processing functions
-void (* processingFunctions[])(void) = { processCommand_Status };
-
-void processCommand_Status(void)
-{
-	// TODO: handle status message
-	
-	return;
-};
+// void (* processingFunctions[])(void) = { processCommand_Status };
 
 typedef enum eTransmitMessageType
 {
@@ -181,6 +222,7 @@ typedef enum eSM_State
 } eSM_StateType;
 
 /* Function prototypes to handle individual state */
+void fsm_Initialize(void);
 void fsm_Idle(void);
 void fsm_Receive(void);
 void fsm_ProcessData(void);
