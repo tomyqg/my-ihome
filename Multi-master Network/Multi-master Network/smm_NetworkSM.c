@@ -94,6 +94,7 @@ eTransmitMessageType_t gTxMsgType;
 /* Lookup table containing a pointer to the function to call in each state */
 void (*SM_stateTable[])(void) =
 {
+	fsm_Initialize,
 	fsm_Idle,
 	fsm_Receive,
 	fsm_ProcessData,
@@ -162,7 +163,7 @@ bool mmsn_IsCommandSupported(uint8_t a_u8Command)
 /************************************************************************/
 
 /* INITIALIZE */
-void fsm_InitializeStateMachine(void)
+void fsm_Initialize(void)
 {
 	/* Set current state to \ref eSM_Initialize */
 	gNSM_CurrentState = eSM_Initialize;
@@ -173,8 +174,6 @@ void fsm_InitializeStateMachine(void)
 	fifo_init(&fifo_receive_buffer_desc, &fifo_receive_buffer[0], FIFO_RECEIVE_BUFFER_SIZE);
 	fifo_init(&fifo_send_buffer_desc,	 &fifo_send_buffer[0],	  FIFO_SEND_BUFFER_SIZE);
 	
-	// Set own network address to default value
-	u16OwnNetworkAddress = DEFAULT_NETWORK_ADDRESS;
 	// Initialize communication data frame with zeros
 	memset(&gCommDataFrameReceive.u8CommFrameArray[0], 0x00, MMSN_COMM_FRAME_SIZE);
 	
@@ -184,7 +183,7 @@ void fsm_InitializeStateMachine(void)
 	
 	// Go to IDLE state
 	gNSM_CurrentState = eSM_Idle;
-}
+};
 
 /* IDLE state handler */
 void fsm_Idle(void)
