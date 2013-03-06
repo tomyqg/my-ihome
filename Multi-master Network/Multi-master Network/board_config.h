@@ -45,32 +45,39 @@
 /* The board runs at internal 32MHz cpu clock. The peripherals at 8MHz.
  * Wakeup timeout occurs 1000 times per second (1000Hz - 1ms)
  * TargetTimerCount = (Input Frequency/Prescaler Value)/(Target Frequency) - 1
- * Prescaler = 1
+ * Prescaler = 64
  * Input frequency = 8MHz
  * Target frequency = 1000Hz (1ms)
- * TargetTimerCount = (8M/1)/(1000) - 1 = 8000-1 = 7999
+ * TargetTimerCount = (8M/64)/(1000) - 1 = 125 - 1 = 124
  */
 
 /** \brief Heartbeat / Initial back off timer */
 #define TIMER_HEARTBEAT	TCC0
 
 /** Period used to measure busy line */
-#define TIMER_HEARTBEAT_PERIOD 7999
+#define TIMER_HEARTBEAT_PERIOD 124
 
 /** \brief Timer used to measure busy line */
 #define TIMER_BUSY_LINE TCD0
 
-/** Period used to measure busy line */
-// Is calculated based on device serial number and then CRC-16
-// #define TIMER_BUSY_LINE_PERIOD 31250
+/** Busy line timer is calculated based on a given logical address in the network,
+ *  or based on the random value within the range <1..127>
+ */
 
 /** \brief Timer used to measure busy line */
 #define TIMER_NO_RESPONSE TCE0
 
-/** Period used to measure busy line */
-#define TIMER_NO_RESPONSE_PERIOD 31250
+/** Period used to measure waiting for response
+ *  Timer configuration: Clock = 8MHz, Prescaler = 64
+ *  1 CPU clock = 8ns (f = 125kHz)
+ *  Wait for response time = 20ms
+ *  Period value = 2500 (20ms/8ns)
+ */
+#define TIMER_NO_RESPONSE_PERIOD 2500
 
-/** RS-485 Transceiver */
+/************************************************************************/
+/* RS-485 PHY transceiver                                               */
+/************************************************************************/
 // +----------------------------------------------+
 // | RS-485 control pin |        Function		  |
 // |--------------------|-------------------------|
