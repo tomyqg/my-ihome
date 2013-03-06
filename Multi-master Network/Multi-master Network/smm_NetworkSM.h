@@ -5,6 +5,10 @@ Serial Multi-Master Network State Machine
 #ifndef SMM_NETWORKSM_H_
 #define SMM_NETWORKSM_H_
 
+#include <stdbool.h>
+#include <stdlib.h>
+#include "nvm_driver/nvm_driver.h"
+
 /** EVENT definitions */
 
 //! Interrupt type events
@@ -68,8 +72,10 @@ enum eBusyLine {FREE = 0, BUSY = 1};
 // [Address] = [12bits] = [DeviceType, 4bits][DeviceNumber/SystemCommand, 7bits][RemoteTransmissionRequest (RTR), 1bit]
 #define MMSN_COMM_FRAME_SIZE	(12)
 
-// Default device address in the network (DeviceNumber, 7bit value). Every device has default address after startup.
-#define MMSN_DEFAULT_NETWORK_ADDRESS	(0xFF)
+/** Default device logical address in the network (DeviceNumber, 7bit value).
+ *  Every device has default address after startup.
+ */
+#define MMSN_DEFAULT_LOGICAL_NETWORK_ADDRESS	(0xFF)
 
 // Multi-Master Serial Network Destination Address offset
 //#define MMSN_DST_ADDRESS_OFFSET	(0)
@@ -133,7 +139,7 @@ typedef struct mmsn_comm_data_frame mmsn_comm_data_frame_t;
 	_u8DeviceNum = ((_u16Identifier & MMSN_DEVNUM_bm) >> MMSN_DEVNUM_bp)
 
 #define set_MMSN_DeviceNumber(_u8DeviceNum, _u16Identifier)	\
-	_u16Identifier = (_u16Identifier & (~MMSN_DEVNUM_bm)) | (_u8DeviceNum << MMSN_DEVNUM_bp)
+	_u16Identifier = (_u16Identifier & (~MMSN_DEVNUM_bm)) | ((_u8DeviceNum & 0x7F) << MMSN_DEVNUM_bp)
 	
 #define get_MMSN_RTR(_u16Identifier, _u8RTR)	\
 	_u8RTR = ((_u16Identifier & MMSN_RTR_bm) >> MMSN_RTR_bp)
@@ -232,5 +238,73 @@ void fsm_WaitForResend(void);
 void fsm_Retransmission(void);
 void fsm_WaitForResponse(void);
 void fsm_Error(void);
+
+/************************************************************************/
+/* Helper functions                                                     */
+/************************************************************************/
+
+/**
+ * \brief Determine if Logical Network Address was assigned to the device.
+ *
+ * This function checks if logical network address was already assigned and stored
+ * in the EEPROM. 
+ *
+ * \param a_pu8LogicalNetworkAddr pointer to the variable holding logical address.
+ *
+ * \retval true if logical address was already assigned.
+ * \retval false if logical address was not assigned.
+ */
+bool isLogicalNetworkAddrAssigned(uint8_t *a_pu8LogicalNetworkAddr);
+
+/**
+ * \brief Structure containing the xmega shortened serial number.
+ *
+ * This structure is used to store shortened (7 bytes) device serial number.
+ * This would be needed when supervisor is requesting uC serial number encoded on 7 bytes.
+ * Shortened serial number is comprised of lotnum4, lotnum5, ..., and coordy1 bytes.
+ * These are 7 lowest bytes which are more unique for a device.
+ */
+typedef struct xmega_shortened_serial_number
+{
+	union {
+		struct {
+			uint8_t lotnum4;
+			uint8_t lotnum5;
+			uint8_t wafnum;
+			uint8_t coordx0;
+			uint8_t coordx1;
+			uint8_t coordy0;
+			uint8_t coordy1;
+		};
+		uint8_t u8DataArray[7];
+	};
+} xmega_shortened_serial_number_t;
+
+/**
+ * \brief Get the shortened XMEGA device serial number.
+ *
+ * This function gets the shortened version XMEGA device serial number.
+ * Shortened version of complete serial number is comprised of 7 bytes
+ * excluding lotnum0 - lotnum3 bytes.
+ *
+ * \Note Functions arguments (pointers) must be properly provided. No checks against NULL pointers are made.
+ *
+ * \param a_pInCompleteSerialNum	Pointer to the structure holding complete device serial number (11 bytes).
+ * \param a_pOutShortenedSerialNum	Pointer to the structure holding shortened device serial number (7 bytes).
+ *
+ * \retval none.
+ */
+void xmega_get_shortened_serial_num(struct nvm_device_serial *a_pInCompleteSerialNum, xmega_shortened_serial_number_t *a_pOutShortenedSerialNum);
+
+/**
+ *  \brief Function generates random logical network address.
+ *		   Function utilizes rand() function to compute a pseudo-random integer
+ *		   in the range of 1 to 127.
+ *
+ *  \param none.
+ *
+ *  \return unsigned 8bit random value within range <1..127>
+ */
+uint8_t xmega_generate_random_logical_network_address(void);
 
 #endif /* SMM_NETWORKSM_H_ */

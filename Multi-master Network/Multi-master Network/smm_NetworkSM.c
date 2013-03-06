@@ -2,12 +2,13 @@
 Serial Multi-Master Network State Machine
 */
 
+#include "smm_NetworkSM.h"
+
 #include <avr/io.h>
 #include <util/atomic.h>
 #include <string.h>
 #include <stdbool.h>
 #include "fifo/fifo.h"
-#include "smm_NetworkSM.h"
 #include "board_config.h"
 #include "tc_driver.h"
 #include "usart_driver/usart_driver.h"
@@ -623,4 +624,27 @@ void fsm_Error(void)
 	
 	// Go to the IDLE state
 	gNSM_CurrentState = eSM_Idle;
+};
+
+// Determine if Logical Network Address was assigned to the device
+bool isLogicalNetworkAddrAssigned(uint8_t *a_pu8LogicalNetworkAddr)
+{
+	return (!(MMSN_DEFAULT_LOGICAL_NETWORK_ADDRESS == (*a_pu8LogicalNetworkAddr)));
+};
+
+/**
+ * \brief Get the shortened XMEGA device serial number.
+ */
+void xmega_get_shortened_serial_num(struct nvm_device_serial *a_pInCompleteSerialNum, xmega_shortened_serial_number_t *a_pOutShortenedSerialNum)
+{
+	// !Note that functions arguments must be properly provided
+	
+	// Magic numbers left on purpose
+	memcpy(&(a_pOutShortenedSerialNum->u8DataArray[0]), &(a_pInCompleteSerialNum->u8DataArray[4]), 7);
+};
+
+// Function generates random logical network address.
+uint8_t xmega_generate_random_logical_network_address(void)
+{
+	return ((rand() % 127) + 1);
 };
