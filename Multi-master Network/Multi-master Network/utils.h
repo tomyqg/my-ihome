@@ -37,6 +37,22 @@
 */
 #define _MemoryBarrier() __asm__ __volatile__("":::"memory")
 
+/************************************************************************/
+/* Clock Management                                                     */
+/************************************************************************/
+
+/**
+* \brief Configure XMEGA oscillator and clock source.
+*
+* This function enables internal 32MHz oscillator and sets it as main cpu clock.
+* Prescaler (A:B:C) are configured as (4:1:1) to provide 8MHz clock to peripherals.
+*
+* \param none.
+*
+* \retval none.
+*/
+void xmega_set_cpu_clock_to_32MHz(void);
+
 /**
  *  \brief Function calculates CRC-16 value using XMEGA CRC peripheral.
  *         Calculation is performed on the data and data count provided as parameters.
@@ -75,7 +91,7 @@ uint16_t xmega_generate_adc_random_value(ADC_t * a_pADC, ADC_REFSEL_t a_VoltageR
  *  \param a_u16Offset		Offset from the beginning from Internal SRAM start. Useful to jump over .data section.
  *  \param a_u16ElemCount	Count of elements used for CRC-16 calculation.
  *
- *  \return 16bit unsigned random value.
+ *  \return unsigned 16bit random value.
  */
 uint16_t xmega_generate_sram_random_value(uint16_t a_u16Offset, uint16_t a_u16ElemCount);
 
