@@ -9,6 +9,34 @@
 #include "nvm_driver/nvm_driver.h"
 #include <stddef.h>
 
+// Configure XMEGA oscillator and clock source.
+void xmega_set_cpu_clock_to_32MHz(void)
+{
+	uint8_t u8PrescalerConfig;
+	uint8_t u8ClockControl;
+	
+	/*  Enable internal 32MHz ring oscillator. */
+	OSC.CTRL |= OSC_RC32MEN_bm;
+	
+	/*  Wait until oscillator is ready. */
+	while ((OSC.STATUS & OSC_RC32MRDY_bm) == 0);
+
+	/*  Select Prescaler A divider as 4 and Prescaler B & C divider as (1,1) respectively.  */
+	/*  Overall divide by 4 i.e. A*B*C  */
+	u8PrescalerConfig = (uint8_t)(CLK_PSADIV_4_gc | CLK_PSBCDIV_1_1_gc);
+	
+	/* Disable register security for clock update */
+	CCP = CCP_IOREG_gc;
+	CLK.PSCTRL = u8PrescalerConfig;
+	
+	/*  Set the 32 MHz ring oscillator as the main clock source */
+	u8ClockControl = ( CLK.CTRL & ~CLK_SCLKSEL_gm ) | CLK_SCLKSEL_RC32M_gc;
+
+	/* Disable register security for clock update */
+	CCP = CCP_IOREG_gc;
+	CLK.CTRL = u8ClockControl;
+}
+
 // CRC-16(CRC-CCITT) Polynomial x^16 + x^12 + x^5 + 1 --> 0x1021
 uint16_t xmega_calculate_checksum_crc16(uint8_t *a_pData, uint8_t a_u8Count)
 {
