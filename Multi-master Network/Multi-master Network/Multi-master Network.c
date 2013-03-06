@@ -110,43 +110,6 @@ static inline void usartCommTerminalInit(void)
 	
 }	// usartCommTerminalInit()
 
-/**
-* \brief Configure XMEGA oscillator and clock source.
-*z 
-* This function enables internal 32MHz oscillator and sets it as main cpu clock.
-* Prescaler (A:B:C) are configured as (4:1:1) to provide 8MHz clock to peripherals.
-*
-* \param none.
-*
-* \retval none.
-*/
-void xmega_set_cpu_clock_to_32MHz(void)
-{
-	uint8_t u8PrescalerConfig;
-	uint8_t u8ClockControl;
-	
-	/*  Enable internal 32MHz ring oscillator. */
-	OSC.CTRL |= OSC_RC32MEN_bm;
-	
-	/*  Wait until oscillator is ready. */
-	while ((OSC.STATUS & OSC_RC32MRDY_bm) == 0);
-
-	/*  Select Prescaler A divider as 4 and Prescaler B & C divider as (1,1) respectively.  */
-	/*  Overall divide by 4 i.e. A*B*C  */
-	u8PrescalerConfig = (uint8_t)(CLK_PSADIV_4_gc | CLK_PSBCDIV_1_1_gc);
-	
-	/* Disable register security for clock update */
-	CCP = CCP_IOREG_gc;
-	CLK.PSCTRL = u8PrescalerConfig;
-	
-	/*  Set the 32 MHz ring oscillator as the main clock source */
-	u8ClockControl = ( CLK.CTRL & ~CLK_SCLKSEL_gm ) | CLK_SCLKSEL_RC32M_gc;
-
-	/* Disable register security for clock update */
-	CCP = CCP_IOREG_gc;
-	CLK.CTRL = u8ClockControl;
-}
-
 /********************************************//**
 * Busy Line timer configuration section
 ***********************************************/
@@ -262,7 +225,7 @@ uint16_t g_u16BackOffValue;
 // Structure to store device configuration data
 typedef struct
 {
-	uint8_t u8ConfiguredDeviceNumber;	// Configured device number (address in the network)
+	uint8_t u8LogicalNetworkAddr;	// Logical address in the network
 } ConfigData_t;
 
 /* EEPROM variables section */
@@ -285,7 +248,6 @@ inline void xmega_save_configuration_data(void)
 	eeprom_update_block(&ConfigurationData, &eeConfigurationData, sizeof(ConfigData_t));
 }
 
-
 int main(void)
 {
 	
@@ -307,15 +269,14 @@ int main(void)
 	stdout = &mystdout;
 	
 	/* Print out welcome message */
-	// printf("Multi-master Network ver 1.0\n");
+	printf("Multi-master Network ver 1.0\n");
 	
-	// Get random value from ADC conversion on pin 5
-	uint16_t u16ConvResult = xmega_generate_adc_random_value(&ADCA, ADC_REFSEL_INT1V_gc, ADC_CH_MUXPOS_PIN5_gc);
-	// printf("ADC conversion on PIN5 = %i\n", u16ConvResult);
-	
-	// SRAM randomness
-	u16ConvResult = xmega_calculate_checksum_crc16((uint8_t *)(INTERNAL_SRAM_START + 0x100), 20);
-	printf("SRAM randomness = %d\n", u16ConvResult);
+	// Calculate CRC-16 value based on the random Internal SRAM memory content
+	// Move by 0x100 from the beginning to omit constant data related to global variables declaration
+	// Take 20 consecutive SRAM data for CRC-16 calculation
+	uint16_t u16RandomValue = xmega_calculate_checksum_crc16((uint8_t *)(INTERNAL_SRAM_START + 0x100), 20);
+	// Pseudo-random number generator seeding with previously obtain value
+	srand(u16RandomValue);
 	
 	/*********************************//**
 	 * No response timer configuration
@@ -328,23 +289,23 @@ int main(void)
 	// Calculate CRC-16 (CRC-CCITT) using XMEGA hardware CRC peripheral
 	g_u16BackOffValue = xmega_calculate_checksum_crc16(&xmegaSerialNumber.u8DataArray[0], 11);
 	// printf("crc-16: 0x%04x\n", g_u16BackOffValue);
-	
-	// Pseudo-random number generator seeding
-	// srand(g_u16BackOffValue * u16ConvResult);
-	srand(u16ConvResult);
-	printf("random val = %i\n", rand() % 127);
-
-	for (uint8_t u8loop=0; u8loop < 200; u8loop++)
-	{
-		printf("%d, ", rand() % 127 + 1);
-	}
-	printf("\n");
 
 	// Read configuration data from EEPROM
 	xmega_read_configuration_data();
 
-	// Check if DeviceNumber was already assigned
-	if (MMSN_DEFAULT_NETWORK_ADDRESS == ConfigurationData.u8ConfiguredDeviceNumber)
+	// Check if logical address was already assigned
+	if (isLogicalNetworkAddrAssigned(&ConfigurationData.u8LogicalNetworkAddr))
+	{
+		// We have Logical Network Address already assigned.
+		// Get the back-off/busy line timer period value.
+		
+		
+		// Initialize GPIO related to RS-485 driver
+		rs485_driver_gpio_initialize();
+		// Initially go LOW to enable receiver - start listening
+		rs485_receiver_enable();
+	}
+	else
 	{
 		// Erased value in EEPROM equals to 0xFF so is default network address
 		// Device Number not assigned. Prepare first "I am alive" data frame to request network address/device number
@@ -354,7 +315,7 @@ int main(void)
 		
 		// Compose data frame		
 		set_MMSN_DeviceType(MY_DEVICE_TYPE, pSendingFrame->u16Identifier);							// set Device Type
-		set_MMSN_DeviceNumber((MMSN_DEFAULT_NETWORK_ADDRESS & 0x7F), pSendingFrame->u16Identifier);	// set Device Number
+		set_MMSN_DeviceNumber(MMSN_DEFAULT_LOGICAL_NETWORK_ADDRESS, pSendingFrame->u16Identifier);	// set Device Number
 		set_MMSN_RTR(eRTR_DataFrame, pSendingFrame->u16Identifier);									// set Remote Transmission Request
 		set_MMSN_CTRLF(0, pSendingFrame->u16Identifier);											// set Control Field
 		
@@ -373,15 +334,6 @@ int main(void)
 		// Enable RS-485 driver for transmission
 		rs485_driver_enable();
 	}
-	else
-	{
-		// We have Device number already assigned.
-		
-		// Initialize GPIO related to RS-485 driver
-		rs485_driver_gpio_initialize();
-		// Initially go LOW to enable receiver - start listening
-		rs485_receiver_enable();
-	};
 	
 	/************************************************************************/
 	/* Back off waiting time depending on device serial number              */
@@ -478,3 +430,10 @@ int main(void)
 		crc = _crc_xmodem_update(crc,xmegaSerialNumber.u8DataArray[u8idx]);
 
 	printf("crc-16 xmodem: 0x%04x\n", crc); */
+	
+/************************************************************************/
+/* RANDOM VALUE GENERATION                                              */
+/************************************************************************/
+// Get random value from ADC conversion on pin 5
+/* uint16_t u16ConvResult = xmega_generate_adc_random_value(&ADCA, ADC_REFSEL_INT1V_gc, ADC_CH_MUXPOS_PIN5_gc);
+printf("ADC conversion on PIN5 = %i\n", u16ConvResult); */ 	
