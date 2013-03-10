@@ -21,7 +21,7 @@ Serial Multi-Master Network State Machine
 //! Data is ready to be sent
 #define EVENT_SW_DATA_READY_TO_SEND_bm			(1 << 3)
 //! Busy line timer time out
-#define EVENT_IRQ_BUSY_LINE_TIMEOUT_bm			(1 << 4)
+#define EVENT_IRQ_COLLISION_AVOIDANCE_TIMEOUT_bm	(1 << 4)
 //! Waiting for response timer time out
 #define EVENT_IRQ_WAIT_FOR_RESPONSE_TIMEOUT_bm	(1 << 5)
 //! System heartbeat timer time out
@@ -56,7 +56,18 @@ typedef enum eNetworkError
 } eNetworkError_Type;
 
 /* Line free/busy indicators */
-enum eBusyLine {FREE = 0, BUSY = 1};
+enum eBusyLine
+{
+	FREE = 0,
+	BUSY = 1
+};
+
+/* Device configuration status */
+typedef enum eConfigStatus
+{
+	eLogicalAddrNotAssigned = 0,
+	eLogicalAddrAssigned = 1
+} eConfigStatus_t;
 
 /* Size of Network receiving FIFO buffer */
 #define FIFO_RECEIVE_BUFFER_SIZE	(16)
@@ -153,6 +164,7 @@ typedef struct mmsn_comm_data_frame mmsn_comm_data_frame_t;
 #define set_MMSN_CTRLF(_u8CtrlF, _u16Identifier)	\
 	_u16Identifier = (_u16Identifier & (~MMSN_CTRLF_bm)) | (_u8CtrlF << MMSN_CTRLF_bp)
 
+// Device Types
 #define	MMSN_ConfigurationUnit	(0x00)
 #define	MMSN_SupervisorUnit		(0x01)
 #define	MMSN_ButtonUnit			(0x02)
@@ -238,6 +250,49 @@ void fsm_WaitForResend(void);
 void fsm_Retransmission(void);
 void fsm_WaitForResponse(void);
 void fsm_Error(void);
+
+/************************************************************************/
+/* COMMUNICATION                                                        */
+/************************************************************************/
+// 0x00 (0) First Command Number
+#define COMMAND_NUMBER_FIRST	(0)
+// 0X7F (127) Last Command Number
+#define COMMAND_NUMBER_LAST		(0x7F)
+// Commands count
+#define COMMAND_COUNT			(0X80)
+
+// 0x65 (101) First System Command Number
+#define SYSTEM_COMMAND_NUMBER_FIRST 0x65
+// 0x7F (127) Last System Command Number
+#define SYSTEM_COMMAND_NUMBER_LAST 0x7F
+// (127 - 101) = 26
+#define SYSTEM_COMMAND_COUNT (26)
+
+#define SYSCMD_GROUP_RESTART_REQ		(0x65)
+#define SYSCMD_MODULE_RESTART_REQ		(0x66)
+#define SYSCMD_GROUP_SERIAL_NUMBER_REQ	(0x67)
+#define SYSCMD_MODULE_SERIAL_NUMBER_REQ	(0x68)
+
+typedef void (* funcCommandHandler)(void);
+
+typedef struct CommandDescriptor
+{
+	uint8_t			   u8SysCmdNumber;	// System Command Number
+	funcCommandHandler ptrCmdHandler;	// Pointer to function handler
+} CommandDescriptor_t;
+
+
+/**
+ * \brief Obtain pointer to the Command function handler.
+ * 
+ * This function gets the pointer to the command processing function.
+ *
+ * \param a_u8CommandNumber Command Number.
+ *
+ * \retval Pointer to the function handler.
+ * \retval NULL if command number does not match.
+ */
+funcCommandHandler get_CommandFunctionHandler(uint8_t a_u8CommandNumber);
 
 /************************************************************************/
 /* Helper functions                                                     */
