@@ -57,7 +57,7 @@ void xmega_set_cpu_clock_to_32MHz(void);
  *  \brief Function calculates CRC-16 value using XMEGA CRC peripheral.
  *         Calculation is performed on the data and data count provided as parameters.
  *
- *	\note It is CRC-16(CRC-CCITT) Polynomial x^16 + x^12 + x^5 + 1 --> 0x1021
+ *	\note CRC-16(CRC-CCITT) Polynomial x^16 + x^12 + x^5 + 1 --> 0x1021
  *
  *  \param a_pData		Pointer to the data.
  *  \param a_u8Count	Count of elements used for calculation.
