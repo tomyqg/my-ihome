@@ -78,9 +78,6 @@ volatile eSM_StateType gNSM_CurrentState;
 /* Previous state of Network State Machine */
 volatile eSM_StateType gNSM_PreviousState;
 
-// Own network address
-extern uint16_t u16OwnNetworkAddress;
-
 // Structure for storing received frame
 mmsn_comm_data_frame_t gCommDataFrameReceive;
 // Structure for storing frame to be transmitted
@@ -91,6 +88,162 @@ volatile uint8_t gDataTransmitCounter;
 
 // Transmitted message type
 eTransmitMessageType_t gTxMsgType;
+
+/************************************************************************/
+/* COMMUNICATION                                                        */
+/************************************************************************/
+
+
+
+
+CommandDescriptor_t CmdDescTable[COMMAND_COUNT] = 
+{
+	{ 0,								NULL },		// 0
+	{ 0,								NULL },		// 1
+	{ 0,								NULL },		// 2
+	{ 0,								NULL },		// 3
+	{ 0,								NULL },		// 4
+	{ 0,								NULL },		// 5
+	{ 0,								NULL },		// 6
+	{ 0,								NULL },		// 7
+	{ 0,								NULL },		// 8
+	{ 0,								NULL },		// 9
+	{ 0,								NULL },		// 10
+	{ 0,								NULL },		// 11
+	{ 0,								NULL },		// 12
+	{ 0,								NULL },		// 13
+	{ 0,								NULL },		// 14
+	{ 0,								NULL },		// 15
+	{ 0,								NULL },		// 16
+	{ 0,								NULL },		// 17
+	{ 0,								NULL },		// 18
+	{ 0,								NULL },		// 19
+	{ 0,								NULL },		// 20
+	{ 0,								NULL },		// 21
+	{ 0,								NULL },		// 22
+	{ 0,								NULL },		// 23
+	{ 0,								NULL },		// 24
+	{ 0,								NULL },		// 25
+	{ 0,								NULL },		// 26
+	{ 0,								NULL },		// 27
+	{ 0,								NULL },		// 28
+	{ 0,								NULL },		// 29
+	{ 0,								NULL },		// 30
+	{ 0,								NULL },		// 31
+	{ 0,								NULL },		// 32
+	{ 0,								NULL },		// 33
+	{ 0,								NULL },		// 34
+	{ 0,								NULL },		// 35
+	{ 0,								NULL },		// 36
+	{ 0,								NULL },		// 37
+	{ 0,								NULL },		// 38
+	{ 0,								NULL },		// 39
+	{ 0,								NULL },		// 40
+	{ 0,								NULL },		// 41
+	{ 0,								NULL },		// 42
+	{ 0,								NULL },		// 43
+	{ 0,								NULL },		// 44
+	{ 0,								NULL },		// 45
+	{ 0,								NULL },		// 46
+	{ 0,								NULL },		// 47
+	{ 0,								NULL },		// 48
+	{ 0,								NULL },		// 49
+	{ 0,								NULL },		// 50
+	{ 0,								NULL },		// 51
+	{ 0,								NULL },		// 52
+	{ 0,								NULL },		// 53
+	{ 0,								NULL },		// 54
+	{ 0,								NULL },		// 55
+	{ 0,								NULL },		// 56
+	{ 0,								NULL },		// 57
+	{ 0,								NULL },		// 58
+	{ 0,								NULL },		// 59
+	{ 0,								NULL },		// 60
+	{ 0,								NULL },		// 61
+	{ 0,								NULL },		// 62
+	{ 0,								NULL },		// 63
+	{ 0,								NULL },		// 64
+	{ 0,								NULL },		// 65
+	{ 0,								NULL },		// 66
+	{ 0,								NULL },		// 67
+	{ 0,								NULL },		// 68
+	{ 0,								NULL },		// 69
+	{ 0,								NULL },		// 70
+	{ 0,								NULL },		// 71
+	{ 0,								NULL },		// 72
+	{ 0,								NULL },		// 73
+	{ 0,								NULL },		// 74
+	{ 0,								NULL },		// 75
+	{ 0,								NULL },		// 76
+	{ 0,								NULL },		// 77
+	{ 0,								NULL },		// 78
+	{ 0,								NULL },		// 79
+	{ 0,								NULL },		// 80
+	{ 0,								NULL },		// 81
+	{ 0,								NULL },		// 82
+	{ 0,								NULL },		// 83
+	{ 0,								NULL },		// 84
+	{ 0,								NULL },		// 85
+	{ 0,								NULL },		// 86
+	{ 0,								NULL },		// 87
+	{ 0,								NULL },		// 88
+	{ 0,								NULL },		// 89
+	{ 0,								NULL },		// 90
+	{ 0,								NULL },		// 91
+	{ 0,								NULL },		// 92
+	{ 0,								NULL },		// 93
+	{ 0,								NULL },		// 94
+	{ 0,								NULL },		// 95
+	{ 0,								NULL },		// 96
+	{ 0,								NULL },		// 97
+	{ 0,								NULL },		// 98
+	{ 0,								NULL },		// 99
+	{ 0,								NULL },		// 100				
+	
+	{ SYSCMD_GROUP_RESTART_REQ,			NULL },		// 101
+	{ SYSCMD_MODULE_RESTART_REQ,		NULL },		// 102
+	{ SYSCMD_GROUP_SERIAL_NUMBER_REQ,	NULL },		// 103
+	{ SYSCMD_MODULE_SERIAL_NUMBER_REQ,	NULL },		// 104
+	{ 0,								NULL },		// 105
+	{ 0,								NULL },		// 106
+	{ 0,								NULL },		// 107
+	{ 0,								NULL },		// 108
+	{ 0,								NULL },		// 109
+	{ 0,								NULL },		// 110
+	{ 0,								NULL },		// 111
+	{ 0,								NULL },		// 112
+	{ 0,								NULL },		// 113
+	{ 0,								NULL },		// 114
+	{ 0,								NULL },		// 115
+	{ 0,								NULL },		// 116
+	{ 0,								NULL },		// 117
+	{ 0,								NULL },		// 118
+	{ 0,								NULL },		// 119
+	{ 0,								NULL },		// 120
+	{ 0,								NULL },		// 121
+	{ 0,								NULL },		// 122
+	{ 0,								NULL },		// 123
+	{ 0,								NULL },		// 124
+	{ 0,								NULL },		// 125
+	{ 0,								NULL },		// 126
+	{ 0,								NULL }		// 127
+};
+// int arr_size = sizeof(CmdDescTable)/sizeof(CmdDescTable[0]); 
+
+/**
+ * \brief Obtain pointer to the Command function handler.
+ */
+funcCommandHandler get_CommandFunctionHandler(uint8_t a_u8CommandNumber)
+{
+	if (a_u8CommandNumber <= COMMAND_NUMBER_LAST)
+	{
+		return (CmdDescTable[a_u8CommandNumber].ptrCmdHandler);	
+	}
+	else
+	{
+		return NULL;
+	}
+};
 
 /* Lookup table containing a pointer to the function to call in each state */
 void (*SM_stateTable[])(void) =
@@ -213,10 +366,10 @@ void fsm_Idle(void)
 	};
 	
 	// Check if busy line timer timed out
-	if (u16EventFlags & EVENT_IRQ_BUSY_LINE_TIMEOUT_bm)
+	if (u16EventFlags & EVENT_IRQ_COLLISION_AVOIDANCE_TIMEOUT_bm)
 	{
 		// Stop busy line timer by setting clock source to OFF state
-		xmega_tc_select_clock_source(&TIMER_BUSY_LINE, TC_CLKSEL_OFF_gc);
+		xmega_tc_select_clock_source(&TIMER_COLLISION_AVOIDANCE, TC_CLKSEL_OFF_gc);
 
 		// Clear busy line flag. The bus is free for transmitting the data.
 		fsm_ClearBusyLine();
@@ -227,7 +380,7 @@ void fsm_Idle(void)
 		ATOMIC_BLOCK(ATOMIC_FORCEON)
 		{
 			// Atomic interrupt safe set of global variable storing event flags
-			gSystemEvents &= ~EVENT_IRQ_BUSY_LINE_TIMEOUT_bm;
+			gSystemEvents &= ~EVENT_IRQ_COLLISION_AVOIDANCE_TIMEOUT_bm;
 		}
 	};
 
@@ -242,7 +395,7 @@ void fsm_Receive(void)
 		// To avoid collision (CA) start or restart busy line timer if already running.
 	
 		// Force Restart of busy line timer
-		xmega_tc_restart(&TIMER_BUSY_LINE);
+		xmega_tc_restart(&TIMER_COLLISION_AVOIDANCE);
 
 		// Due to the buffering of the error flags, the status register must be read before the receive buffer
 		// (DATA), since reading the DATA location changes the FIFO buffer.
@@ -294,10 +447,10 @@ void fsm_Receive(void)
 	};
 	
 	// Check if busy line timer timed out
-	if (u16EventFlags & EVENT_IRQ_BUSY_LINE_TIMEOUT_bm)
+	if (u16EventFlags & EVENT_IRQ_COLLISION_AVOIDANCE_TIMEOUT_bm)
 	{
 		// Stop busy line timer by setting clock source to OFF state
-		xmega_tc_select_clock_source(&TIMER_BUSY_LINE, TC_CLKSEL_OFF_gc);
+		xmega_tc_select_clock_source(&TIMER_COLLISION_AVOIDANCE, TC_CLKSEL_OFF_gc);
 
 		// Clear busy line flag. The bus is free for transmitting the data.
 		fsm_ClearBusyLine();
@@ -308,7 +461,7 @@ void fsm_Receive(void)
 		ATOMIC_BLOCK(ATOMIC_FORCEON)
 		{
 			// Atomic interrupt safe set of global variable storing event flags
-			gSystemEvents &= ~EVENT_IRQ_BUSY_LINE_TIMEOUT_bm;
+			gSystemEvents &= ~EVENT_IRQ_COLLISION_AVOIDANCE_TIMEOUT_bm;
 		}
 	};
 };	// fsm_Receive()
@@ -401,10 +554,10 @@ void fsm_ProcessData(void)
 	};
 	
 	// Check if busy line timer timed out
-	if (u16EventFlags & EVENT_IRQ_BUSY_LINE_TIMEOUT_bm)
+	if (u16EventFlags & EVENT_IRQ_COLLISION_AVOIDANCE_TIMEOUT_bm)
 	{
 		// Stop busy line timer by setting clock source to OFF state
-		xmega_tc_select_clock_source(&TIMER_BUSY_LINE, TC_CLKSEL_OFF_gc);
+		xmega_tc_select_clock_source(&TIMER_COLLISION_AVOIDANCE, TC_CLKSEL_OFF_gc);
 
 		// Clear busy line flag. The bus is free for transmitting the data.
 		fsm_ClearBusyLine();
@@ -415,7 +568,7 @@ void fsm_ProcessData(void)
 		ATOMIC_BLOCK(ATOMIC_FORCEON)
 		{
 			// Atomic interrupt safe set of global variable storing event flags
-			gSystemEvents &= ~EVENT_IRQ_BUSY_LINE_TIMEOUT_bm;
+			gSystemEvents &= ~EVENT_IRQ_COLLISION_AVOIDANCE_TIMEOUT_bm;
 		}
 	};
 
