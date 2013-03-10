@@ -173,7 +173,7 @@ ISR(TCC0_OVF_vect)
 ISR(TCD0_OVF_vect)
 {	
 	// Signal busy line timer expiration
-	gSystemEvents |= EVENT_IRQ_BUSY_LINE_TIMEOUT_bm;
+	gSystemEvents |= EVENT_IRQ_COLLISION_AVOIDANCE_TIMEOUT_bm;
 }
 
 /*! \brief No response timer overflow interrupt service routine.
@@ -219,8 +219,11 @@ ISR(USARTD1_TXC_vect, ISR_BLOCK)
 //! Storage for serial number
 struct nvm_device_serial xmegaSerialNumber;
 
-// CRC-16 checksum
-uint16_t g_u16BackOffValue;
+// Global variable for storing Collision Avoidance timer period value
+uint16_t g_u16CollsionAvoidancePeriod;
+
+// Global variable indicate device configuration status
+eConfigStatus_t g_DeviceConfigStatus;
 
 // Structure to store device configuration data
 typedef struct
@@ -271,100 +274,83 @@ int main(void)
 	/* Print out welcome message */
 	printf("Multi-master Network ver 1.0\n");
 	
-	// Calculate CRC-16 value based on the random Internal SRAM memory content
-	// Move by 0x100 from the beginning to omit constant data related to global variables declaration
-	// Take 20 consecutive SRAM data for CRC-16 calculation
+	// Calculate CRC-16 value based on the random Internal SRAM memory content.
+	// Move by 0x100 from the beginning to omit memory area related to global variables section.
+	// Take 20 consecutive SRAM bytes for CRC-16 calculation.
 	uint16_t u16RandomValue = xmega_calculate_checksum_crc16((uint8_t *)(INTERNAL_SRAM_START + 0x100), 20);
 	// Pseudo-random number generator seeding with previously obtain value
-	srand(u16RandomValue);
+	srand(u16RandomValue);		
 	
-	/*********************************//**
-	 * No response timer configuration
-	 *************************************/
-	// xmega_timer_config(&TIMER_NO_RESPONSE, TC_CLKSEL_DIV1024_gc, TIMER_NO_RESPONSE_PERIOD);
-	
-	// Read device serial number
+	// Read XMEGA device serial number
 	nvm_read_device_serial(&xmegaSerialNumber);
-
-	// Calculate CRC-16 (CRC-CCITT) using XMEGA hardware CRC peripheral
-	g_u16BackOffValue = xmega_calculate_checksum_crc16(&xmegaSerialNumber.u8DataArray[0], 11);
-	// printf("crc-16: 0x%04x\n", g_u16BackOffValue);
 
 	// Read configuration data from EEPROM
 	xmega_read_configuration_data();
 
 	// Check if logical address was already assigned
-	if (isLogicalNetworkAddrAssigned(&ConfigurationData.u8LogicalNetworkAddr))
+	if (true == isLogicalNetworkAddrAssigned(&ConfigurationData.u8LogicalNetworkAddr))
 	{
-		// We have Logical Network Address already assigned.
-		// Get the back-off/busy line timer period value.
+		// Logical Network Address was already assigned.
+		g_DeviceConfigStatus = eLogicalAddrAssigned;
 		
-		
-		// Initialize GPIO related to RS-485 driver
-		rs485_driver_gpio_initialize();
-		// Initially go LOW to enable receiver - start listening
-		rs485_receiver_enable();
+		// Calculate Collision Avoidance (back-off/busy line) timer period value.
+		g_u16CollsionAvoidancePeriod = (ConfigurationData.u8LogicalNetworkAddr * TIMER_COLLISION_AVOIDANCE_520us_VALUE) +
+									   TIMER_COLLISION_AVOIDANCE_32us_VALUE;
 	}
 	else
 	{
-		// Erased value in EEPROM equals to 0xFF so is default network address
-		// Device Number not assigned. Prepare first "I am alive" data frame to request network address/device number
+		// Logical Network Address was NOT assigned.
+		g_DeviceConfigStatus = eLogicalAddrNotAssigned;
 		
-		// Clear data buffer for sending frame
-		memset(pSendingFrame, 0x00, sizeof(mmsn_comm_data_frame_t));
-		
-		// Compose data frame		
-		set_MMSN_DeviceType(MY_DEVICE_TYPE, pSendingFrame->u16Identifier);							// set Device Type
-		set_MMSN_DeviceNumber(MMSN_DEFAULT_LOGICAL_NETWORK_ADDRESS, pSendingFrame->u16Identifier);	// set Device Number
-		set_MMSN_RTR(eRTR_DataFrame, pSendingFrame->u16Identifier);									// set Remote Transmission Request
-		set_MMSN_CTRLF(0, pSendingFrame->u16Identifier);											// set Control Field
-		
-		// TODO: data buffer with Assign Network Address request
-		
-		// Calculate CRC-16 (CRC-CCITT) using XMEGA hardware CRC peripheral
-		uint16_t u16TempCRC;
-		u16TempCRC = xmega_calculate_checksum_crc16(pSendingFrame->u8CommFrameArray, MMSN_FRAME_NOCRC_LENGTH);
-		pSendingFrame->u16CRC16 = u16TempCRC;
-		
-		// Indicate that frame is prepared for transmission
-		gSystemEvents |= EVENT_SW_DATA_READY_TO_SEND_bm;
-		
-		// Initialize GPIO related to RS-485 driver
-		rs485_driver_gpio_initialize();
-		// Enable RS-485 driver for transmission
-		rs485_driver_enable();
-	}
+		// Calculate Collision Avoidance (back-off/busy line) timer period using random value.
+		g_u16CollsionAvoidancePeriod = (xmega_generate_random_logical_network_address() * TIMER_COLLISION_AVOIDANCE_520us_VALUE) +
+		TIMER_COLLISION_AVOIDANCE_32us_VALUE;
+	}		
 	
 	/************************************************************************/
-	/* Back off waiting time depending on device serial number              */
+	/* TIMERS CONFIGURATION                                                 */
 	/************************************************************************/
 	
-	// Turn on global interrupts
-	sei();
+	// No response timer - configure but do not run
+	xmega_timer_config(&TIMER_NO_RESPONSE, TC_CLKSEL_OFF_gc, TIMER_NO_RESPONSE_PERIOD);
 	
-	// Configure busy line timer
-	xmega_timer_config(&TIMER_BUSY_LINE, TC_CLKSEL_DIV1_gc, g_u16BackOffValue);
+	// Collision Avoidance timer - configure but do not run
+	xmega_timer_config(&TIMER_COLLISION_AVOIDANCE, TC_CLKSEL_OFF_gc, g_u16CollsionAvoidancePeriod);
 	
-	// Wait until timer times out
-	while((gSystemEvents & EVENT_IRQ_BUSY_LINE_TIMEOUT_bm) == 0);
+	// Heartbeat timer - configure but do not run
+	xmega_timer_config(&TIMER_COLLISION_AVOIDANCE, TC_CLKSEL_OFF_gc, TIMER_HEARTBEAT_PERIOD);
+	
+	/************************************************************************/
+	/* RS-485 PHYSICAL DEVICE CONFIGURATION						            */
+	/************************************************************************/
+	// Initialize GPIO related to RS-485 driver
+	rs485_driver_gpio_initialize();
+	// Initially go LOW to enable receiver - start listening
+	rs485_receiver_enable();
+	
 	
 	// Force the state of the SREG register on exit, disabling the Global Interrupt Status flag bit.
-	ATOMIC_BLOCK(NONATOMIC_FORCEOFF)
+	/* ATOMIC_BLOCK(NONATOMIC_FORCEOFF)
 	{
 		// Clear busy line timeout event
-		FLAG_CLEAR(gSystemEvents, EVENT_IRQ_BUSY_LINE_TIMEOUT_bm);
+		FLAG_CLEAR(gSystemEvents, EVENT_IRQ_COLLISION_AVOIDANCE_TIMEOUT_bm);
 	}
 	
 	// Turn busy line timer off
-	xmega_tc_select_clock_source(&TIMER_BUSY_LINE, TC_CLKSEL_OFF_gc);
+	xmega_tc_select_clock_source(&TIMER_COLLISION_AVOIDANCE, TC_CLKSEL_OFF_gc); */
+	
+	/************************************************************************/
+	/* Initialize Multi-Master Serial Network State Machine                 */
+	/************************************************************************/
 
-	// Initialize Multi-Master Serial Network state machine 
+	
 
+	// Turn on global interrupts
+	sei();
 
 	/************************************************************************/
 	/* Start infinite main loop, go to sleep and wait for interruption      */
 	/************************************************************************/
-
 	for(;;)
     {
 		// Force the state of the SREG register on exit, enabling the Global Interrupt Status flag bit.
@@ -437,3 +423,28 @@ int main(void)
 // Get random value from ADC conversion on pin 5
 /* uint16_t u16ConvResult = xmega_generate_adc_random_value(&ADCA, ADC_REFSEL_INT1V_gc, ADC_CH_MUXPOS_PIN5_gc);
 printf("ADC conversion on PIN5 = %i\n", u16ConvResult); */ 	
+
+
+// Clear data buffer for sending frame
+// memset(pSendingFrame, 0x00, sizeof(mmsn_comm_data_frame_t));
+
+// Compose data frame
+//set_MMSN_DeviceType(MY_DEVICE_TYPE, pSendingFrame->u16Identifier);							// set Device Type
+//set_MMSN_DeviceNumber(MMSN_DEFAULT_LOGICAL_NETWORK_ADDRESS, pSendingFrame->u16Identifier);	// set Device Number
+//set_MMSN_RTR(eRTR_DataFrame, pSendingFrame->u16Identifier);									// set Remote Transmission Request
+//set_MMSN_CTRLF(0, pSendingFrame->u16Identifier);											// set Control Field
+
+// TODO: data buffer with Assign Network Address request
+
+// Calculate CRC-16 (CRC-CCITT) using XMEGA hardware CRC peripheral
+//uint16_t u16TempCRC;
+//u16TempCRC = xmega_calculate_checksum_crc16(pSendingFrame->u8CommFrameArray, MMSN_FRAME_NOCRC_LENGTH);
+//pSendingFrame->u16CRC16 = u16TempCRC;
+
+// Indicate that frame is prepared for transmission
+//gSystemEvents |= EVENT_SW_DATA_READY_TO_SEND_bm;
+
+// Initialize GPIO related to RS-485 driver
+//rs485_driver_gpio_initialize();
+// Enable RS-485 driver for transmission
+//rs485_driver_enable();
