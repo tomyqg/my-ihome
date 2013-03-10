@@ -58,11 +58,29 @@
 #define TIMER_HEARTBEAT_PERIOD 124
 
 /** \brief Timer used to measure busy line */
-#define TIMER_BUSY_LINE TCD0
+#define TIMER_COLLISION_AVOIDANCE TCD0
 
-/** Busy line timer is calculated based on a given logical address in the network,
- *  or based on the random value within the range <1..127>
+/** Collision Avoidance timer (busy line detection) is calculated based on a given logical address in the network,
+ *  or random value within the range <1..127>.
+ *  Formula for calculating Collision Avoidance period with already assigned Logical Address:
+ *		Tca = LogicalAddress * 65 + 4
+ *  Formula for calculating Collision Avoidance period without Logical Address assigned
+ *		Tca = xmega_generate_random_logical_network_address() * 65 + 4
  */
+/** Timer-Counter value for measuring period of 0,52[ms]
+ *  This period is time needed to transmit 1Byte over serial network
+ *  configured as 19200bps. 1Byte is comprised of 10 bits (start, 8b data, stop).
+ *  (1/125kHZ) = 8us - 1 clock tick
+ *  (520us/8us) = 65
+ */
+#define TIMER_COLLISION_AVOIDANCE_520us_VALUE 65
+
+/** Timer-Counter value for measuring period of 0,032[ms]
+ *  This is the additional time for Collision Avoidance.
+ *  (1/125kHZ) = 8us - 1 clock tick
+ *  (32us/8us) = 4
+ */
+#define TIMER_COLLISION_AVOIDANCE_32us_VALUE 4
 
 /** \brief Timer used to measure busy line */
 #define TIMER_NO_RESPONSE TCE0
