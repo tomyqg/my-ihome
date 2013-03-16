@@ -220,7 +220,7 @@ ISR(USARTD1_TXC_vect, ISR_BLOCK)
 struct nvm_device_serial xmegaSerialNumber;
 
 // Global variable for storing Collision Avoidance timer period value
-uint16_t g_u16CollsionAvoidancePeriod;
+uint16_t g_u16CollisionAvoidancePeriod;
 
 // Global variable indicate device configuration status
 eConfigStatus_t g_DeviceConfigStatus;
@@ -275,11 +275,15 @@ int main(void)
 	printf("Multi-master Network ver 1.0\n");
 	
 	// Calculate CRC-16 value based on the random Internal SRAM memory content.
-	// Move by 0x100 from the beginning to omit memory area related to global variables section.
+	// Move by 0x400 from the beginning to omit memory area related to global variables section.
 	// Take 20 consecutive SRAM bytes for CRC-16 calculation.
-	uint16_t u16RandomValue = xmega_calculate_checksum_crc16((uint8_t *)(INTERNAL_SRAM_START + 0x100), 20);
+	uint16_t u16RandomValue = xmega_calculate_checksum_crc16((uint8_t *)(INTERNAL_SRAM_START + 0x400), 20);
 	// Pseudo-random number generator seeding with previously obtain value
-	srand(u16RandomValue);		
+	srand(u16RandomValue);
+	
+#ifdef MMSN_DEBUG
+	printf("rnd = %d\n", u16RandomValue);
+#endif	
 	
 	// Read XMEGA device serial number
 	nvm_read_device_serial(&xmegaSerialNumber);
@@ -294,8 +298,11 @@ int main(void)
 		g_DeviceConfigStatus = eLogicalAddrAssigned;
 		
 		// Calculate Collision Avoidance (back-off/busy line) timer period value.
-		g_u16CollsionAvoidancePeriod = (ConfigurationData.u8LogicalNetworkAddr * TIMER_COLLISION_AVOIDANCE_520us_VALUE) +
+		g_u16CollisionAvoidancePeriod = (ConfigurationData.u8LogicalNetworkAddr * TIMER_COLLISION_AVOIDANCE_520us_VALUE) +
 									   TIMER_COLLISION_AVOIDANCE_32us_VALUE;
+#ifdef MMSN_DEBUG
+		printf("LNA_CA = %d\n", g_u16CollisionAvoidancePeriod);
+#endif									   
 	}
 	else
 	{
@@ -303,9 +310,13 @@ int main(void)
 		g_DeviceConfigStatus = eLogicalAddrNotAssigned;
 		
 		// Calculate Collision Avoidance (back-off/busy line) timer period using random value.
-		g_u16CollsionAvoidancePeriod = (xmega_generate_random_logical_network_address() * TIMER_COLLISION_AVOIDANCE_520us_VALUE) +
+		g_u16CollisionAvoidancePeriod = (xmega_generate_random_logical_network_address() * TIMER_COLLISION_AVOIDANCE_520us_VALUE) +
 		TIMER_COLLISION_AVOIDANCE_32us_VALUE;
-	}		
+
+#ifdef MMSN_DEBUG
+		printf("RND_CA = %d\n", g_u16CollisionAvoidancePeriod);
+#endif		
+	}
 	
 	/************************************************************************/
 	/* TIMERS CONFIGURATION                                                 */
@@ -315,7 +326,7 @@ int main(void)
 	xmega_timer_config(&TIMER_NO_RESPONSE, TC_CLKSEL_OFF_gc, TIMER_NO_RESPONSE_PERIOD);
 	
 	// Collision Avoidance timer - configure but do not run
-	xmega_timer_config(&TIMER_COLLISION_AVOIDANCE, TC_CLKSEL_OFF_gc, g_u16CollsionAvoidancePeriod);
+	xmega_timer_config(&TIMER_COLLISION_AVOIDANCE, TC_CLKSEL_OFF_gc, g_u16CollisionAvoidancePeriod);
 	
 	// Heartbeat timer - configure but do not run
 	xmega_timer_config(&TIMER_COLLISION_AVOIDANCE, TC_CLKSEL_OFF_gc, TIMER_HEARTBEAT_PERIOD);
@@ -327,8 +338,7 @@ int main(void)
 	rs485_driver_gpio_initialize();
 	// Initially go LOW to enable receiver - start listening
 	rs485_receiver_enable();
-	
-	
+		
 	// Force the state of the SREG register on exit, disabling the Global Interrupt Status flag bit.
 	/* ATOMIC_BLOCK(NONATOMIC_FORCEOFF)
 	{
@@ -342,9 +352,8 @@ int main(void)
 	/************************************************************************/
 	/* Initialize Multi-Master Serial Network State Machine                 */
 	/************************************************************************/
-
+	SM_stateTable[eSM_Initialize]();
 	
-
 	// Turn on global interrupts
 	sei();
 
