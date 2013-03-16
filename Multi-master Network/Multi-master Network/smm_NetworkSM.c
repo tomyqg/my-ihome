@@ -6,12 +6,14 @@ Serial Multi-Master Network State Machine
 
 #include <avr/io.h>
 #include <util/atomic.h>
+#include <stdio.h>
 #include <string.h>
 #include <stdbool.h>
 #include "fifo/fifo.h"
 #include "board_config.h"
 #include "tc_driver.h"
 #include "usart_driver/usart_driver.h"
+#include "utils.h"
 
 /**
  * \brief Buffer to associate with receiving FIFO buffer
@@ -61,8 +63,6 @@ uint8_t fifo_send_buffer [FIFO_SEND_BUFFER_SIZE];
  */
 fifo_desc_t fifo_send_buffer_desc;
 
-uint8_t gNetworkError;
-
 /* Bitmasked flags that describe what event has occurred */
 extern volatile uint16_t gSystemEvents;
 
@@ -90,11 +90,45 @@ volatile uint8_t gDataTransmitCounter;
 eTransmitMessageType_t gTxMsgType;
 
 /************************************************************************/
+/* NETWORK ERROR HANDLING                                               */
+/************************************************************************/
+CommNetworkErrorDesc_t CommNetworkErrorTable[NETWORK_ERROR_TABLE_SIZE];
+
+// Network Error descriptor
+NetworkErrorDesc_t g_NetworkErrorDesc;
+
+void init_commNetworkError(NetworkErrorDesc_t * a_pNetworkErrorDesc, CommNetworkErrorDesc_t * a_pCommNetErrTbl, uint8_t a_u8TblSize)
+{
+	// Initialize error descriptor
+	a_pNetworkErrorDesc->u8Iterator		 = 0;
+	a_pNetworkErrorDesc->u16ErrorCounter = 0;
+	a_pNetworkErrorDesc->currError		 = eNE_None;
+	
+	// Clear communication network error table
+	memset(a_pCommNetErrTbl, 0x00, a_u8TblSize);
+};
+
+void add_commNetworkError(NetworkErrorDesc_t * a_pNetworkErrorDesc)
+{
+	// Increase buffer iterator and wrap if necessary
+	a_pNetworkErrorDesc->u8Iterator = (a_pNetworkErrorDesc->u8Iterator + 1) & NETWORK_ERROR_TABLE_SIZE_MASK;
+	
+	// Increase consecutive error counter. Will wrap if max value reached.
+	a_pNetworkErrorDesc->u16ErrorCounter++;
+	
+	// Add another error to the table
+	CommNetworkErrorTable[a_pNetworkErrorDesc->u8Iterator].eErrorReported = a_pNetworkErrorDesc->currError;
+	CommNetworkErrorTable[a_pNetworkErrorDesc->u8Iterator].u16ErrorNumber = a_pNetworkErrorDesc->u16ErrorCounter;
+};
+
+eNetworkError_t get_commNetworkError(uint16_t a_u16ErrorNumber)
+{
+	return (CommNetworkErrorTable[a_u16ErrorNumber].eErrorReported);
+};
+
+/************************************************************************/
 /* COMMUNICATION                                                        */
 /************************************************************************/
-
-
-
 
 CommandDescriptor_t CmdDescTable[COMMAND_COUNT] = 
 {
@@ -304,13 +338,21 @@ void mmsn_Copy_Comm_Frame(fifo_desc_t *a_pFifoDesc, mmsn_comm_data_frame_t *a_pD
 	
 } // mmsn_Copy_Comm_Frame()
 
-extern uint16_t xmega_calculate_checksum_crc16(uint8_t *a_pData, uint8_t count);
-
-bool mmsn_IsCommandSupported(uint8_t a_u8Command)
+static void fsm_CollisionAvoidanceTimeoutHandler(void)
 {
-	return true;
-};
+	// Stop collision avoidance timer by setting clock source to OFF state
+	xmega_tc_select_clock_source(&TIMER_COLLISION_AVOIDANCE, TC_CLKSEL_OFF_gc);
 
+	// Clear busy line flag. The bus is free for transmitting the data.
+	fsm_ClearBusyLine();
+	
+	// Clear corresponding flag
+	ATOMIC_BLOCK(ATOMIC_FORCEON)
+	{
+		// Atomic interrupt safe set of global variable storing event flags
+		FLAG_CLEAR(gSystemEvents, EVENT_IRQ_COLLISION_AVOIDANCE_TIMEOUT_bm);
+	}
+}
 
 /************************************************************************/
 /* FINITE STATE MACHINE HANDLERS                                        */
@@ -328,12 +370,17 @@ void fsm_Initialize(void)
 	fifo_init(&fifo_receive_buffer_desc, &fifo_receive_buffer[0], FIFO_RECEIVE_BUFFER_SIZE);
 	fifo_init(&fifo_send_buffer_desc,	 &fifo_send_buffer[0],	  FIFO_SEND_BUFFER_SIZE);
 	
-	// Initialize communication data frame with zeros
-	memset(&gCommDataFrameReceive.u8CommFrameArray[0], 0x00, MMSN_COMM_FRAME_SIZE);
-	
+	// Initialize communication data frame receiving buffer with zeros
+	memset(&(gCommDataFrameReceive.u8CommFrameArray[0]), 0x00, MMSN_COMM_FRAME_SIZE);
+	// Initialize communication data frame transmission buffer with zeros
+	memset(&(gCommDataFrameTransmit.u8CommFrameArray[0]), 0x00, MMSN_COMM_FRAME_SIZE);
+		
 	gDataTransmitCounter = 0;
 	
-	/* TODO: reset hardware  - hardware cleanup */
+	// Initialize Network Error Descriptor
+	init_commNetworkError(&g_NetworkErrorDesc, &CommNetworkErrorTable[0], sizeof(CommNetworkErrorTable));
+	
+	/* TODO: is reset hardware  - hardware cleanup needed? */
 	
 	// Go to IDLE state
 	gNSM_CurrentState = eSM_Idle;
@@ -365,23 +412,25 @@ void fsm_Idle(void)
 		gNSM_CurrentState = eSM_Send;
 	};
 	
+	/* Command execution was completed.
+	 * Make cleanup of all necessary resources.
+	 * Clear event and stay in the same state.
+	 */
+	if (u16EventFlags & EVENT_SW_COMM_CMD_EXECUTED_bm)
+	{
+		
+		
+		// Clear corresponding event
+		ATOMIC_BLOCK(ATOMIC_FORCEON)
+		{
+			FLAG_CLEAR(gSystemEvents, EVENT_SW_COMM_CMD_EXECUTED_bm);
+		}
+	};
+	
 	// Check if busy line timer timed out
 	if (u16EventFlags & EVENT_IRQ_COLLISION_AVOIDANCE_TIMEOUT_bm)
 	{
-		// Stop busy line timer by setting clock source to OFF state
-		xmega_tc_select_clock_source(&TIMER_COLLISION_AVOIDANCE, TC_CLKSEL_OFF_gc);
-
-		// Clear busy line flag. The bus is free for transmitting the data.
-		fsm_ClearBusyLine();
-		
-		// Stay in the same state.
-		
-		// Clear corresponding flag 
-		ATOMIC_BLOCK(ATOMIC_FORCEON)
-		{
-			// Atomic interrupt safe set of global variable storing event flags
-			gSystemEvents &= ~EVENT_IRQ_COLLISION_AVOIDANCE_TIMEOUT_bm;
-		}
+		fsm_CollisionAvoidanceTimeoutHandler();
 	};
 
 };	// fsm_Idle()
@@ -419,15 +468,15 @@ void fsm_Receive(void)
 			// Set data processing software event
 			ATOMIC_BLOCK(ATOMIC_FORCEON)
 			{
-				gSystemEvents |= EVENT_SW_RECEIVE_DATA_NO_ERROR_bm;
+				FLAG_SET(gSystemEvents, EVENT_SW_RECEIVE_DATA_NO_ERROR_bm);
 			}
 		} 
 		else
 		{
 			// If data was erroneous at hardware level than discard the data.
 		
-			// Save error
-			gNetworkError = eNE_USART_Receiver_Error;
+			// Report network error
+			g_NetworkErrorDesc.currError = eNE_USART_Receiver_Error;
 		
 			// Make transition to the ERROR state
 			gNSM_CurrentState = eSM_Error;
@@ -435,34 +484,21 @@ void fsm_Receive(void)
 			// Set error in data processing software event
 			ATOMIC_BLOCK(ATOMIC_FORCEON)
 			{
-				gSystemEvents |= EVENT_SW_RECEIVE_DATA_ERROR_bm;
+				FLAG_SET(gSystemEvents, EVENT_SW_RECEIVE_DATA_ERROR_bm);
 			}
 		}
 		
 		// Always clear receive complete event flag
 		ATOMIC_BLOCK(ATOMIC_FORCEON)
 		{
-			gSystemEvents &= ~EVENT_IRQ_RECEIVE_COMPLETE_bm;
+			FLAG_CLEAR(gSystemEvents, EVENT_IRQ_RECEIVE_COMPLETE_bm);
 		}
 	};
 	
 	// Check if busy line timer timed out
 	if (u16EventFlags & EVENT_IRQ_COLLISION_AVOIDANCE_TIMEOUT_bm)
 	{
-		// Stop busy line timer by setting clock source to OFF state
-		xmega_tc_select_clock_source(&TIMER_COLLISION_AVOIDANCE, TC_CLKSEL_OFF_gc);
-
-		// Clear busy line flag. The bus is free for transmitting the data.
-		fsm_ClearBusyLine();
-		
-		// Stay in the same state.
-		
-		// Clear corresponding flag
-		ATOMIC_BLOCK(ATOMIC_FORCEON)
-		{
-			// Atomic interrupt safe set of global variable storing event flags
-			gSystemEvents &= ~EVENT_IRQ_COLLISION_AVOIDANCE_TIMEOUT_bm;
-		}
+		fsm_CollisionAvoidanceTimeoutHandler();
 	};
 };	// fsm_Receive()
 
@@ -485,43 +521,31 @@ void fsm_ProcessData(void)
 			// Make a working copy of received data frame
 			mmsn_Copy_Comm_Frame(&fifo_receive_buffer_desc, &gCommDataFrameReceive);
 			
-			// Calculate CRC-16 (CRC-CCITT) using XMEGA hardware CRC peripheral
-			// Get all data bytes without last 2 CRC bytes
+			/* Calculate CRC-16 (CRC-CCITT) using XMEGA hardware CRC peripheral
+			 * excluding last 2 bytes with CRC-16.
+			 */
 			g_u16crc16_checksum = xmega_calculate_checksum_crc16(&gCommDataFrameReceive.u8CommFrameArray[0], MMSN_FRAME_NOCRC_LENGTH);
 			
 			// Check data integrity
 			if (g_u16crc16_checksum == gCommDataFrameReceive.u16CRC16)
 			{
-				// CRC-16 OK continue processing
+				// Calculated and received CRC-16 value matched. Go to command execution state.
 				
-				// Check if command should be handled by this device
-				//if(true == mmsn_IsCommandSupported((uint8_t)gCommDataFrameReceive.nDeviceNumber_SystemCommand))
-				if(0)
+				//Go to \ref eSM_ExecuteCommand state.
+				gNSM_CurrentState = eSM_ExecuteCommand;
+				
+				// Set communication frame OK software event
+				ATOMIC_BLOCK(ATOMIC_FORCEON)
 				{
-					//Go to \ref eSM_ExecuteCommand state.
-					gNSM_CurrentState = eSM_ExecuteCommand;
-					
-					// Set communication frame OK software event
-					ATOMIC_BLOCK(ATOMIC_FORCEON)
-					{
-						gSystemEvents |= EVENT_SW_COMM_FRAME_COMPLETE_bm;
-					}
-				}
-				else
-				{
-					// Frame not for this network element. Go to \ref eSM_Idle state.
-					gNSM_CurrentState = eSM_Idle;
-					// Set no processing communication frame software event
-					ATOMIC_BLOCK(ATOMIC_FORCEON)
-					{
-						gSystemEvents |= EVENT_SW_COMM_FRAME_NO_PROCESSING_bm;
-					};
-				}
+					FLAG_SET(gSystemEvents, EVENT_SW_COMM_FRAME_COMPLETE_bm);
+				};
 			}
 			else
 			{
-				// Save CRC integrity error.
-				gNetworkError = eNE_Frame_CRC;
+				/* Received and calculated CRC-16 value does not match.
+				 * Report CRC integrity error.
+				 */
+				g_NetworkErrorDesc.currError = eNE_Frame_CRC;
 				
 				// Go to \ref eSM_Error state
 				gNSM_CurrentState = eSM_Error;
@@ -529,7 +553,7 @@ void fsm_ProcessData(void)
 				// Set error in data integrity software event
 				ATOMIC_BLOCK(ATOMIC_FORCEON)
 				{
-					gSystemEvents |= EVENT_SW_COMM_FRAME_CRC_ERROR_bm;
+					FLAG_SET(gSystemEvents, EVENT_SW_COMM_FRAME_CRC_ERROR_bm);
 				};
 			}
 		}
@@ -541,7 +565,7 @@ void fsm_ProcessData(void)
 			// Set communication frame incomplete software event
 			ATOMIC_BLOCK(ATOMIC_FORCEON)
 			{
-				gSystemEvents |= EVENT_SW_COMM_FRAME_INCOMPLETE_bm;
+				FLAG_SET(gSystemEvents, EVENT_SW_COMM_FRAME_INCOMPLETE_bm);
 			};
 		}
 		
@@ -549,60 +573,77 @@ void fsm_ProcessData(void)
 		ATOMIC_BLOCK(ATOMIC_FORCEON)
 		{
 			// Atomic interrupt safe set of global variable storing event flags
-			gSystemEvents &= ~EVENT_SW_RECEIVE_DATA_NO_ERROR_bm;
-		}
+			FLAG_CLEAR(gSystemEvents, EVENT_SW_RECEIVE_DATA_NO_ERROR_bm);
+		};
 	};
 	
-	// Check if busy line timer timed out
+	// Check if collision avoidance timer timed out
 	if (u16EventFlags & EVENT_IRQ_COLLISION_AVOIDANCE_TIMEOUT_bm)
 	{
-		// Stop busy line timer by setting clock source to OFF state
-		xmega_tc_select_clock_source(&TIMER_COLLISION_AVOIDANCE, TC_CLKSEL_OFF_gc);
-
-		// Clear busy line flag. The bus is free for transmitting the data.
-		fsm_ClearBusyLine();
-		
-		// Stay in the same state.
-		
-		// Clear corresponding flag
-		ATOMIC_BLOCK(ATOMIC_FORCEON)
-		{
-			// Atomic interrupt safe set of global variable storing event flags
-			gSystemEvents &= ~EVENT_IRQ_COLLISION_AVOIDANCE_TIMEOUT_bm;
-		}
+		fsm_CollisionAvoidanceTimeoutHandler();
 	};
 
 };	// fsm_ProcessData()
 
 void fsm_ExecuteCommand(void)
 {
-	// Complete frame was received and should be processed by this device.
+	/* Complete frame was received and is ready to be processed.
+	 * Check if this message is handled by this device.
+	 */
+	
+	funcCommandHandler ptrCommandHandler = NULL;
 	
 	// Check for frame complete event
 	if (u16EventFlags & EVENT_SW_COMM_FRAME_COMPLETE_bm)
 	{
-		// Callback appropriate function
+		uint8_t u8DeviceType;
+		uint8_t u8DeviceNumber;
 		
-		// Check return value and mark errors if any
+		// Retrieve device type from the message
+		get_MMSN_DeviceType(gCommDataFrameReceive.u16Identifier, u8DeviceType);
 		
-		// Make cleanup??
+		// Retrieve device number/command from the message
+		get_MMSN_DeviceNumber(gCommDataFrameReceive.u16Identifier, u8DeviceNumber);
 		
-		// Return to IDLE state
+#ifdef MMSN_DEBUG
+		printf("Exec:dev_typ = %d\n", u8DeviceType);
+		printf("Exec:dev_num = %d\n", u8DeviceNumber);
+#endif		
+		// Obtain appropriate function handler
+		ptrCommandHandler = get_CommandFunctionHandler(u8DeviceNumber);
+		
+		// Execute if needed
+		if (NULL == ptrCommandHandler)
+		{
+			/* Command is NOT handled by this device
+			*/
+		} 
+		else
+		{
+			/* Command is handled by this device.
+			*/
+		}
+		
+		/* Go to \ref eSM_Idle state.
+		 * All cleanup will be handled there.
+		 */
 		gNSM_CurrentState = eSM_Idle;
 		
 		// Clear corresponding flag
 		ATOMIC_BLOCK(ATOMIC_FORCEON)
 		{
 			// Atomic interrupt safe set of global variable storing event flags
-			gSystemEvents &= ~EVENT_SW_COMM_FRAME_COMPLETE_bm;
-		}
+			FLAG_CLEAR(gSystemEvents, EVENT_SW_COMM_FRAME_COMPLETE_bm);
+			// Set event indicating that command execution was completed
+			FLAG_SET(gSystemEvents, EVENT_SW_COMM_CMD_EXECUTED_bm);
+		};
 	}
 	else
 	{
 		// We have received unexpected event
 		
-		// Save unexpected event error
-		gNetworkError = eNE_Unexpected_Event;
+		// Report unexpected event error
+		g_NetworkErrorDesc.currError = eNE_Unexpected_Event;
 		
 		// Go to \ref eSM_Error state
 		gNSM_CurrentState = eSM_Error;
@@ -610,9 +651,9 @@ void fsm_ExecuteCommand(void)
 		// Set unexpected event error software event
 		ATOMIC_BLOCK(ATOMIC_FORCEON)
 		{
-			gSystemEvents |= EVENT_SW_UNEXPECTED_EVENT_RECEIVED_bm;
+			FLAG_SET(gSystemEvents, EVENT_SW_UNEXPECTED_EVENT_RECEIVED_bm);
 		};
-	}	
+	};
 };
 
 /* SEND state handler */
@@ -723,7 +764,8 @@ void fsm_Retransmission(void)
 	gNSM_CurrentState = eSM_Send;
 	
 	// Otherwise go to Error state and report error
-	gNetworkError = eNE_MaximumRetries;
+	g_NetworkErrorDesc.currError = eNE_MaximumRetries;
+	
 	gNSM_CurrentState = eSM_Error;
 };
 
@@ -759,15 +801,13 @@ void fsm_WaitForResponse(void)
 
 void fsm_Error(void)
 {
-	// Add current Network error to log
+	// Add current Network Error to the table
+	add_commNetworkError(&g_NetworkErrorDesc);
 	
-	// Clear error
-	gNetworkError = eNE_None;
+	// Clear network error descriptor
+	g_NetworkErrorDesc.currError = eNE_None;
 	
 	// Make cleanup
-	
-	
-	
 	
 	// Flush receiving FIFO
 	fifo_flush(&fifo_receive_buffer_desc);
