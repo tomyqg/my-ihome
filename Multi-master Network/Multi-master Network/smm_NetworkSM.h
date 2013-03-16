@@ -38,22 +38,10 @@ Serial Multi-Master Network State Machine
 #define EVENT_SW_COMM_FRAME_COMPLETE_bm			(1 << 10)
 //! Communication frame incomplete
 #define EVENT_SW_COMM_FRAME_INCOMPLETE_bm		(1 << 11)
-//! Communication frame without processing
-#define EVENT_SW_COMM_FRAME_NO_PROCESSING_bm	(1 << 12)
+//! Communication frame was executed
+#define EVENT_SW_COMM_CMD_EXECUTED_bm			(1 << 12)
 //! Communication frame without processing
 #define EVENT_SW_UNEXPECTED_EVENT_RECEIVED_bm	(1 << 13)
-
-/* Error types */
-typedef enum eNetworkError
-{
-	eNE_None = 0,
-	eNE_MaximumRetries,
-	eNE_USART_Receiver_Error,
-	eNE_Frame_CRC,
-	eNE_Unexpected_Event,
-	
-	eNE_MAX
-} eNetworkError_Type;
 
 /* Line free/busy indicators */
 enum eBusyLine
@@ -273,6 +261,7 @@ void fsm_Error(void);
 #define SYSCMD_GROUP_SERIAL_NUMBER_REQ	(0x67)
 #define SYSCMD_MODULE_SERIAL_NUMBER_REQ	(0x68)
 
+// Command function handler
 typedef void (* funcCommandHandler)(void);
 
 typedef struct CommandDescriptor
@@ -293,6 +282,47 @@ typedef struct CommandDescriptor
  * \retval NULL if command number does not match.
  */
 funcCommandHandler get_CommandFunctionHandler(uint8_t a_u8CommandNumber);
+
+/************************************************************************/
+/* NETWORK ERROR HANDLING                                               */
+/************************************************************************/
+
+// Size of network error storage table. Power of 2 for easier size management.
+#define NETWORK_ERROR_TABLE_SIZE 64
+// Create a mask to speed up the table management (index swapping).
+// mask = (2 * size) - 1 => mask = 63 (0x3F)
+#define NETWORK_ERROR_TABLE_SIZE_MASK 0x3F
+
+/* Network Error types */
+typedef enum eNetworkError
+{
+	eNE_None = 0,
+	eNE_MaximumRetries,
+	eNE_USART_Receiver_Error,
+	eNE_Frame_CRC,
+	eNE_Unexpected_Event,
+	
+	eNE_MAX
+} eNetworkError_t;
+
+typedef struct CommNetworkErrorDesc
+{
+	uint16_t		u16ErrorNumber;
+	eNetworkError_t	eErrorReported;
+	
+} CommNetworkErrorDesc_t;
+
+typedef struct NetworkErrorDesc
+{
+	uint8_t			u8Iterator;			// Buffer iterator
+	uint16_t		u16ErrorCounter;	// Consecutive error number
+	eNetworkError_t	currError;			// Currently reported error
+	
+} NetworkErrorDesc_t;
+
+void			init_commNetworkError(NetworkErrorDesc_t * a_pNetworkErrorDesc, CommNetworkErrorDesc_t * a_pCommNetErrTbl, uint8_t a_u8TblSize);
+void			add_commNetworkError(NetworkErrorDesc_t * a_pNetworkErrorDesc);
+eNetworkError_t get_commNetworkError(uint16_t a_u16ErrorNumber);
 
 /************************************************************************/
 /* Helper functions                                                     */
