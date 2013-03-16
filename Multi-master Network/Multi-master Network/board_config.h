@@ -12,7 +12,7 @@
 #include "utils.h"
 #include "smm_NetworkSM.h"
 
-#define TPASTE3( a, b, c)	a##b##c
+#define MMSN_DEBUG
 
 #define MY_DEVICE_TYPE	MMSN_RelayUnit
 
