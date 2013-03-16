@@ -99,7 +99,10 @@ uint16_t xmega_generate_sram_random_value(uint16_t a_u16Offset, uint16_t a_u16El
 /* Bit manipulation                                                     */
 /************************************************************************/
 
-// clear a bit 
+// Set a bit
+#define FLAG_SET(arg1, arg2)	arg1 |= arg2;
+
+// Clear a bit 
 #define	FLAG_CLEAR(arg1, arg2)	arg1 &= ~(arg2)
 
 // Port Direction Set
