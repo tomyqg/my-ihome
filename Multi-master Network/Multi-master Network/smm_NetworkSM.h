@@ -8,40 +8,46 @@ Serial Multi-Master Network State Machine
 #include <stdbool.h>
 #include <stdlib.h>
 #include "nvm_driver/nvm_driver.h"
+#include "fsm_Receiver.h"
 
 /** EVENT definitions */
 
 //! Interrupt type events
 //! Received data from serial bus
-#define EVENT_IRQ_RECEIVE_COMPLETE_bm			(1 << 0)
+#define EVENT_IRQ_RECEIVE_COMPLETE_bm				(1 << 0)
 //! Data register empty
-#define EVENT_IRQ_DATA_REGISTER_EMPTY_bm		(1 << 1)
+#define EVENT_IRQ_DATA_REGISTER_EMPTY_bm			(1 << 1)
 //! Frame completely transmitted
-#define EVENT_IRQ_TRANSMIT_COMPLETE_bm			(1 << 2)
+#define EVENT_IRQ_TRANSMIT_COMPLETE_bm				(1 << 2)
 //! Data is ready to be sent
-#define EVENT_SW_DATA_READY_TO_SEND_bm			(1 << 3)
+#define EVENT_SW_DATA_READY_TO_SEND_bm				(1 << 3)
 //! Busy line timer time out
 #define EVENT_IRQ_COLLISION_AVOIDANCE_TIMEOUT_bm	(1 << 4)
 //! Waiting for response timer time out
-#define EVENT_IRQ_WAIT_FOR_RESPONSE_TIMEOUT_bm	(1 << 5)
+#define EVENT_IRQ_WAIT_FOR_RESPONSE_TIMEOUT_bm		(1 << 5)
 //! System heartbeat timer time out
-#define EVENT_IRQ_HEARTBEAT_TIMEOUT_bm			(1 << 6)
+#define EVENT_IRQ_HEARTBEAT_TIMEOUT_bm				(1 << 6)
 
 //! Software events
 //! Received data is error free
-#define EVENT_SW_RECEIVE_DATA_NO_ERROR_bm		(1 << 7)
+#define EVENT_SW_RECEIVE_DATA_NO_ERROR_bm			(1 << 7)
 //! Received data is erroneous
-#define EVENT_SW_RECEIVE_DATA_ERROR_bm			(1 << 8)
+#define EVENT_SW_RECEIVE_DATA_ERROR_bm				(1 << 8)
 //! Communication frame data integrity error
-#define EVENT_SW_COMM_FRAME_CRC_ERROR_bm		(1 << 9)
+#define EVENT_SW_COMM_FRAME_CRC_ERROR_bm			(1 << 9)
 //! Communication frame complete
-#define EVENT_SW_COMM_FRAME_COMPLETE_bm			(1 << 10)
+#define EVENT_SW_COMM_FRAME_COMPLETE_bm				(1 << 10)
 //! Communication frame incomplete
-#define EVENT_SW_COMM_FRAME_INCOMPLETE_bm		(1 << 11)
+#define EVENT_SW_COMM_FRAME_INCOMPLETE_bm			(1 << 11)
 //! Communication frame was executed
-#define EVENT_SW_COMM_CMD_EXECUTED_bm			(1 << 12)
+#define EVENT_SW_COMM_FRAME_RETRANSMIT_bm			(1 << 12)
+//! Communication frame was executed
+#define EVENT_SW_MAX_RETRIES_COUNT_REACHED_bm		(1 << 13)
 //! Communication frame without processing
-#define EVENT_SW_UNEXPECTED_EVENT_RECEIVED_bm	(1 << 13)
+#define EVENT_SW_UNEXPECTED_EVENT_RECEIVED_bm		(1 << 14)
+
+//! Maximum retries count
+#define MMSN_MAX_RETRIES	(5)
 
 /* Line free/busy indicators */
 enum eBusyLine
@@ -101,10 +107,10 @@ struct mmsn_comm_data_frame {
 	union {
 		struct {
 			uint16_t u16Identifier;
-			uint8_t	 u8DataArray[MMSN_DATA_LENGTH];
+			uint8_t	 u8DataTable[MMSN_DATA_LENGTH];
 			uint16_t u16CRC16;
 		};
-		uint8_t u8CommFrameArray[MMSN_COMM_FRAME_SIZE];
+		uint8_t u8CommFrameTable[MMSN_COMM_FRAME_SIZE];
 	};
 };
 
