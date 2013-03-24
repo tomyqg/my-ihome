@@ -162,7 +162,7 @@ extern void (*SM_stateTable[])(void);
 ISR(TCC0_OVF_vect)
 {	
 	// Notify that no response timer expired
-	gSystemEvents |= EVENT_IRQ_HEARTBEAT_TIMEOUT_bm;
+	FLAG_SET(gSystemEvents, EVENT_IRQ_HEARTBEAT_TIMEOUT_bm);
 }
 
 /*! \brief Busy line timer overflow interrupt service routine.
@@ -172,8 +172,8 @@ ISR(TCC0_OVF_vect)
  */
 ISR(TCD0_OVF_vect)
 {	
-	// Signal busy line timer expiration
-	gSystemEvents |= EVENT_IRQ_COLLISION_AVOIDANCE_TIMEOUT_bm;
+	// Signal Collision Avoidance (busy line) timer expiration
+	FLAG_SET(gSystemEvents, EVENT_IRQ_COLLISION_AVOIDANCE_TIMEOUT_bm);
 }
 
 /*! \brief No response timer overflow interrupt service routine.
@@ -184,7 +184,7 @@ ISR(TCD0_OVF_vect)
 ISR(TCE0_OVF_vect)
 {	
 	// Notify that no response timer expired
-	gSystemEvents |= EVENT_IRQ_WAIT_FOR_RESPONSE_TIMEOUT_bm;
+	FLAG_SET(gSystemEvents, EVENT_IRQ_WAIT_FOR_RESPONSE_TIMEOUT_bm);
 }
 
 /*! \brief Reception Complete Interrupt interrupt service routine.
@@ -195,14 +195,14 @@ ISR(TCE0_OVF_vect)
 ISR(USARTD1_RXC_vect, ISR_BLOCK)
 {
 	// Notify that new data arrived on the bus
-	gSystemEvents |= EVENT_IRQ_RECEIVE_COMPLETE_bm;
+	FLAG_SET(gSystemEvents, EVENT_IRQ_RECEIVE_COMPLETE_bm);
 }
 
 /* Data Register Empty Interrupt */
 ISR(USARTD1_DRE_vect, ISR_BLOCK)
 {
 	// Set Data Register Empty event
-	gSystemEvents |= EVENT_IRQ_DATA_REGISTER_EMPTY_bm;
+	FLAG_SET(gSystemEvents, EVENT_IRQ_DATA_REGISTER_EMPTY_bm);
 	
 	/* DREIF is cleared by writing DATA.
 	   Disable DRE interrupt because DATA is read in corresponding FSM handler.
@@ -329,16 +329,8 @@ int main(void)
 	xmega_timer_config(&TIMER_COLLISION_AVOIDANCE, TC_CLKSEL_OFF_gc, g_u16CollisionAvoidancePeriod);
 	
 	// Heartbeat timer - configure but do not run
-	xmega_timer_config(&TIMER_COLLISION_AVOIDANCE, TC_CLKSEL_OFF_gc, TIMER_HEARTBEAT_PERIOD);
+	xmega_timer_config(&TIMER_HEARTBEAT, TC_CLKSEL_OFF_gc, TIMER_HEARTBEAT_PERIOD);
 	
-	/************************************************************************/
-	/* RS-485 PHYSICAL DEVICE CONFIGURATION						            */
-	/************************************************************************/
-	// Initialize GPIO related to RS-485 driver
-	rs485_driver_gpio_initialize();
-	// Initially go LOW to enable receiver - start listening
-	rs485_receiver_enable();
-		
 	// Force the state of the SREG register on exit, disabling the Global Interrupt Status flag bit.
 	/* ATOMIC_BLOCK(NONATOMIC_FORCEOFF)
 	{
