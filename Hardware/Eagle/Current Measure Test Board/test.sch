@@ -6079,8 +6079,8 @@ Source: http://eshop.phoenixcontact.com .. 1729128.pdf</description>
 <wire x1="-1.9311" y1="0.16" x2="-2.4421" y2="0.639" width="0.2032" layer="51" curve="65.201851"/>
 <circle x="-2.5611" y="0.025" radius="1.915" width="0.2032" layer="21"/>
 <circle x="2.5189" y="0.025" radius="1.915" width="0.2032" layer="21"/>
-<pad name="1" x="-2.5611" y="0.025" drill="1.3" diameter="2"/>
-<pad name="2" x="2.5189" y="0.025" drill="1.3" diameter="2"/>
+<pad name="1" x="-2.5611" y="0.025" drill="0.7" diameter="2"/>
+<pad name="2" x="2.5189" y="0.025" drill="0.7" diameter="2"/>
 <text x="-4.7511" y="4.445" size="1.27" layer="25">&gt;NAME</text>
 <text x="6.985" y="-3.81" size="1.27" layer="27" rot="R90">&gt;VALUE</text>
 </package>
