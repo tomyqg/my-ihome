@@ -10215,6 +10215,24 @@ Metric Code Size 5664</description>
 </nets>
 </sheet>
 </sheets>
+<errors>
+<approved hash="104,1,30.48,45.72,U1,REXT,N$33,,,"/>
+<approved hash="104,1,30.48,-20.32,U2,REXT,N$25,,,"/>
+<approved hash="106,1,-71.12,17.78,X0,,,,,"/>
+<approved hash="106,1,-71.12,20.32,X1,,,,,"/>
+<approved hash="106,1,-63.5,20.32,X2,,,,,"/>
+<approved hash="106,1,-40.64,17.78,X3,,,,,"/>
+<approved hash="106,1,-40.64,20.32,X4,,,,,"/>
+<approved hash="106,1,-88.9,63.5,Y0,,,,,"/>
+<approved hash="106,1,-96.52,63.5,Y1,,,,,"/>
+<approved hash="106,1,-35.56,60.96,Y2,,,,,"/>
+<approved hash="115,1,140.187,86.36,D1,,,,,"/>
+<approved hash="115,1,-92.7523,63.6312,JP2,,,,,"/>
+<approved hash="115,1,-39.3277,58.2888,JP3,,,,,"/>
+<approved hash="115,1,-67.2677,17.6488,JP4,,,,,"/>
+<approved hash="115,1,-36.7877,17.6488,JP5,,,,,"/>
+<approved hash="115,1,-9.02123,59.6477,JP1,,,,,"/>
+</errors>
 </schematic>
 </drawing>
 </eagle>

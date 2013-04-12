@@ -9647,7 +9647,7 @@ Metric Code Size 5664</description>
 <part name="GND7" library="supply1" deviceset="GND" device=""/>
 <part name="+3V4" library="supply1" deviceset="+3V3" device=""/>
 <part name="U$1" library="myHome" deviceset="PHOTO_TRANS" device=""/>
-<part name="R5" library="resistor" deviceset="R-EU_" device="R0805" value="10"/>
+<part name="R5" library="resistor" deviceset="R-EU_" device="R0805" value="4k6"/>
 <part name="+3V5" library="supply1" deviceset="+3V3" device=""/>
 <part name="GND8" library="supply1" deviceset="GND" device=""/>
 </parts>
