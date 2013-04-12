@@ -150,6 +150,30 @@
 <text x="-2.8575" y="-1.905" size="1.27" layer="25">&gt;NAME</text>
 <text x="-2.8575" y="1.27" size="1.27" layer="27">&gt;VALUE</text>
 </package>
+<package name="PHOTO_TRANS">
+<wire x1="-0.35" y1="0.925" x2="0.35" y2="0.925" width="0.1016" layer="51" curve="162.394521"/>
+<wire x1="-0.35" y1="-0.925" x2="0.35" y2="-0.925" width="0.1016" layer="51" curve="-162.394521"/>
+<wire x1="0.575" y1="0.525" x2="0.575" y2="-0.525" width="0.1016" layer="51"/>
+<wire x1="-0.575" y1="-0.5" x2="-0.575" y2="0.925" width="0.1016" layer="51"/>
+<circle x="-0.45" y="0.85" radius="0.103" width="0.1016" layer="51"/>
+<smd name="C" x="0" y="1.05" dx="1.2" dy="1.2" layer="1"/>
+<smd name="A" x="0" y="-1.05" dx="1.2" dy="1.2" layer="1"/>
+<text x="-1.27" y="-1.27" size="1.27" layer="25" rot="R90">&gt;NAME</text>
+<text x="2.54" y="-1.27" size="1.27" layer="27" rot="R90">&gt;VALUE</text>
+<rectangle x1="0.3" y1="0.5" x2="0.625" y2="1" layer="51"/>
+<rectangle x1="-0.325" y1="0.5" x2="-0.175" y2="0.75" layer="51"/>
+<rectangle x1="0.175" y1="0.5" x2="0.325" y2="0.75" layer="51"/>
+<rectangle x1="-0.2" y1="0.5" x2="0.2" y2="0.675" layer="51"/>
+<rectangle x1="0.3" y1="-1" x2="0.625" y2="-0.5" layer="51"/>
+<rectangle x1="-0.625" y1="-1" x2="-0.3" y2="-0.5" layer="51"/>
+<rectangle x1="0.175" y1="-0.75" x2="0.325" y2="-0.5" layer="51"/>
+<rectangle x1="-0.325" y1="-0.75" x2="-0.175" y2="-0.5" layer="51"/>
+<rectangle x1="-0.2" y1="-0.675" x2="0.2" y2="-0.5" layer="51"/>
+<rectangle x1="-0.1" y1="0" x2="0.1" y2="0.2" layer="21"/>
+<rectangle x1="-0.6" y1="0.5" x2="-0.3" y2="0.8" layer="51"/>
+<rectangle x1="-0.625" y1="0.925" x2="-0.3" y2="1" layer="51"/>
+<hole x="0" y="0" drill="2"/>
+</package>
 </packages>
 <symbols>
 <symbol name="SCT2024">
@@ -184,6 +208,27 @@
 <pin name="SDO" x="-15.24" y="-2.54" length="middle" direction="out"/>
 <pin name="REXT" x="-15.24" y="-7.62" length="middle" direction="pwr"/>
 </symbol>
+<symbol name="PHOTO_TRAN">
+<wire x1="-5.588" y1="-2.54" x2="-3.81" y2="-0.762" width="0.1524" layer="94"/>
+<wire x1="-3.81" y1="-0.762" x2="-4.953" y2="-1.143" width="0.1524" layer="94"/>
+<wire x1="-4.953" y1="-1.143" x2="-4.191" y2="-1.905" width="0.1524" layer="94"/>
+<wire x1="-4.191" y1="-1.905" x2="-3.81" y2="-0.762" width="0.1524" layer="94"/>
+<wire x1="-3.683" y1="1.143" x2="-4.826" y2="0.762" width="0.1524" layer="94"/>
+<wire x1="-4.826" y1="0.762" x2="-4.064" y2="0" width="0.1524" layer="94"/>
+<wire x1="-4.064" y1="0" x2="-3.683" y2="1.143" width="0.1524" layer="94"/>
+<wire x1="-5.461" y1="-0.635" x2="-3.683" y2="1.143" width="0.1524" layer="94"/>
+<wire x1="0" y1="2.54" x2="-2.54" y2="0" width="0.1524" layer="94"/>
+<wire x1="-2.54" y1="0" x2="-0.254" y2="-2.286" width="0.1524" layer="94"/>
+<wire x1="-0.762" y1="-1.016" x2="-0.254" y2="-2.286" width="0.1524" layer="94"/>
+<wire x1="-0.254" y1="-2.286" x2="0" y2="-2.54" width="0.1524" layer="94"/>
+<wire x1="-0.254" y1="-2.286" x2="-1.524" y2="-1.778" width="0.1524" layer="94"/>
+<wire x1="-1.524" y1="-1.778" x2="-0.762" y2="-1.016" width="0.1524" layer="94"/>
+<text x="2.54" y="2.54" size="1.778" layer="95">&gt;NAME</text>
+<text x="2.54" y="0" size="1.778" layer="96">&gt;VALUE</text>
+<rectangle x1="-2.921" y1="-2.54" x2="-2.159" y2="2.54" layer="94"/>
+<pin name="E" x="0" y="-5.08" visible="off" length="short" direction="pas" rot="R90"/>
+<pin name="C" x="0" y="5.08" visible="off" length="short" direction="pas" rot="R270"/>
+</symbol>
 </symbols>
 <devicesets>
 <deviceset name="SCT2024(CSOG,CSSG,CSTG,CSDG)">
@@ -217,6 +262,22 @@
 <connect gate="G$1" pin="SDI" pad="2"/>
 <connect gate="G$1" pin="SDO" pad="22"/>
 <connect gate="G$1" pin="VDD" pad="24"/>
+</connects>
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
+</devices>
+</deviceset>
+<deviceset name="PHOTO_TRANS">
+<gates>
+<gate name="G$1" symbol="PHOTO_TRAN" x="2.54" y="0"/>
+</gates>
+<devices>
+<device name="" package="PHOTO_TRANS">
+<connects>
+<connect gate="G$1" pin="C" pad="A"/>
+<connect gate="G$1" pin="E" pad="C"/>
 </connects>
 <technologies>
 <technology name=""/>
@@ -9585,6 +9646,10 @@ Metric Code Size 5664</description>
 <part name="GND6" library="supply1" deviceset="GND" device=""/>
 <part name="GND7" library="supply1" deviceset="GND" device=""/>
 <part name="+3V4" library="supply1" deviceset="+3V3" device=""/>
+<part name="U$1" library="myHome" deviceset="PHOTO_TRANS" device=""/>
+<part name="R5" library="resistor" deviceset="R-EU_" device="R0805" value="10"/>
+<part name="+3V5" library="supply1" deviceset="+3V3" device=""/>
+<part name="GND8" library="supply1" deviceset="GND" device=""/>
 </parts>
 <sheets>
 <sheet>
@@ -9644,6 +9709,10 @@ Metric Code Size 5664</description>
 <instance part="GND6" gate="1" x="-30.48" y="50.8"/>
 <instance part="GND7" gate="1" x="-10.16" y="48.26"/>
 <instance part="+3V4" gate="G$1" x="-10.16" y="73.66"/>
+<instance part="U$1" gate="G$1" x="-60.96" y="63.5"/>
+<instance part="R5" gate="G$1" x="-60.96" y="50.8" rot="R90"/>
+<instance part="+3V5" gate="G$1" x="-60.96" y="73.66"/>
+<instance part="GND8" gate="1" x="-60.96" y="40.64"/>
 </instances>
 <busses>
 </busses>
@@ -10030,13 +10099,9 @@ Metric Code Size 5664</description>
 </segment>
 <segment>
 <pinref part="GND6" gate="1" pin="GND"/>
-<wire x1="-30.48" y1="53.34" x2="-30.48" y2="58.42" width="0.1524" layer="91"/>
-<pinref part="JP3" gate="A" pin="1"/>
-<wire x1="-35.56" y1="58.42" x2="-30.48" y2="58.42" width="0.1524" layer="91"/>
 <pinref part="JP3" gate="A" pin="2"/>
 <wire x1="-43.18" y1="58.42" x2="-43.18" y2="53.34" width="0.1524" layer="91"/>
 <wire x1="-43.18" y1="53.34" x2="-30.48" y2="53.34" width="0.1524" layer="91"/>
-<junction x="-30.48" y="53.34"/>
 </segment>
 <segment>
 <pinref part="GND7" gate="1" pin="GND"/>
@@ -10052,6 +10117,11 @@ Metric Code Size 5664</description>
 <wire x1="-88.9" y1="60.96" x2="-88.9" y2="55.88" width="0.1524" layer="91"/>
 <wire x1="-88.9" y1="55.88" x2="-99.06" y2="55.88" width="0.1524" layer="91"/>
 <junction x="-99.06" y="55.88"/>
+</segment>
+<segment>
+<pinref part="R5" gate="G$1" pin="1"/>
+<pinref part="GND8" gate="1" pin="GND"/>
+<wire x1="-60.96" y1="45.72" x2="-60.96" y2="43.18" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="+3V3" class="0">
@@ -10072,6 +10142,11 @@ Metric Code Size 5664</description>
 <pinref part="JP1" gate="A" pin="2"/>
 <pinref part="+3V4" gate="G$1" pin="+3V3"/>
 <wire x1="-10.16" y1="63.5" x2="-10.16" y2="71.12" width="0.1524" layer="91"/>
+</segment>
+<segment>
+<pinref part="+3V5" gate="G$1" pin="+3V3"/>
+<pinref part="U$1" gate="G$1" pin="C"/>
+<wire x1="-60.96" y1="71.12" x2="-60.96" y2="68.58" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="N$25" class="0">
@@ -10210,6 +10285,18 @@ Metric Code Size 5664</description>
 <pinref part="JP2" gate="A" pin="1"/>
 <wire x1="-96.52" y1="63.5" x2="-104.14" y2="63.5" width="0.1524" layer="91"/>
 <label x="-104.14" y="63.5" size="1.778" layer="95" rot="R180" xref="yes"/>
+</segment>
+</net>
+<net name="N$15" class="0">
+<segment>
+<pinref part="U$1" gate="G$1" pin="E"/>
+<pinref part="R5" gate="G$1" pin="2"/>
+<wire x1="-60.96" y1="58.42" x2="-60.96" y2="55.88" width="0.1524" layer="91"/>
+<junction x="-60.96" y="55.88"/>
+<pinref part="JP3" gate="A" pin="1"/>
+<wire x1="-35.56" y1="58.42" x2="-33.02" y2="58.42" width="0.1524" layer="91"/>
+<wire x1="-33.02" y1="58.42" x2="-33.02" y2="55.88" width="0.1524" layer="91"/>
+<wire x1="-33.02" y1="55.88" x2="-60.96" y2="55.88" width="0.1524" layer="91"/>
 </segment>
 </net>
 </nets>

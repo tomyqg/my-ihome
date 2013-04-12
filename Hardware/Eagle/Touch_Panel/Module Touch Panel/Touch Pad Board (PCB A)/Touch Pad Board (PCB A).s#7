@@ -10030,13 +10030,9 @@ Metric Code Size 5664</description>
 </segment>
 <segment>
 <pinref part="GND5" gate="1" pin="GND"/>
-<wire x1="-96.52" y1="53.34" x2="-96.52" y2="58.42" width="0.1524" layer="91"/>
-<pinref part="JP2" gate="A" pin="2"/>
-<wire x1="-93.98" y1="58.42" x2="-96.52" y2="58.42" width="0.1524" layer="91"/>
 <pinref part="JP2" gate="A" pin="1"/>
 <wire x1="-86.36" y1="58.42" x2="-86.36" y2="53.34" width="0.1524" layer="91"/>
 <wire x1="-86.36" y1="53.34" x2="-96.52" y2="53.34" width="0.1524" layer="91"/>
-<junction x="-96.52" y="53.34"/>
 </segment>
 <segment>
 <pinref part="GND6" gate="1" pin="GND"/>
@@ -10155,9 +10151,9 @@ Metric Code Size 5664</description>
 </net>
 <net name="Y2" class="0">
 <segment>
-<pinref part="JP3" gate="A" pin="4"/>
-<wire x1="-53.34" y1="60.96" x2="-43.18" y2="60.96" width="0.1524" layer="91"/>
-<label x="-53.34" y="60.96" size="1.778" layer="95" rot="R180" xref="yes"/>
+<pinref part="JP3" gate="A" pin="3"/>
+<wire x1="-35.56" y1="60.96" x2="-27.94" y2="60.96" width="0.1524" layer="91"/>
+<label x="-27.94" y="60.96" size="1.778" layer="95" xref="yes"/>
 </segment>
 </net>
 <net name="X1" class="0">
