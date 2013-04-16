@@ -9647,6 +9647,8 @@ Metric Code Size 5664</description>
 <part name="GND7" library="supply1" deviceset="GND" device=""/>
 <part name="+3V4" library="supply1" deviceset="+3V3" device=""/>
 <part name="U$1" library="myHome" deviceset="PHOTO_TRANS" device=""/>
+<part name="R5" library="resistor" deviceset="R-EU_" device="R0805" value="10"/>
+<part name="+3V5" library="supply1" deviceset="+3V3" device=""/>
 </parts>
 <sheets>
 <sheet>
@@ -9706,7 +9708,9 @@ Metric Code Size 5664</description>
 <instance part="GND6" gate="1" x="-30.48" y="50.8"/>
 <instance part="GND7" gate="1" x="-10.16" y="48.26"/>
 <instance part="+3V4" gate="G$1" x="-10.16" y="73.66"/>
-<instance part="U$1" gate="G$1" x="-5.08" y="30.48"/>
+<instance part="U$1" gate="G$1" x="-60.96" y="50.8"/>
+<instance part="R5" gate="G$1" x="-60.96" y="63.5" rot="R90"/>
+<instance part="+3V5" gate="G$1" x="-60.96" y="73.66"/>
 </instances>
 <busses>
 </busses>
