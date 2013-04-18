@@ -5,7 +5,6 @@
  *  Author: fidectom
  */ 
 
-
 #ifndef UTILS_H_
 #define UTILS_H_
 
@@ -95,6 +94,20 @@ uint16_t xmega_generate_adc_random_value(ADC_t * a_pADC, ADC_REFSEL_t a_VoltageR
  */
 uint16_t xmega_generate_sram_random_value(uint16_t a_u16Offset, uint16_t a_u16ElemCount);
 
+/**
+* \brief Configure and initialize xmega USART.
+*
+* This function performs all necessary USART configuration to enable receiving and transmission.
+* During configuration global interrupts are disabled.
+*
+* \note Configuration is only valid for a chosen USART, baud rate and peripheral clock.
+*
+* \param none.
+*
+* \retval none.
+*/
+void xmega_usart_configure(void);
+
 /************************************************************************/
 /* Bit manipulation                                                     */
 /************************************************************************/
@@ -120,5 +133,46 @@ uint16_t xmega_generate_sram_random_value(uint16_t a_u16Offset, uint16_t a_u16El
 // Port Output Set
 #define PORT_OUTSET(...)	port_outset_(__VA_ARGS__)
 #define port_outset_(arg1, arg2)	arg1.OUTSET = arg2
+
+
+/**
+ * \brief Structure containing the xmega shortened serial number.
+ *
+ * This structure is used to store shortened (7 bytes) device serial number.
+ * This would be needed when supervisor is requesting uC serial number encoded on 7 bytes.
+ * Shortened serial number is comprised of lotnum4, lotnum5, ..., and coordy1 bytes.
+ * These are 7 lowest bytes which are more unique for a device.
+ */
+typedef struct xmega_shortened_serial_number
+{
+	union {
+		struct {
+			uint8_t lotnum4;
+			uint8_t lotnum5;
+			uint8_t wafnum;
+			uint8_t coordx0;
+			uint8_t coordx1;
+			uint8_t coordy0;
+			uint8_t coordy1;
+		};
+		uint8_t u8DataArray[7];
+	};
+} xmega_shortened_serial_number_t;
+
+/**
+ * \brief Get the shortened XMEGA device serial number.
+ *
+ * This function gets the shortened version XMEGA device serial number.
+ * Shortened version of complete serial number is comprised of 7 bytes
+ * excluding lotnum0 - lotnum3 bytes.
+ *
+ * \Note Functions arguments (pointers) must be properly provided. No checks against NULL pointers are made.
+ *
+ * \param a_pInCompleteSerialNum	Pointer to the structure holding complete device serial number (11 bytes).
+ * \param a_pOutShortenedSerialNum	Pointer to the structure holding shortened device serial number (7 bytes).
+ *
+ * \retval none.
+ */
+// void xmega_get_shortened_serial_num(nvm_device_serial *a_pInCompleteSerialNum, xmega_shortened_serial_number_t *a_pOutShortenedSerialNum);
 
 #endif /* UTILS_H_ */
