@@ -8,9 +8,20 @@ Serial Multi-Master Network State Machine
 #include <stdbool.h>
 #include <stdlib.h>
 #include "nvm_driver/nvm_driver.h"
+#include "fifo/fifo.h"
 #include "fsm_Receiver.h"
 
 /** EVENT definitions */
+
+// Add event to the queue
+#define ADD_EVENT_TO_QUEUE(p_eventQDesc, _event)	\
+do {	\
+		ATOMIC_BLOCK(ATOMIC_FORCEON)	\
+		{	\
+			fifo_push_uint8_nocheck(p_eventQDesc, _event);	\
+		};	\
+} while(0)
+
 
 //! Interrupt type events
 //! Received data from serial bus
@@ -52,8 +63,8 @@ Serial Multi-Master Network State Machine
 /* Line free/busy indicators */
 enum eBusyLine
 {
-	FREE = 0,
-	BUSY = 1
+	MMSN_FREE_BUS = 0,
+	MMSN_BUSY_BUS = 1
 };
 
 /* Device configuration status */
@@ -107,15 +118,16 @@ struct mmsn_comm_data_frame {
 	union {
 		struct {
 			uint16_t u16Identifier;
-			uint8_t	 u8DataTable[MMSN_DATA_LENGTH];
+			uint8_t	 u8DataBuffer[MMSN_DATA_LENGTH];
 			uint16_t u16CRC16;
 		};
-		uint8_t u8CommFrameTable[MMSN_COMM_FRAME_SIZE];
+		uint8_t u8FrameBuffer[MMSN_COMM_FRAME_SIZE];
 	};
 };
 
 typedef struct mmsn_comm_data_frame mmsn_comm_data_frame_t;
 
+/* All the magic need for frame processing macros */
 #define MMSN_ADDRESS_bm	0xFFF0	/* Multi-Master Serial Network Address bit mask */
 #define MMSN_ADDRESS_bp	4		/* Multi-Master Serial Network Address bit position */
 #define MMSN_DEVTYPE_bm	0xF000	/* Multi-Master Serial Network Device Type bit mask */
@@ -157,6 +169,12 @@ typedef struct mmsn_comm_data_frame mmsn_comm_data_frame_t;
 
 #define set_MMSN_CTRLF(_u8CtrlF, _u16Identifier)	\
 	_u16Identifier = (_u16Identifier & (~MMSN_CTRLF_bm)) | (_u8CtrlF << MMSN_CTRLF_bp)
+
+#define MMSN_BYTES_2_WORD(_InByte1, _InByte2, _OutWord)	\
+do {	\
+	_OutWord = (((_InByte1 << 8) & 0xFF00) | (_InByte2));	\
+} while (0);
+
 
 // Device Types
 #define	MMSN_ConfigurationUnit	(0x00)
@@ -212,17 +230,18 @@ void processCommand_Status(void);
 // Establish table of pointers to processing functions
 // void (* processingFunctions[])(void) = { processCommand_Status };
 
-typedef enum eTransmitMessageType
+typedef enum eMMSN_FrameStatus
 {
-	NORMAL = 0,
-	ACK,
-	NACK
-} eTransmitMessageType_t;
+	MMSN_FrameUnknown = 0,
+	MMSN_FrameBegin,
+	MMSN_FrameEnd,
+	MMSN_FrameCollect
+	
+} eMMSN_FrameStatus_t;
 
 typedef enum eSM_State
 {
-	eSM_Initialize = 0,
-	eSM_Idle,
+	eSM_Idle = 0,
 	eSM_Receive,
 	eSM_ProcessData,
 	eSM_ExecuteCommand,
@@ -234,7 +253,6 @@ typedef enum eSM_State
 } eSM_StateType;
 
 /* Function prototypes to handle individual state */
-void fsm_Initialize(void);
 void fsm_Idle(void);
 void fsm_Receive(void);
 void fsm_ProcessData(void);
@@ -244,6 +262,99 @@ void fsm_WaitForResend(void);
 void fsm_Retransmission(void);
 void fsm_WaitForResponse(void);
 void fsm_Error(void);
+
+
+/* Multi-Master Serial Network FSM states */
+enum eMMSN_FSMState
+{
+	MMSN_IDLE_STATE = 0,
+	MMSN_RECEIVE_STATE,
+	MMSN_PROCESS_DATA_STATE,
+	MMSN_EXECUTE_COMMAND_STATE,
+	MMSN_SEND_STATE,
+	// MMSN_WAIT_FOR_RESEND_STATE,
+	MMSN_WAIT_FOR_RESPOND_STATE,
+	MMSN_RECEIVE_RESPONSE_STATE,
+	MMSN_PROCESS_RESPONSE_STATE,
+	MMSN_RETRANSMIT_STATE,
+	MMSN_ERROR_STATE,
+	MMSN_MAX_STATES
+};
+
+/* FSM Events */
+enum eMMSN_FSMEvent
+{
+	MMSN_DATA_RECEIVED_EVENT = 0,
+	MMSN_COLLISION_AVOIDANCE_TIMEOUT,
+	MMSN_ERROR_EVENT,
+	MMSN_FRAME_PROCESS_EVENT,
+	MMSN_EXECUTE_COMMAND_EVENT,
+	MMSN_SEND_DATA_EVENT,
+	//MMSN_
+	MMSN_NO_RESPONSE_TIMEOUT_EVENT,
+	MMSN_DATA_REG_EMPTY_EVENT,
+	MMSN_MAX_EVENTS
+};
+
+/* MMSN FSM return codes */
+enum eMMSN_FSMReturnCode
+{
+	MMSN_OK = 0,
+	MMSN_ERROR = 0xFF	//! Error during processing
+	
+} eMMSN_FSMReturnCode_t;
+
+typedef struct MMSN_FSM
+{
+	uint8_t						u8LineState;		//! Flag to indicate that the line is busy
+	eSM_StateType				CurrentState;
+	eSM_StateType				PreviousState;
+	mmsn_comm_data_frame_t		* ptrRXDataFrame;	//! Pointer to structure holding frame being received
+	mmsn_comm_data_frame_t		* ptrTXDataFrame;	//! Pointer to structure holding frame to be transmitted
+	uint8_t						u8TXDataCounter;	//! Transmitted data counter
+	uint8_t						u8RetriesCount;		//! Retransmission counter
+	eMMSN_FrameStatus_t			FrameStatus;	//! Data Frame status
+	
+	fifo_desc_t					* ptrEventQueueDesc;
+	
+	FSMReceiver_t				ReceiverFSM;		//! Receiver FSM
+	fsmReceiverActionHandler	(* pFSMRActionTable)[FSMR_MAX_EVENTS];	//! Pointer to Receiver FSM action function pointer array
+	
+} MMSN_FSM_t;
+
+// Helper macro to obtain pointer to action handler function
+#define GET_EV_HDL_P(fsmActionTablePtr, fsm, event) \
+(* (fsmActionTablePtr + fsm.u8State))[event]
+
+// Helper macro to call action handler function
+#define CALL_EV_HDL(fsmActionTablePtr, fsm, event, arg)	\
+(* (fsmActionTablePtr + fsm.u8State))[event](&fsm, event, &arg)
+
+
+void mmsn_InitializeStateMachine(MMSN_FSM_t * a_pFSM);
+
+/**
+ * \brief Definition of Multi-Master Serial Network FSM event handler function.
+ *
+ * This function handles all necessary events related with corresponding FSM state.
+ *
+ * \param a_pFSM		pointer to the structure holding MMSN FSM.
+ * \param a_u8Event		event value.
+ * \param a_pEventArg	pointer to the event argument.
+ *
+ * \retval returned value encoded with eMMSN_FSMReturnCode enumeration.
+ * \retval MMSN_ERROR in case of processing error.
+ */
+typedef uint8_t (* mmsnFsmEventHandler) (MMSN_FSM_t * a_pFSM, uint8_t a_u8Event, void * a_pEventArg);
+
+uint8_t mmsn_Idle_DataReceived_Handler(MMSN_FSM_t * a_pFSM, uint8_t a_u8Event, void * a_pEventArg);
+uint8_t mmsn_Generic_CollisionAvoidanceTimeout_Handler(MMSN_FSM_t * a_pFSM, uint8_t a_u8Event, void * a_pEventArg);
+uint8_t mmsn_Receive_DataReceived_Handler(MMSN_FSM_t * a_pFSM, uint8_t a_u8Event, void * a_pEventArg);
+uint8_t mmsn_ProcessData_FrameProcess_Handler(MMSN_FSM_t * a_pFSM, uint8_t a_u8Event, void * a_pEventArg);
+uint8_t	mmsn_ExecuteCommand_ExecuteCommandEvent_Handler(MMSN_FSM_t * a_pFSM, uint8_t a_u8Event, void * a_pEventArg);
+uint8_t mmsn_Idle_SendData_Handler(MMSN_FSM_t * a_pFSM, uint8_t a_u8Event, void * a_pEventArg);
+
+uint8_t mmsn_Error_ErrorEvent_Handler(MMSN_FSM_t * a_pFSM, uint8_t a_u8Event, void * a_pEventArg);
 
 /************************************************************************/
 /* COMMUNICATION                                                        */
@@ -302,11 +413,18 @@ funcCommandHandler get_CommandFunctionHandler(uint8_t a_u8CommandNumber);
 /* Network Error types */
 typedef enum eNetworkError
 {
-	eNE_None = 0,
-	eNE_MaximumRetries,
-	eNE_USART_Receiver_Error,
-	eNE_Frame_CRC,
-	eNE_Unexpected_Event,
+	NE_None = 0,						// 0
+	NE_MaximumRetries,					// 1
+	NE_USART_Receiver_Error,			// 2
+	NE_Frame_CRC,						// 3
+	NE_Frame_Malfunction_STX,			// 4
+	NE_Frame_Malfunction_ETX,			// 5
+	NE_ReceiverFSM_Malfunction,			// 6
+	NE_ReceiverFSM_UnknownState,		// 7
+	NE_ReceiverFSM_UndefinedFuncPtr,	// 8
+	NE_RX_Buffer_Overflow,				// 9
+	NE_RX_Buffer_Underflow,				// 10
+	NE_Unexpected_Event,				// 11
 	
 	eNE_MAX
 } eNetworkError_t;
@@ -345,47 +463,7 @@ eNetworkError_t get_commNetworkError(uint16_t a_u16ErrorNumber);
  * \retval true if logical address was already assigned.
  * \retval false if logical address was not assigned.
  */
-bool isLogicalNetworkAddrAssigned(uint8_t *a_pu8LogicalNetworkAddr);
-
-/**
- * \brief Structure containing the xmega shortened serial number.
- *
- * This structure is used to store shortened (7 bytes) device serial number.
- * This would be needed when supervisor is requesting uC serial number encoded on 7 bytes.
- * Shortened serial number is comprised of lotnum4, lotnum5, ..., and coordy1 bytes.
- * These are 7 lowest bytes which are more unique for a device.
- */
-typedef struct xmega_shortened_serial_number
-{
-	union {
-		struct {
-			uint8_t lotnum4;
-			uint8_t lotnum5;
-			uint8_t wafnum;
-			uint8_t coordx0;
-			uint8_t coordx1;
-			uint8_t coordy0;
-			uint8_t coordy1;
-		};
-		uint8_t u8DataArray[7];
-	};
-} xmega_shortened_serial_number_t;
-
-/**
- * \brief Get the shortened XMEGA device serial number.
- *
- * This function gets the shortened version XMEGA device serial number.
- * Shortened version of complete serial number is comprised of 7 bytes
- * excluding lotnum0 - lotnum3 bytes.
- *
- * \Note Functions arguments (pointers) must be properly provided. No checks against NULL pointers are made.
- *
- * \param a_pInCompleteSerialNum	Pointer to the structure holding complete device serial number (11 bytes).
- * \param a_pOutShortenedSerialNum	Pointer to the structure holding shortened device serial number (7 bytes).
- *
- * \retval none.
- */
-void xmega_get_shortened_serial_num(struct nvm_device_serial *a_pInCompleteSerialNum, xmega_shortened_serial_number_t *a_pOutShortenedSerialNum);
+bool _isLogicalNetworkAddrAssigned(uint8_t *a_pu8LogicalNetworkAddr);
 
 /**
  *  \brief Function generates random logical network address.

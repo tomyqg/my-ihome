@@ -10,64 +10,76 @@
 /* Function event handlers pointer table */
 fsmReceiverActionHandler FSMReceiverActionHandlerTable[][FSMR_MAX_EVENTS] =
 {
-	/* FSMR_WAIT_FOR_FLAG - waiting for STX or ETX flag meaning start of the frame */
-	{ fsmr_WaitForFlag_EventHandler },
-
-	/* FSMR_DATA_IN - processing incoming data within the frame */
-	{ fsmr_DataIn_EventHandler },
+	/* FSMR_WAIT_FOR_DLE - waiting for DLE character */
+	{ fsmr_WaitForDLE_DataReceived_Handler },
 	
-	/* FSMR_DLE_IN - processing ESC data byte within the frame */
-	{ fsmr_DLEIn_EventHandler }
+	/* FSMR_WAIT_FOR_STX - waiting for STX or ETX flag meaning start of the frame */
+	{ fsmr_WaitForSTX_DataReceived_Handler },
+
+	/* FSMR_PROCESS_DATA - processing incoming data within the frame */
+	{ fsmr_ProcessData_DataReceived_Handler },
+	
+	/* FSMR_PROCESS_DLE - processing Control Escape data byte within the frame */
+	{ fsmr_ProcessDLE_DataReceived_Handler }
 };
 
 /* Function initializes Receiver FSM */
 void fsmReceiverInitialize(FSMReceiver_t *a_pFSM)
 {
 	// Set default state which waits for STX/ETX flag byte
-	a_pFSM->u8State = FSMR_WAIT_FOR_FLAG;
+	a_pFSM->u8State = FSMR_WAIT_FOR_DLE;
 };
 
-/* Function handles \ref DATA_IN event at \ref FSMR_WAIT_FOR_FLAG state */
-uint8_t fsmr_WaitForFlag_EventHandler(FSMReceiver_t * a_pFSM, uint8_t a_u8Event, void * a_pEventArg)
+/* Function handles \ref FSMR_DATA_RECEIVED event in \ref FSMR_WAIT_FOR_DLE state */
+uint8_t fsmr_WaitForDLE_DataReceived_Handler(FSMReceiver_t * a_pFSM, uint8_t a_u8Event, void * a_pEventArg)
 {
-	if (FSMR_STX_ETX_BYTE_VALUE == (*(uint8_t *)a_pEventArg))
+	// Ignore any data until DLE is received
+	
+	if (FSMR_DLE_BYTE_VALUE == (*(uint8_t *)a_pEventArg))
 	{
-		// STX or ETX data byte spotted
+		// Change state to one waiting for STX byte to recognize start of frame
+		a_pFSM->u8State = FSMR_WAIT_FOR_STX;
+	}
+	
+	// Always return with ignore action
+	return FSMR_IGNORE_BYTE;
+};
+
+/* Function handles \ref FSMR_DATA_RECEIVED event in \ref FSMR_WAIT_FOR_STX state */
+uint8_t fsmr_WaitForSTX_DataReceived_Handler(FSMReceiver_t * a_pFSM, uint8_t a_u8Event, void * a_pEventArg)
+{
+	if (FSMR_STX_BYTE_VALUE == (*(uint8_t *)a_pEventArg))
+	{
+		// STX data received (start of frame)
 		
-		// Go to DATA_IN state
-		a_pFSM->u8State = FSMR_DATA_IN;
+		// Go to data processing state
+		a_pFSM->u8State = FSMR_PROCESS_DATA;
 		
-		// Ignore this byte
-		return FSMR_IGNORE_BYTE;
+		// Indicate start of frame
+		return FSMR_FRAME_BEGIN;
 	}
 	else
 	{
-		// Do not change the state and ignore any other byte
+		// Change the state to waiting for another DLE if received data is not STX
+		// Go to data processing state
+		a_pFSM->u8State = FSMR_WAIT_FOR_DLE;
+		
+		// Indicate that this byte should be ignored
 		return FSMR_IGNORE_BYTE;
 	}
 };
 
-/* Function handles \ref DATA_IN event at \ref FSMR_DATA_IN state */
-uint8_t fsmr_DataIn_EventHandler(FSMReceiver_t * a_pFSM, uint8_t a_u8Event, void * a_pEventArg)
+/* Function handles \ref FSMR_DATA_RECEIVED event in \ref FSMR_PROCESS_DATA state */
+uint8_t fsmr_ProcessData_DataReceived_Handler(FSMReceiver_t * a_pFSM, uint8_t a_u8Event, void * a_pEventArg)
 {
-	if (FSMR_STX_ETX_BYTE_VALUE == (*(uint8_t *)a_pEventArg))
+	if (FSMR_DLE_BYTE_VALUE == (*(uint8_t *)a_pEventArg))
 	{
-		// ETX byte indicating end of frame
+		// DLE byte indicating that following data is escaped
 		
-		// Go to \ref FSMR_WAIT_FOR_FLAG state
-		a_pFSM->u8State = FSMR_WAIT_FOR_FLAG;
+		// Go to \ref FSMR_PROCESS_DLE state
+		a_pFSM->u8State = FSMR_PROCESS_DLE;
 		
-		// Indicate ETX byte
-		return FSMR_ETX_BYTE;
-	}
-	else if (FSMR_DLE_BYTE_VALUE == (*(uint8_t *)a_pEventArg))
-	{
-		// DLE byte - escape data byte
-		
-		// Go to \ref FSMR_DLE_IN state
-		a_pFSM->u8State = FSMR_DLE_IN;
-		
-		// Ignore byte
+		// Ignore this data
 		return FSMR_IGNORE_BYTE;
 	}
 	else
@@ -78,30 +90,42 @@ uint8_t fsmr_DataIn_EventHandler(FSMReceiver_t * a_pFSM, uint8_t a_u8Event, void
 };
 
 /**
- * \brief Function handles \ref DATA_IN event at \ref FSMR_DLE_IN state.
+ * \brief Function handles \ref FSMR_DATA_RECEIVED event at \ref FSMR_PROCESS_DLE state.
  *
  * This function is invoked right after DLE byte was received in input stream.
- * The FSM always transits to \ref FSMR_DATA_IN state.
- * Event argument is XOR-ed with 0x20 to get the original value - un-stuff process.
+ * Every received data should be collected unless it is ETX.
+ * //Event argument is XOR-ed with 0x20 to get the original value - un-stuff process.
  *
- * Note that event argument value is modified after function return.
+ * //Note that event argument value is modified after function return.
  *
  * \param a_pFSM		pointer to the structure storing Receiver FSM.
  * \param a_u8Event		event value.
  * \param a_pEventArg	pointer to the event argument.
  *
- * \retval FSMR_COLLECT_BYTE.
+ * \retval FSMR_IGNORE_BYTE if received data is ETX.
+ * \retval FSMR_COLLECT_BYTE otherwise.
  */
-uint8_t fsmr_DLEIn_EventHandler(FSMReceiver_t * a_pFSM, uint8_t a_u8Event, void * a_pEventArg)
+uint8_t fsmr_ProcessDLE_DataReceived_Handler(FSMReceiver_t * a_pFSM, uint8_t a_u8Event, void * a_pEventArg)
 {
-	// Go to \ref FSMR_DATA_IN state
-	a_pFSM->u8State = FSMR_DATA_IN;
+	if (FSMR_ETX_BYTE_VALUE == (*(uint8_t *)a_pEventArg))
+	{
+		// The data frame is completed. Go to waiting for DLE|STX pair state
+		a_pFSM->u8State = FSMR_WAIT_FOR_DLE;
+		
+		// Return with ETX indication
+		return FSMR_FRAME_END;
+	}
+	else
+	{
+		// Go back to \ref FSMR_PROCESS_DATA state
+		a_pFSM->u8State = FSMR_PROCESS_DATA;
 	
-	// XOR incoming byte to obtain correct value
-	(*(uint8_t *)a_pEventArg) ^= FSMR_RFC1662_XOR_VALUE;
+		// XOR incoming byte to obtain correct value
+		// (*(uint8_t *)a_pEventArg) ^= FSMR_RFC1662_XOR_VALUE;
 	
-	// Any data byte followed by DLE should be collected
-	return FSMR_COLLECT_BYTE;
+		// Any data varying from ETX should be collected
+		return FSMR_COLLECT_BYTE;
+	}
 };
 
 /* 
