@@ -8,6 +8,8 @@
 #include "utils.h"
 #include "nvm_driver/nvm_driver.h"
 #include <stddef.h>
+#include "board_config.h"
+#include "usart_driver/usart_driver.h"
 
 // Configure XMEGA oscillator and clock source.
 void xmega_set_cpu_clock_to_32MHz(void)
@@ -56,7 +58,7 @@ uint16_t xmega_calculate_checksum_crc16(uint8_t *a_pData, uint8_t a_u8Count)
 	
 	for (uint8_t u8Idx = 0; u8Idx < a_u8Count; u8Idx++)
 	{
-		CRC_DATAIN = a_pData[a_u8Count];
+		CRC_DATAIN = a_pData[u8Idx];
 	}
 
 	// Signal CRC complete
@@ -100,4 +102,67 @@ uint16_t xmega_generate_sram_random_value(uint16_t a_u16Offset, uint16_t a_u16El
 	//! Parameters not checked against boundary values.
 	
 	return(xmega_calculate_checksum_crc16((uint8_t *)(INTERNAL_SRAM_START + a_u16Offset), a_u16ElemCount));
+};
+
+/**
+* \brief Configure and initialize xmega USART.
+*/
+void xmega_usart_configure(void)
+{
+	/* Set USART transmission 19200 baud rate @8MHz */
+	/* BSCALE = -7		*/
+	/* CLK2X = 0		*/
+	/* BSEL = 3205		*/
+	/* Error = 0,01%	*/
+		
+	/* USART initialization should use the following sequence:
+		1. Set the TxD pin value high, and optionally set the XCK pin low.
+		2. Set the TxD and optionally the XCK pin as output.
+		3. Set the baud rate and frame format.
+		4. Set the mode of operation (enables XCK pin output in synchronous mode).
+		5. Enable the transmitter or the receiver, depending on the usage.
+	For interrupt-driven USART operation, global interrupts should be disabled during the
+	initialization. */	
+	
+	/* Configure TXD pin as output - high */
+	PORT_DIRSET(USART_COMMUNICATION_BUS_TX_IO);
+	PORT_OUTSET(USART_COMMUNICATION_BUS_TX_IO);
+	
+	/* Configure RXD pin as input */
+	PORT_DIRCLR(USART_COMMUNICATION_BUS_RX_IO);
+	
+	/* Enable system clock to peripheral */
+	// Should be enabled after restart - USARTD0
+	PR.PRPD &= ~PR_USART0_bm;
+	
+	/* Set the baud rate: use BSCALE and BSEL */
+	xmega_set_usart_baudrate(&USART_COMMUNICATION_BUS, 3205, -7);	// 19200bps
+	
+	/* Set frame format */
+	xmega_set_usart_format(&USART_COMMUNICATION_BUS, USART_COMMUNICATION_BUS_CHAR_LENGTH,
+							USART_COMMUNICATION_BUS_PARITY, USART_COMMUNICATION_BUS_STOP_BIT);
+
+	/* Set mode */
+	xmega_set_usart_mode(&USART_COMMUNICATION_BUS, USART_CMODE_ASYNCHRONOUS_gc);
+	
+	/* Set interrupts level */
+	// xmega_set_usart_rx_interrupt_level(&USART_COMMUNICATION_BUS, USART_RXCINTLVL_HI_gc);
+	// xmega_set_usart_dre_interrupt_level(&USART_COMMUNICATION_BUS, USART_DREINTLVL_HI_gc);
+	// xmega_set_usart_tx_interrupt_level(&USART_COMMUNICATION_BUS, USART_TXCINTLVL_HI_gc);
+	
+	/* Enable transmitter and receiver */
+	xmega_enable_usart_tx(&USART_COMMUNICATION_BUS);
+	xmega_enable_usart_rx(&USART_COMMUNICATION_BUS);
+	
+};	// xmega_usart_configure()
+
+/**
+ * \brief Get the shortened XMEGA device serial number.
+ */
+void xmega_get_shortened_serial_num(struct nvm_device_serial *a_pInCompleteSerialNum, xmega_shortened_serial_number_t *a_pOutShortenedSerialNum)
+{
+	// !Note that functions arguments must be properly provided
+	
+	// Magic numbers left on purpose
+	// memcpy(&(a_pOutShortenedSerialNum->u8DataArray[0]), &(a_pInCompleteSerialNum->u8DataArray[4]), 7);
 };
