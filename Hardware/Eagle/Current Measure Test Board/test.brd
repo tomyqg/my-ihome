@@ -23,7 +23,7 @@
 <layer number="13" name="Route13" color="4" fill="5" visible="no" active="no"/>
 <layer number="14" name="Route14" color="1" fill="6" visible="no" active="no"/>
 <layer number="15" name="Route15" color="4" fill="6" visible="no" active="no"/>
-<layer number="16" name="Bottom" color="1" fill="1" visible="no" active="yes"/>
+<layer number="16" name="Bottom" color="1" fill="1" visible="yes" active="yes"/>
 <layer number="17" name="Pads" color="2" fill="1" visible="yes" active="yes"/>
 <layer number="18" name="Vias" color="2" fill="1" visible="yes" active="yes"/>
 <layer number="19" name="Unrouted" color="6" fill="1" visible="no" active="yes"/>
@@ -117,6 +117,7 @@
 <wire x1="26.65" y1="0" x2="26.65" y2="13.005" width="0" layer="20"/>
 <wire x1="26.65" y1="13.005" x2="3.81" y2="13.005" width="0" layer="20"/>
 <wire x1="3.81" y1="13.005" x2="3.81" y2="0" width="0" layer="20"/>
+<text x="19.05" y="12.065" size="0.6096" layer="1">Current Measure TB</text>
 </plain>
 <libraries>
 <library name="myHome">
