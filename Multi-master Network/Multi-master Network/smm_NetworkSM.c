@@ -141,53 +141,74 @@ eNetworkError_t get_commNetworkError(uint16_t a_u16ErrorNumber)
 /* Function event handlers pointer table */
 mmsnFsmEventHandler mmsnFSMActionTable[MMSN_MAX_STATES][MMSN_MAX_EVENTS] =
 {
-	/* MMSN_IDLE_STATE - idle */
-	/* MMSN_DATA_RECEIVED_EVENT, MMSN_COLLISION_AVOIDANCE_TIMEOUT, MMSN_ERROR_EVENT, MMSN_FRAME_PROCESS_EVENT */
-	/* MMSN_EXECUTE_COMMAND_EVENT, MMSN_SEND_DATA_EVENT */
-	{ mmsn_Idle_DataReceived_Handler, mmsn_Generic_CollisionAvoidanceTimeout_Handler, NULL, NULL,
+	/* MMSN_IDLE_STATE */
+	/* MMSN_DATA_RECEIVED_EVENT, MMSN_COLLISION_AVOIDANCE_TIMEOUT, MMSN_ERROR_EVENT, MMSN_FRAME_PROCESS_EVENT	   */
+	/* MMSN_EXECUTE_COMMAND_EVENT, MMSN_SEND_DATA_EVENT, MMSN_DATA_REG_EMPTY_EVENT, MMSN_NO_RESPONSE_TIMEOUT_EVENT */
+	{ mmsn_Idle_DataReceived_Handler, mmsn_Idle_CollisionAvoidanceTimeout_Handler, NULL, NULL,
 	  NULL, NULL },
 	
 	/* MMSN_RECEIVE_STATE */
-	/* MMSN_DATA_RECEIVED_EVENT, MMSN_COLLISION_AVOIDANCE_TIMEOUT, MMSN_ERROR_EVENT, MMSN_FRAME_PROCESS_EVENT */
-	/* MMSN_EXECUTE_COMMAND_EVENT, MMSN_SEND_DATA_EVENT */
-	{ mmsn_Receive_DataReceived_Handler, mmsn_Generic_CollisionAvoidanceTimeout_Handler, NULL, NULL,
-	  NULL, NULL },
+	/* MMSN_DATA_RECEIVED_EVENT, MMSN_COLLISION_AVOIDANCE_TIMEOUT, MMSN_ERROR_EVENT, MMSN_FRAME_PROCESS_EVENT	   */
+	/* MMSN_EXECUTE_COMMAND_EVENT, MMSN_SEND_DATA_EVENT, MMSN_DATA_REG_EMPTY_EVENT, MMSN_NO_RESPONSE_TIMEOUT_EVENT */
+	{ mmsn_Receive_DataReceived_Handler, mmsn_xxx_CollisionAvoidanceTimeout_Handler, NULL, NULL,
+	  NULL, NULL, NULL },
 
 	/* MMSN_PROCESS_DATA_STATE */
-	/* MMSN_DATA_RECEIVED_EVENT, MMSN_COLLISION_AVOIDANCE_TIMEOUT, MMSN_ERROR_EVENT, MMSN_FRAME_PROCESS_EVENT */
-	/* MMSN_EXECUTE_COMMAND_EVENT, MMSN_SEND_DATA_EVENT */
-	{ NULL, mmsn_Generic_CollisionAvoidanceTimeout_Handler, NULL, mmsn_ProcessData_FrameProcess_Handler,
-	  NULL, NULL },
+	/* MMSN_DATA_RECEIVED_EVENT, MMSN_COLLISION_AVOIDANCE_TIMEOUT, MMSN_ERROR_EVENT, MMSN_FRAME_PROCESS_EVENT	   */
+	/* MMSN_EXECUTE_COMMAND_EVENT, MMSN_SEND_DATA_EVENT, MMSN_DATA_REG_EMPTY_EVENT, MMSN_NO_RESPONSE_TIMEOUT_EVENT */
+	{ NULL, mmsn_xxx_CollisionAvoidanceTimeout_Handler, NULL, mmsn_ProcessData_FrameProcess_Handler,
+	  NULL, NULL, NULL },
 
 	/* MMSN_EXECUTE_COMMAND_STATE */
-	/* MMSN_DATA_RECEIVED_EVENT, MMSN_COLLISION_AVOIDANCE_TIMEOUT, MMSN_ERROR_EVENT, MMSN_FRAME_PROCESS_EVENT */
-	/* MMSN_EXECUTE_COMMAND_EVENT, MMSN_SEND_DATA_EVENT */
-	{ NULL, mmsn_Generic_CollisionAvoidanceTimeout_Handler, NULL, NULL,
-	  mmsn_ExecuteCommand_ExecuteCommandEvent_Handler, NULL },
+	/* MMSN_DATA_RECEIVED_EVENT, MMSN_COLLISION_AVOIDANCE_TIMEOUT, MMSN_ERROR_EVENT, MMSN_FRAME_PROCESS_EVENT	   */
+	/* MMSN_EXECUTE_COMMAND_EVENT, MMSN_SEND_DATA_EVENT, MMSN_DATA_REG_EMPTY_EVENT, MMSN_NO_RESPONSE_TIMEOUT_EVENT */
+	{ NULL, mmsn_xxx_CollisionAvoidanceTimeout_Handler, NULL, NULL,
+	  mmsn_ExecuteCommand_ExecuteCommandEvent_Handler, NULL, NULL },
 
 	/* MMSN_SEND_STATE */
-	
-	{ NULL },
-		
-	/* MMSN_WAIT_FOR_RESEND_STATE */
-	//{ NULL },
-		
-	/* MMSN_WAIT_FOR_RESPOND_STATE */
-	{ NULL },
-		
+	/* MMSN_DATA_RECEIVED_EVENT, MMSN_COLLISION_AVOIDANCE_TIMEOUT, MMSN_ERROR_EVENT, MMSN_FRAME_PROCESS_EVENT	   */
+	/* MMSN_EXECUTE_COMMAND_EVENT, MMSN_SEND_DATA_EVENT, MMSN_DATA_REG_EMPTY_EVENT, MMSN_NO_RESPONSE_TIMEOUT_EVENT */
+	/* MMSN_RETRANSMISSION_EVENT */
+	{ NULL, NULL, NULL, NULL,
+	  NULL, NULL, mmsn_Send_DataRegEmptyEvent_Handler,
+	  NULL },
+				
+	/* MMSN_WAIT_FOR_RESPONSE_STATE */
+	/* MMSN_DATA_RECEIVED_EVENT, MMSN_COLLISION_AVOIDANCE_TIMEOUT, MMSN_ERROR_EVENT, MMSN_FRAME_PROCESS_EVENT	   */
+	/* MMSN_EXECUTE_COMMAND_EVENT, MMSN_SEND_DATA_EVENT, MMSN_DATA_REG_EMPTY_EVENT, MMSN_NO_RESPONSE_TIMEOUT_EVENT */
+	/* MMSN_RETRANSMISSION_EVENT */
+	{ mmsn_WaitForResponse_DataReceivedEvent_Handler, mmsn_xxx_CollisionAvoidanceTimeout_Handler, NULL, NULL,
+	  NULL, NULL, NULL, mmsn_xxx_NoResponseTimeoutEvent_Handler,
+	  NULL },
+
 	/* MMSN_RECEIVE_RESPONSE_STATE */
-	{ NULL },
-		
+	/* MMSN_DATA_RECEIVED_EVENT, MMSN_COLLISION_AVOIDANCE_TIMEOUT, MMSN_ERROR_EVENT, MMSN_FRAME_PROCESS_EVENT	   */
+	/* MMSN_EXECUTE_COMMAND_EVENT, MMSN_SEND_DATA_EVENT, MMSN_DATA_REG_EMPTY_EVENT, MMSN_NO_RESPONSE_TIMEOUT_EVENT */
+	/* MMSN_RETRANSMISSION_EVENT */
+	{ mmsn_ReceiveResponse_DataReceivedEvent_Handler, mmsn_xxx_CollisionAvoidanceTimeout_Handler, NULL, NULL,
+	  NULL, NULL, NULL, mmsn_xxx_NoResponseTimeoutEvent_Handler,
+	  NULL },
+
 	/* MMSN_PROCESS_RESPONSE_STATE */
-	{ NULL },
-		
+	/* MMSN_DATA_RECEIVED_EVENT, MMSN_COLLISION_AVOIDANCE_TIMEOUT, MMSN_ERROR_EVENT, MMSN_FRAME_PROCESS_EVENT	   */
+	/* MMSN_EXECUTE_COMMAND_EVENT, MMSN_SEND_DATA_EVENT, MMSN_DATA_REG_EMPTY_EVENT, MMSN_NO_RESPONSE_TIMEOUT_EVENT */
+	/* MMSN_RETRANSMISSION_EVENT */
+	{ NULL, mmsn_xxx_CollisionAvoidanceTimeout_Handler, NULL, NULL,
+	  NULL, NULL, NULL, NULL,
+	   },
+
 	/* MMSN_RETRANSMIT_STATE */
-	{ NULL },
-		
+	/* MMSN_DATA_RECEIVED_EVENT, MMSN_COLLISION_AVOIDANCE_TIMEOUT, MMSN_ERROR_EVENT, MMSN_FRAME_PROCESS_EVENT	   */
+	/* MMSN_EXECUTE_COMMAND_EVENT, MMSN_SEND_DATA_EVENT, MMSN_DATA_REG_EMPTY_EVENT, MMSN_NO_RESPONSE_TIMEOUT_EVENT */
+	/* MMSN_RETRANSMISSION_EVENT */
+	{ NULL, mmsn_xxx_CollisionAvoidanceTimeout_Handler, NULL, NULL,
+	  NULL, NULL, NULL, NULL,
+	  mmsn_Retransmit_RetransmissionEvent_Handler },
+
 	/* MMSN_ERROR_STATE */
 	/* MMSN_DATA_RECEIVED_EVENT, MMSN_COLLISION_AVOIDANCE_TIMEOUT, MMSN_ERROR_EVENT, MMSN_FRAME_PROCESS_EVENT */
 	/* MMSN_EXECUTE_COMMAND_EVENT, MMSN_SEND_DATA_EVENT */
-	{ NULL, mmsn_Generic_CollisionAvoidanceTimeout_Handler, mmsn_Error_ErrorEvent_Handler, NULL,
+	{ NULL, mmsn_xxx_CollisionAvoidanceTimeout_Handler, mmsn_Error_ErrorEvent_Handler, NULL,
 	  NULL, NULL }
 };
 
@@ -227,13 +248,51 @@ void _copyDataFrame(fifo_desc_t * a_pFifoDesc, mmsn_comm_data_frame_t * a_pDstDa
 	MMSN_BYTES_2_WORD(u8Tmp1, u8Tmp2, a_pDstDataFrame->u16CRC16);
 } // _copyDataFrame()
 
+/**
+ * \brief Clear all resources utilized during receiving process.
+ *
+ *  \param a_pFSM Pointer to Multi-master FSM
+ */
+void _ClearRxResources(MMSN_FSM_t * a_pFSM)
+{
+	// Clear working RX buffer
+	memset(a_pFSM->ptrRxDataFrame->u8FrameBuffer, 0, MMSN_COMM_FRAME_SIZE);
+	
+	// Flush receiving FIFO
+	fifo_flush(&fifo_receive_buffer_desc);
+	
+	// Reset Receiver FSM
+	fsmReceiverInitialize(&a_pFSM->ReceiverFSM);
+}
+
+/**
+ * \brief Clear all resources utilized during sending process.
+ *
+ *  \param a_pFSM Pointer to Multi-master FSM
+ */
+void _ClearTxResources(MMSN_FSM_t * a_pFSM)
+{
+	// Clear working TX buffer
+	memset(a_pFSM->ptrTxDataFrame->u8FrameBuffer, 0, MMSN_COMM_FRAME_SIZE);
+	
+	// Flush transmission FIFO
+	fifo_flush(&fifo_send_buffer_desc);
+	
+	// Clear sending attributes
+	a_pFSM->SendDataAttr.u8DataSize			= 0;
+	a_pFSM->SendDataAttr.u8IsResponseNeeded = false;
+	
+	// Reset transmission counter
+	a_pFSM->u8TxDataCounter = 0;
+}
+
 /************************************************************************/
 /* EVENT HANDLERS                                                       */
 /************************************************************************/
 uint8_t mmsn_Idle_DataReceived_Handler(MMSN_FSM_t * a_pFSM, uint8_t a_u8Event, void * a_pEventArg)
 {
 	/* The error free data was received. It means that the bus currently is or was in use.
-	* To avoid collision (CA) start or restart busy line timer if already running.
+	* To avoid collision (CA) start busy line timer or restart if already running.
 	*/
 	_restartCollisionAvoidanceTimer();
 
@@ -280,7 +339,7 @@ uint8_t mmsn_Idle_DataReceived_Handler(MMSN_FSM_t * a_pFSM, uint8_t a_u8Event, v
 	return MMSN_OK;
 };
 
-uint8_t mmsn_Generic_CollisionAvoidanceTimeout_Handler(MMSN_FSM_t * a_pFSM, uint8_t a_u8Event, void * a_pEventArg)
+uint8_t mmsn_xxx_CollisionAvoidanceTimeout_Handler(MMSN_FSM_t * a_pFSM, uint8_t a_u8Event, void * a_pEventArg)
 {
 	// Stop collision avoidance timer by setting clock source to OFF state
 	xmega_tc_select_clock_source(&TIMER_COLLISION_AVOIDANCE, TC_CLKSEL_OFF_gc);
@@ -290,6 +349,61 @@ uint8_t mmsn_Generic_CollisionAvoidanceTimeout_Handler(MMSN_FSM_t * a_pFSM, uint
 	
 	return MMSN_OK;
 }
+
+uint8_t mmsn_Idle_CollisionAvoidanceTimeout_Handler(MMSN_FSM_t * a_pFSM, uint8_t a_u8Event, void * a_pEventArg)
+{
+	/* Perform common activities related to Collision Avoidance timer timeout.
+	 * Stop the timer.
+	 * Indicate that the bus is free.
+	 */
+	
+	// Stop collision avoidance timer by setting clock source to OFF state
+	xmega_tc_select_clock_source(&TIMER_COLLISION_AVOIDANCE, TC_CLKSEL_OFF_gc);
+
+	// Clear busy line flag.
+	a_pFSM->u8LineState = MMSN_FREE_BUS;
+	
+	// Check if there is data pending to be sent
+	if (true == a_pFSM->u8IsDataToSend)
+	{
+		/* Data is pending. Send first byte and go to sending state.
+		 * Remaining data will be handled in \ref MMSN_DATA_REG_EMPTY_EVENT event handler.
+		 */
+		
+		/* Turn off receiving (automatically if RS-485 driver and receiver pins are tight together)
+		 * and set RS-485 transceiver to transmit mode
+		 */
+		rs485_driver_enable();
+		
+		// Nevertheless turn off USART RXC interrupt during sending the data
+		xmega_set_usart_rx_interrupt_level(&USART_COMMUNICATION_BUS, USART_RXCINTLVL_OFF_gc);
+		
+		// Turn on TXC and DRE interrupts
+		xmega_set_usart_tx_interrupt_level(&USART_COMMUNICATION_BUS, USART_TXCINTLVL_MED_gc);
+		xmega_set_usart_dre_interrupt_level(&USART_COMMUNICATION_BUS, USART_DREINTLVL_MED_gc);
+		
+		// Reset data transmit counter
+		a_pFSM->u8TxDataCounter = 0;
+		
+		// Send first data byte. The remaining bytes will be sent in DRE event handler directly.
+		USART_COMMUNICATION_BUS.DATA = a_pFSM->ptrTxDataFrame->u8FrameBuffer[0];
+		
+		// Increase sent data counter by 1
+		a_pFSM->u8TxDataCounter++;
+		
+		// Change state to \ref MMSN_SEND_STATE
+		a_pFSM->CurrentState = MMSN_SEND_STATE;
+		
+		// Clear flag indicating data waiting to be sent
+		a_pFSM->u8IsDataToSend = false;
+	}
+	else
+	{
+		// Do nothing here
+	}
+	
+	return MMSN_OK;
+};
 
 uint8_t mmsn_Receive_DataReceived_Handler(MMSN_FSM_t * a_pFSM, uint8_t a_u8Event, void * a_pEventArg)
 {
@@ -431,10 +545,10 @@ uint8_t	mmsn_ExecuteCommand_ExecuteCommandEvent_Handler(MMSN_FSM_t * a_pFSM, uin
 	uint8_t				u8DeviceNumber = 0;
 		
 	// Retrieve device type from the message
-	get_MMSN_DeviceType(a_pFSM->ptrRXDataFrame->u16Identifier, u8DeviceType);
+	get_MMSN_DeviceType(a_pFSM->ptrRxDataFrame->u16Identifier, u8DeviceType);
 		
 	// Retrieve device number/command from the message
-	get_MMSN_DeviceNumber(a_pFSM->ptrRXDataFrame->u16Identifier, u8DeviceNumber);
+	get_MMSN_DeviceNumber(a_pFSM->ptrRxDataFrame->u16Identifier, u8DeviceNumber);
 		
 #ifdef MMSN_DEBUG
 	printf("\nExec:dev_typ = %d", u8DeviceType);
@@ -461,11 +575,327 @@ uint8_t	mmsn_ExecuteCommand_ExecuteCommandEvent_Handler(MMSN_FSM_t * a_pFSM, uin
 
 	// Clear internal receiving data buffer
 	// memset(a_pFSM->ptrRXDataFrame->u8CommFrameTable, 0, MMSN_COMM_FRAME_SIZE);
-	memset(a_pFSM->ptrRXDataFrame, 0, MMSN_COMM_FRAME_SIZE);
+	memset(a_pFSM->ptrRxDataFrame, 0, MMSN_COMM_FRAME_SIZE);
 	
-	/* All clean-up done. Go to \ref eSM_Idle state. */
-	a_pFSM->CurrentState = eSM_Idle;
+	/* All clean-up done. Go to \ref MMSN_IDLE_STATE state */
+	a_pFSM->CurrentState = MMSN_IDLE_STATE;
 
+	return MMSN_OK;
+};
+
+uint8_t mmsn_Send_DataRegEmptyEvent_Handler(MMSN_FSM_t * a_pFSM, uint8_t a_u8Event, void * a_pEventArg)
+{
+	// Check if any data is left by comparing actual counter value with data size within attribute structure
+	if( a_pFSM->u8TxDataCounter < a_pFSM->SendDataAttr.u8DataSize)
+	{
+		// Data still waiting to be sent
+			
+		/* Get next data byte and put it to USART register for sending.
+		 */
+		USART_COMMUNICATION_BUS.DATA = a_pFSM->ptrTxDataFrame->u8FrameBuffer[a_pFSM->u8TxDataCounter];
+			
+		// Increase transmission counter
+		a_pFSM->u8TxDataCounter++;
+			
+		// Turn on DRE interrupt
+		xmega_set_usart_dre_interrupt_level (&USART_COMMUNICATION_BUS, USART_DREINTLVL_MED_gc);
+			
+		// Do not change the state until any data left in transmission buffer
+	}
+	else
+	{
+		/* Complete frame was sent out */
+			
+		// Set RS-485 transceiver for receiving
+		rs485_receiver_enable();
+			
+		// Turn on USART RXC interrupt
+		xmega_set_usart_rx_interrupt_level(&USART_COMMUNICATION_BUS, USART_RXCINTLVL_MED_gc);
+			
+		// Turn off TXC and DRE interrupts
+		xmega_set_usart_tx_interrupt_level(&USART_COMMUNICATION_BUS, USART_TXCINTLVL_OFF_gc);
+		xmega_set_usart_dre_interrupt_level(&USART_COMMUNICATION_BUS, USART_DREINTLVL_OFF_gc);
+			
+		/* If response is needed then
+		 * - start timer waiting for a response
+		 * - initialize receiver FSM
+		 * - go to the \ref MMSN_WAIT_FOR_RESPONSE_STATE state
+		 *
+		 * Otherwise
+		 * - clear things up
+		 * - go to the \ref MMSN_IDLE_STATE state
+		 */
+		if (true == a_pFSM->SendDataAttr.u8IsResponseNeeded)
+		{
+			// Start waiting for response timer
+			xmega_tc_select_clock_source(&TIMER_NO_RESPONSE, TC_CLKSEL_DIV64_gc);
+			
+			/* Make transition to waiting for a response.
+			 * State machine will be woken up after USART RXC IRQ.
+			 */
+			a_pFSM->CurrentState = MMSN_WAIT_FOR_RESPONSE_STATE;
+		} 
+		else
+		{
+			// Reset transmission related resources
+			_ClearTxResources(a_pFSM);
+			
+			// Make transition to IDLE state.
+			a_pFSM->CurrentState = MMSN_IDLE_STATE;
+		}
+
+		// Always clear receiver related resources
+		_ClearRxResources(a_pFSM);
+	}
+	
+	return MMSN_OK;
+};
+
+
+uint8_t mmsn_WaitForResponse_DataReceivedEvent_Handler(MMSN_FSM_t * a_pFSM, uint8_t a_u8Event, void * a_pEventArg)
+{
+	/* The error free data was received. It means that the bus currently is or was in use.
+	* To avoid collision (CA) start busy line timer or restart if already running.
+	*/
+	_restartCollisionAvoidanceTimer();
+
+	// Set bus to busy state
+	a_pFSM->u8LineState = MMSN_BUSY_BUS;
+
+	// In this state no other than DLE data is expected and ignore return value from Receiver FSM.
+	
+	// Obtain pointer to ReceiverFSM action handler
+	if( GET_EV_HDL_P(a_pFSM->pFSMRActionTable, a_pFSM->ReceiverFSM, FSMR_DATA_RECEIVED))
+	{
+		uint8_t u8RetCode;
+	
+		// Call action handler	
+		u8RetCode = CALL_EV_HDL(a_pFSM->pFSMRActionTable, a_pFSM->ReceiverFSM, FSMR_DATA_RECEIVED, (*(uint8_t *)a_pEventArg));
+		
+		/* Receiver FSM will always return with IGNORE until |DLE|STX| sequence is received.
+		 * |DLE|STX| data pair is a frame begin marker. When received change the state to \ref MMSN_RECEIVE_RESPONSE_STATE.
+		 * Otherwise ignore the data and do not change current state.
+		 */
+		if (FSMR_FRAME_BEGIN == u8RetCode)
+		{
+			// Change state to ReceiveResponse and wait for another received data system event
+			a_pFSM->CurrentState = MMSN_RECEIVE_RESPONSE_STATE;
+			
+			// Set frame status to begin
+			a_pFSM->FrameStatus = MMSN_FrameBegin;
+		}
+		else
+		{
+			// No action needed. Simply ignore.
+		}
+	}
+	else
+	{
+		// Undefined function pointer to handle this event.
+		g_NetworkErrorDesc.currError = NE_ReceiverFSM_UndefinedFuncPtr;
+		
+		// Change state to Error
+		a_pFSM->CurrentState = MMSN_ERROR_STATE;
+		
+		// Add software event to queue. This will trigger immediate FSM run to handle error state.
+		ADD_EVENT_TO_QUEUE(a_pFSM->ptrEventQueueDesc, MMSN_ERROR_EVENT);
+	}
+	
+	return MMSN_OK;
+};
+
+/**
+ * \brief Generic handler for No Response Timeout event
+ *
+ * \param a_pFSM Pointer to Network FSM.
+ * \param a_u8Event Event.
+ * \param a_pEventArg Pointer to event argument.
+ */
+uint8_t mmsn_xxx_NoResponseTimeoutEvent_Handler(MMSN_FSM_t * a_pFSM, uint8_t a_u8Event, void * a_pEventArg)
+{
+	// Stop no response timer by setting clock source to OFF state
+	xmega_tc_select_clock_source(&TIMER_NO_RESPONSE, TC_CLKSEL_OFF_gc);
+	
+	// Report no response timeout error
+	g_NetworkErrorDesc.currError = NE_NoResponseTimeout;
+	
+	// Change state to Retransmit
+	a_pFSM->CurrentState = MMSN_RETRANSMIT_STATE;
+	
+	// Add software event to queue. This will trigger immediate FSM run to handle event in the next state.
+	ADD_EVENT_TO_QUEUE(a_pFSM->ptrEventQueueDesc, MMSN_RETRANSMISSION_EVENT);
+	
+	return MMSN_OK;
+};
+
+uint8_t mmsn_ReceiveResponse_DataReceivedEvent_Handler(MMSN_FSM_t * a_pFSM, uint8_t a_u8Event, void * a_pEventArg)
+{
+	// Restart collision avoidance timer
+	_restartCollisionAvoidanceTimer();
+	
+	// Set bus to busy state
+	a_pFSM->u8LineState = MMSN_BUSY_BUS;
+	
+	// Obtain received data byte from event argument
+	uint8_t u8Data = (*(uint8_t *)a_pEventArg);
+
+	// Obtain pointer to ReceiverFSM action handler
+	if( GET_EV_HDL_P(a_pFSM->pFSMRActionTable, a_pFSM->ReceiverFSM, FSMR_DATA_RECEIVED))
+	{
+		uint8_t u8RetCode;
+		
+		u8RetCode = CALL_EV_HDL(a_pFSM->pFSMRActionTable, a_pFSM->ReceiverFSM, FSMR_DATA_RECEIVED, u8Data);
+		
+		// Check if data should be stored in RX fifo buffer
+		switch (u8RetCode)
+		{
+			case FSMR_FRAME_BEGIN:
+				/* Check if frame begin was not already received by probing internal frame status.
+				 * If so then this frame is malfunctioned - |DLE|STX| ... |DLE|STX|
+				 */ 
+				if( MMSN_FrameBegin == a_pFSM->FrameStatus)
+				{
+					// Report begin of frame error. All cleanup will be done in Retransmit state.
+					g_NetworkErrorDesc.currError = NE_Frame_Malfunction_STX;
+					
+					// Change state to Retransmit
+					a_pFSM->CurrentState = MMSN_RETRANSMIT_STATE;
+					
+					// Add software event to queue. This will trigger immediate FSM run to handle error state.
+					ADD_EVENT_TO_QUEUE(a_pFSM->ptrEventQueueDesc, MMSN_RETRANSMISSION_EVENT);
+				}
+				else
+				{
+					// Set frame status to begin
+					a_pFSM->FrameStatus = MMSN_FrameBegin;
+					
+					// Do not change the state and wait for incoming data
+				}
+				break;
+				
+			case FSMR_FRAME_END:
+				/* Check if frame end was already received.
+				 * If true then it means frame malfunction - |DLE|ETX| ... |DLE|ETX|
+				 */
+				if( MMSN_FrameEnd == a_pFSM->FrameStatus)
+				{
+					// Report end of frame error. All cleanup will be done in Retransmit state.
+					g_NetworkErrorDesc.currError = NE_Frame_Malfunction_ETX;
+					
+					// Change state to Retransmission
+					a_pFSM->CurrentState = MMSN_RETRANSMIT_STATE;
+					
+					// Add software event to queue. This will trigger immediate FSM run to handle retransmission.
+					ADD_EVENT_TO_QUEUE(a_pFSM->ptrEventQueueDesc, MMSN_RETRANSMISSION_EVENT);
+				}
+				else
+				{
+					// Set frame status to end
+					a_pFSM->FrameStatus = MMSN_FrameEnd;
+					
+					// We are ready to process complete response data frame
+					a_pFSM->CurrentState = MMSN_PROCESS_RESPONSE_STATE;
+					
+					// Add software event to queue. This will trigger immediate FSM run to handle response frame processing.
+					ADD_EVENT_TO_QUEUE(a_pFSM->ptrEventQueueDesc, MMSN_FRAME_PROCESS_EVENT);
+				}
+				break;
+				
+			case FSMR_IGNORE_BYTE:
+				// Do nothing and wait for another data
+				break;
+				
+			case FSMR_COLLECT_BYTE:
+				/* Try to add another element to the buffer
+				 * and check for buffer overflow.
+				 */
+				if (FIFO_ERROR_OVERFLOW == fifo_push_uint8(&fifo_receive_buffer_desc, u8Data))
+				{
+					/* Not enough space in the buffer to hold additional data.
+					 * It means that frame is broken. Current data will be lost.
+					 */
+					g_NetworkErrorDesc.currError = NE_RX_Buffer_Overflow;
+					
+					// Change state to Retransmission
+					a_pFSM->CurrentState = MMSN_RETRANSMIT_STATE;
+					
+					// Add software event to queue. This will trigger immediate FSM run to handle retransmission.
+					ADD_EVENT_TO_QUEUE(a_pFSM->ptrEventQueueDesc, MMSN_RETRANSMISSION_EVENT);
+				}
+				else
+				{
+					// Change frame status to collect
+					a_pFSM->FrameStatus = MMSN_FrameCollect;
+				}
+				break;
+				
+			default:
+				// Unhanded return code. Report an fatal error.
+				g_NetworkErrorDesc.currError = NE_ReceiverFSM_UnknownState;
+				
+				// Change state to Error
+				a_pFSM->CurrentState = MMSN_ERROR_STATE;
+				
+				// Add software event to queue. This will trigger immediate FSM run to handle error state.
+				ADD_EVENT_TO_QUEUE(a_pFSM->ptrEventQueueDesc, MMSN_ERROR_EVENT);
+				 
+				break;
+		}	// end of switch
+	}
+	else
+	{
+		// Undefined function pointer to handle this event.
+		g_NetworkErrorDesc.currError = NE_ReceiverFSM_UndefinedFuncPtr;
+		
+		// Change state to Error
+		a_pFSM->CurrentState = MMSN_ERROR_STATE;
+		
+		// Add software event to queue. This will trigger immediate FSM run to handle error state.
+		ADD_EVENT_TO_QUEUE(a_pFSM->ptrEventQueueDesc, MMSN_ERROR_EVENT);
+	}
+	
+	return MMSN_OK;
+};
+
+uint8_t mmsn_Retransmit_RetransmissionEvent_Handler(MMSN_FSM_t * a_pFSM, uint8_t a_u8Event, void * a_pEventArg)
+{
+#ifdef MMSN_DEBUG
+	printf("\nRetransmit: %u", g_NetworkErrorDesc.currError);
+#endif	
+	
+	// Log current Network Error
+	add_commNetworkError(&g_NetworkErrorDesc);
+	
+	// Check retries count
+	if (a_pFSM->u8RetriesCount > MMSN_MAX_RETRIES)
+	{
+		// Maximum retries number reached
+		g_NetworkErrorDesc.currError = NE_MaximumRetries;
+		
+		// Change state to Error
+		a_pFSM->CurrentState = MMSN_ERROR_STATE;
+		
+		// Add software event to queue. This will trigger immediate FSM run to handle error state.
+		ADD_EVENT_TO_QUEUE(a_pFSM->ptrEventQueueDesc, MMSN_ERROR_EVENT);
+	} 
+	else
+	{
+		// Try again to send data frame
+		
+		// Reset Rx resources
+		_ClearRxResources(a_pFSM);
+		
+		// Reset Tx resources
+		_ClearTxResources(a_pFSM);
+	
+		// Clear network error descriptor
+		g_NetworkErrorDesc.currError = NE_None;
+
+		// Go to the \ref MMSN_IDLE_STATE state
+		a_pFSM->CurrentState = MMSN_IDLE_STATE;
+	
+	}
+	
 	return MMSN_OK;
 }
 
@@ -490,14 +920,8 @@ uint8_t mmsn_Error_ErrorEvent_Handler(MMSN_FSM_t * a_pFSM, uint8_t a_u8Event, vo
 		case NE_RX_Buffer_Underflow:
 			/* All errors are related to data receiving */
 			
-			// Clear working RX buffer
-			memset(a_pFSM->ptrRXDataFrame->u8FrameBuffer, 0, MMSN_COMM_FRAME_SIZE);
-			
-			// Flush receiving FIFO
-			fifo_flush(&fifo_receive_buffer_desc);
-			
-			// Reset Receiver FSM
-			fsmReceiverInitialize(&a_pFSM->ReceiverFSM);
+			// Reset Rx resources
+			_ClearRxResources(a_pFSM);
 		break;
 		
 		default:
@@ -508,11 +932,11 @@ uint8_t mmsn_Error_ErrorEvent_Handler(MMSN_FSM_t * a_pFSM, uint8_t a_u8Event, vo
 	// Clear network error descriptor
 	g_NetworkErrorDesc.currError = NE_None;
 
-	// Go to the \ref eSM_Idle state
-	a_pFSM->CurrentState = eSM_Idle;
+	// Go to the \ref MMSN_IDLE_STATE state
+	a_pFSM->CurrentState = MMSN_IDLE_STATE;
 	
 	return MMSN_OK;
-}
+};
 
 uint8_t mmsn_ProcessData_FrameProcess_Handler(MMSN_FSM_t * a_pFSM, uint8_t a_u8Event, void * a_pEventArg)
 {
@@ -530,7 +954,7 @@ uint8_t mmsn_ProcessData_FrameProcess_Handler(MMSN_FSM_t * a_pFSM, uint8_t a_u8E
 		/* Complete frame was received. */
 		
 		// Make a working copy of received data frame
-		_copyDataFrame(&fifo_receive_buffer_desc, a_pFSM->ptrRXDataFrame);
+		_copyDataFrame(&fifo_receive_buffer_desc, a_pFSM->ptrRxDataFrame);
 	
 		/* printf("\nRX data = ");
 		for (uint8_t u8idx = 0; u8idx < MMSN_COMM_FRAME_SIZE; u8idx++)
@@ -550,14 +974,14 @@ uint8_t mmsn_ProcessData_FrameProcess_Handler(MMSN_FSM_t * a_pFSM, uint8_t a_u8E
 		/* Calculate CRC-16 (CRC-CCITT) using XMEGA hardware CRC peripheral
 		 * excluding last 2 bytes with CRC-16.
 		 */
-		u16CRC16 = xmega_calculate_checksum_crc16(a_pFSM->ptrRXDataFrame->u8FrameBuffer, MMSN_FRAME_NOCRC_LENGTH);
+		u16CRC16 = xmega_calculate_checksum_crc16(a_pFSM->ptrRxDataFrame->u8FrameBuffer, MMSN_FRAME_NOCRC_LENGTH);
 
 		/* printf("\nmsg.CRC-16=%u", a_pFSM->ptrRXDataFrame->u16CRC16);
 		printf("\nCRC-16=%u", u16CRC16); */
 		
 		// Check received data integrity
 		
-		if (u16CRC16 == a_pFSM->ptrRXDataFrame->u16CRC16)
+		if (u16CRC16 == a_pFSM->ptrRxDataFrame->u16CRC16)
 		{
 			// Calculated and received CRC-16 value matched. Go to command execution state.
 
@@ -604,129 +1028,85 @@ uint8_t mmsn_ProcessData_FrameProcess_Handler(MMSN_FSM_t * a_pFSM, uint8_t a_u8E
 	return MMSN_OK;
 }
 
-uint8_t mmsn_Idle_SendData_Handler(MMSN_FSM_t * a_pFSM, uint8_t a_u8Event, void * a_pEventArg)
+/* FSM was triggered by \ref MMSN_SEND_DATA_EVENT event.
+ * It means that data frame is ready to be sent.
+ */
+uint8_t mmsn_Idle_SendDataEvent_Handler(MMSN_FSM_t * a_pFSM, uint8_t a_u8Event, void * a_pEventArg)
 {
-	/* At first check is the line is free (Collision Avoidance).
-	 * If the line is still busy than back-off and wait until timer times out.
-	 * The back-off timer value is determined by Logical Address in Network.
-	 * Go waiting for free bus.
+	uint8_t u8EventArg;
+
+	// Retrieve event arguments. Send data frame attributes in this case.
+	u8EventArg = (*(uint8_t *)a_pEventArg);
+
+	/************************************************************************/
+	/* Get attributes of the data to be sent: size and response necessity   */
+	/************************************************************************/
+	/* This is the first place where send request event is consumed         */
+	/************************************************************************/
+	
+	// Obtain data size
+	get_MMSN_SEND_DATA_SIZE(u8EventArg, a_pFSM->SendDataAttr.u8DataSize);
+	
+	// Obtain response needed
+	get_MMSN_SEND_RESPONSE_NEEDED(u8EventArg, a_pFSM->SendDataAttr.u8IsResponseNeeded);
+	
+#ifdef MMSN_DEBUG
+	printf("\nSend data attr. Size=%u, Resp=%u\n", a_pFSM->SendDataAttr.u8DataSize, a_pFSM->SendDataAttr.u8IsResponseNeeded);
+#endif	
+	
+	/* Check if the line is free (Collision Avoidance mechanism).
+	 * If the line is busy then wait for free bus
+	 * - stay in the same state
+	 *
+	 * If the line is free:
+	 * - send the first byte
+	 * - go to sending state
 	 */
 	if (MMSN_BUSY_BUS == a_pFSM->u8LineState)
 	{
-		/* Do not clear the Data Ready To Send event
-		 * Transition to Wait For Resending state and wait for free bus.
+		// Indicate that there is data waiting to be sent.
+		a_pFSM->u8IsDataToSend = true;
+		
+		/* Exit and wait for Collision Avoidance timer timeout.
+		 * The rest will be handled there.
+		 */
+	}
+	else
+	{
+		/* Data is pending. Send first byte and go to sending state.
+		 * Remaining data will be handled in \ref MMSN_DATA_REG_EMPTY_EVENT event handler.
 		 */
 		
+		/* Turn off receiving (automatically if RS-485 driver and receiver pins are tight together)
+		 * and set RS-485 transceiver to transmit mode
+		 */
+		rs485_driver_enable();
 		
-		// Add software event to queue. This will trigger immediate FSM run.
-		ADD_EVENT_TO_QUEUE(a_pFSM->ptrEventQueueDesc, );
+		// Nevertheless turn off USART RXC interrupt during sending the data
+		xmega_set_usart_rx_interrupt_level(&USART_COMMUNICATION_BUS, USART_RXCINTLVL_OFF_gc);
 		
+		// Turn on TXC and DRE interrupts
+		xmega_set_usart_tx_interrupt_level(&USART_COMMUNICATION_BUS, USART_TXCINTLVL_MED_gc);
+		xmega_set_usart_dre_interrupt_level(&USART_COMMUNICATION_BUS, USART_DREINTLVL_MED_gc);
 		
+		// Reset data transmit counter
+		a_pFSM->u8TxDataCounter = 0;
 		
-		mmsnFSM.CurrentState = eSM_WaitForResend;
-			
-			// return immediately with \ref EVENT_SW_DATA_READY_TO_SEND_bm event set
-			return;
-		}
-		else
-		{
-			/* The line is free:
-			 * 1. Turn off receiving (automatically if RS-485 driver and receiver pins are tight together).
-			 * 2. Transmit entire frame by putting first byte and than using DRE interrupt.
-			 * 3. Regular and ACKnowledge messages have the same length (for simplicity reasons).
-			 * 4. Complete frame with calculated CRC-16 value is already stored in \ref gCommDataFrameTransmit buffer.
-			*/
-			
-			// Set RS-485 transceiver to transmit mode
-			rs485_driver_enable();
-			
-			// Nevertheless turn off USART RXC interrupt during sending the data
-			xmega_set_usart_rx_interrupt_level(&USART_COMMUNICATION_BUS, USART_RXCINTLVL_OFF_gc);
-			
-			// Turn on TXC and DRE interrupts
-			xmega_set_usart_tx_interrupt_level(&USART_COMMUNICATION_BUS, USART_TXCINTLVL_MED_gc);
-			xmega_set_usart_dre_interrupt_level(&USART_COMMUNICATION_BUS, USART_DREINTLVL_MED_gc);
-			
-			// Reset data transmit counter
-			mmsnFSM.u8TXDataCounter = 0;
-			
-			// Send first data byte. The remaining bytes will be sent in DRE event handler directly.
-			USART_COMMUNICATION_BUS.DATA = mmsnFSM.ptrTXDataFrame->u8FrameBuffer[0];
-			
-			ATOMIC_BLOCK(ATOMIC_FORCEON)
-			{
-				// Mark that the first byte was sent
-				mmsnFSM.u8TXDataCounter++;
-			};
-		}
+		// Send first data byte. The remaining bytes will be sent in DRE event handler directly.
+		USART_COMMUNICATION_BUS.DATA = a_pFSM->ptrTxDataFrame->u8FrameBuffer[0];
 		
-		// Clear data ready to be sent event flag
-		ATOMIC_BLOCK(ATOMIC_FORCEON)
-		{
-			FLAG_CLEAR(gSystemEvents, EVENT_SW_DATA_READY_TO_SEND_bm);
-		}
+		// Increase sent data counter by 1
+		a_pFSM->u8TxDataCounter++;
+		
+		// Change state to \ref MMSN_SEND_STATE
+		a_pFSM->CurrentState = MMSN_SEND_STATE;
+		
+		// Clear flag indicating data waiting to be sent
+		a_pFSM->u8IsDataToSend = false;
 	};
-	
-	// Data Register Empty (DRE) IRQ handling
-	if (u16EventFlags & EVENT_IRQ_DATA_REGISTER_EMPTY_bm)
-	{
-		if (mmsnFSM.u8TXDataCounter < MMSN_COMM_FRAME_SIZE)
-		{
-			// Data still waiting to be sent
-			
-			/* Get next data byte and put it to USART register for sending.
-			 */
-			USART_COMMUNICATION_BUS.DATA = mmsnFSM.ptrTXDataFrame->u8FrameBuffer[mmsnFSM.u8TXDataCounter];
-			
-			// Increase transmission counter
-			ATOMIC_BLOCK(ATOMIC_FORCEON)
-			{
-				// Another byte was sent
-				mmsnFSM.u8TXDataCounter++;
-			};
-			
-			// Turn on DRE interrupt
-			xmega_set_usart_dre_interrupt_level (&USART_COMMUNICATION_BUS, USART_DREINTLVL_MED_gc);
-			
-			// Do not change the state
-		}
-		else
-		{
-			/* Complete frame was sent out */
-			
-			// Set RS-485 transceiver for receiving
-			rs485_receiver_enable();
-			
-			// Turn on USART RXC interrupt
-			xmega_set_usart_rx_interrupt_level(&USART_COMMUNICATION_BUS, USART_RXCINTLVL_MED_gc);
-			
-			// Turn off TXC and DRE interrupts
-			xmega_set_usart_tx_interrupt_level(&USART_COMMUNICATION_BUS, USART_TXCINTLVL_OFF_gc);
-			xmega_set_usart_dre_interrupt_level(&USART_COMMUNICATION_BUS, USART_DREINTLVL_OFF_gc);
-			
-			// Start waiting for response timer
-			xmega_tc_select_clock_source(&TIMER_NO_RESPONSE, TC_CLKSEL_DIV64_gc);
-			
-			/* Make transition to waiting for a response. State machine will be woken up after USART RXC IRQ.
-			 */
-			 mmsnFSM.CurrentState = eSM_WaitForResponse;
-		}
-		
-		// Always clear data register empty event flag
-		ATOMIC_BLOCK(ATOMIC_FORCEON)
-		{
-			FLAG_CLEAR(gSystemEvents, EVENT_IRQ_DATA_REGISTER_EMPTY_bm);
-		};		
-	}
 	
 	return MMSN_OK;
 }
-
-
-
-
-
-
 
 /**
  *  \brief Common helper function to handle Collision Detection timeout.
@@ -760,12 +1140,16 @@ void mmsn_InitializeStateMachine(MMSN_FSM_t * a_pFSM)
 	a_pFSM->u8LineState			= MMSN_BUSY_BUS;		//! Set bus state to busy
 	a_pFSM->CurrentState		= eSM_Idle;				//! Set current state to \ref eSM_Initialize
 	a_pFSM->PreviousState		= eSM_Idle;				//! Set previous state to \ref eSM_Initialize
-	a_pFSM->ptrRXDataFrame		= &g_RxCommFrameBuffer;	//! Pointer to internal copy of received data frame
-	a_pFSM->ptrTXDataFrame		= &g_TxCommFrameBuffer;	//! Pointer to internal copy of transmitted data frame
-	a_pFSM->u8TXDataCounter		= 0;					//! Transmitted data counter
+	a_pFSM->ptrRxDataFrame		= &g_RxCommFrameBuffer;	//! Pointer to internal copy of received data frame
+	a_pFSM->ptrTxDataFrame		= &g_TxCommFrameBuffer;	//! Pointer to internal copy of transmitted data frame
+	a_pFSM->u8TxDataCounter		= 0;					//! Transmitted data counter
 	a_pFSM->u8RetriesCount		= 0;					//! Retries counter
 	a_pFSM->FrameStatus			= MMSN_FrameUnknown;	//! Start with an unknown frame state
 	a_pFSM->ptrEventQueueDesc	= &eventQueue_desc;		//! Store pointer to event queue
+	a_pFSM->u8IsDataToSend      = false;
+	
+	a_pFSM->SendDataAttr.u8DataSize = 0;
+	a_pFSM->SendDataAttr.u8IsResponseNeeded = false;
 	
 	// Assign pointer to receiver FSM action handler table
 	a_pFSM->pFSMRActionTable = FSMReceiverActionHandlerTable;
@@ -865,15 +1249,15 @@ void fsm_Send(void)
 			xmega_set_usart_dre_interrupt_level(&USART_COMMUNICATION_BUS, USART_DREINTLVL_MED_gc);
 			
 			// Reset data transmit counter
-			mmsnFSM.u8TXDataCounter = 0;
+			mmsnFSM.u8TxDataCounter = 0;
 			
 			// Send first data byte. The remaining bytes will be sent in DRE event handler directly.
-			USART_COMMUNICATION_BUS.DATA = mmsnFSM.ptrTXDataFrame->u8FrameBuffer[0];
+			USART_COMMUNICATION_BUS.DATA = mmsnFSM.ptrTxDataFrame->u8FrameBuffer[0];
 			
 			ATOMIC_BLOCK(ATOMIC_FORCEON)
 			{
 				// Mark that the first byte was sent
-				mmsnFSM.u8TXDataCounter++;
+				mmsnFSM.u8TxDataCounter++;
 			};
 		}
 		
@@ -887,19 +1271,19 @@ void fsm_Send(void)
 	// Data Register Empty (DRE) IRQ handling
 	if (u16EventFlags & EVENT_IRQ_DATA_REGISTER_EMPTY_bm)
 	{
-		if (mmsnFSM.u8TXDataCounter < MMSN_COMM_FRAME_SIZE)
+		if (mmsnFSM.u8TxDataCounter < MMSN_COMM_FRAME_SIZE)
 		{
 			// Data still waiting to be sent
 			
 			/* Get next data byte and put it to USART register for sending.
 			 */
-			USART_COMMUNICATION_BUS.DATA = mmsnFSM.ptrTXDataFrame->u8FrameBuffer[mmsnFSM.u8TXDataCounter];
+			USART_COMMUNICATION_BUS.DATA = mmsnFSM.ptrTxDataFrame->u8FrameBuffer[mmsnFSM.u8TxDataCounter];
 			
 			// Increase transmission counter
 			ATOMIC_BLOCK(ATOMIC_FORCEON)
 			{
 				// Another byte was sent
-				mmsnFSM.u8TXDataCounter++;
+				mmsnFSM.u8TxDataCounter++;
 			};
 			
 			// Turn on DRE interrupt
@@ -980,12 +1364,7 @@ void fsm_WaitForResponse(void)
 	 * Could be acknowledge frame if requested [RTR=1].
 	 */ 
 	
-	
-	
-	
-	
 	// EVENT_IRQ_RECEIVE_COMPLETE_bm
-
 	
 	// Restart waiting for response timer
 	
@@ -1036,7 +1415,7 @@ void fsm_Retransmission(void)
 			mmsnFSM.u8RetriesCount++;
 			
 			// Reset data transmission counter
-			mmsnFSM.u8TXDataCounter = 0;
+			mmsnFSM.u8TxDataCounter = 0;
 			
 			// Go to \ref eSM_Send state to send complete message again
 			mmsnFSM.CurrentState = eSM_Send;
@@ -1126,7 +1505,7 @@ void fsm_Error(void)
 		g_NetworkErrorDesc.currError = NE_None;
 		
 		// Clear transmission buffer
-		memset(mmsnFSM.ptrTXDataFrame->u8FrameBuffer , 0, MMSN_COMM_FRAME_SIZE);
+		memset(mmsnFSM.ptrTxDataFrame->u8FrameBuffer , 0, MMSN_COMM_FRAME_SIZE);
 		
 		// Clear transmission FIFO
 		fifo_flush(&fifo_send_buffer_desc);
@@ -1135,7 +1514,7 @@ void fsm_Error(void)
 		mmsnFSM.u8RetriesCount = 0;
 		
 		// Clear transmitted bytes counter
-		mmsnFSM.u8TXDataCounter = 0;
+		mmsnFSM.u8TxDataCounter = 0;
 		
 		// Clear corresponding event
 		ATOMIC_BLOCK(ATOMIC_FORCEON)
