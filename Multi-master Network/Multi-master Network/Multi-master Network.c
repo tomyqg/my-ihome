@@ -407,11 +407,11 @@ void syscmd_Module_Serial_Number_Handler(void)
 	printf_P(PSTR("\nShortSN "));
 	
 	// Copy 7 lower bytes to TX frame buffer
-	memcpy((mmsnFSM.ptrTXDataFrame->u8DataBuffer + 1), &xmegaSerialNumber.u8DataArray[4], 7);
+	memcpy((mmsnFSM.ptrTxDataFrame->u8DataBuffer + 1), &xmegaSerialNumber.u8DataArray[4], 7);
 	
 	for (uint8_t u8idx = 0; u8idx < MMSN_DATA_LENGTH; u8idx++)
 	{
-		printf("%u:", mmsnFSM.ptrTXDataFrame->u8DataBuffer[u8idx]);
+		printf("%u:", mmsnFSM.ptrTxDataFrame->u8DataBuffer[u8idx]);
 	}
 }
 
