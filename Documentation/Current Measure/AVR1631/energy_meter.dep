@@ -1,0 +1,376 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+
+<project>
+  <fileVersion>2</fileVersion>
+  <fileChecksum>865293821</fileChecksum>
+  <configuration>
+    <name>Debug</name>
+    <outputs>
+      <file>$PROJ_DIR$\meter_initialisation.c</file>
+      <file>$TOOLKIT_DIR$\inc\ioavr.h</file>
+      <file>$PROJ_DIR$\meter_rtc.c</file>
+      <file>$PROJ_DIR$\Debug\Obj\adc_driver.pbi</file>
+      <file>$PROJ_DIR$\Debug\Obj\meter_initialisation.r90</file>
+      <file>$PROJ_DIR$\Debug\List\meter_initialisation.lst</file>
+      <file>$PROJ_DIR$\Debug\List\adc_driver.lst</file>
+      <file>$PROJ_DIR$\Debug\List\meter_calibration.lst</file>
+      <file>$TOOLKIT_DIR$\inc\ioxm32a4u.h</file>
+      <file>$TOOLKIT_DIR$\inc\dlib\c\yvals.h</file>
+      <file>$PROJ_DIR$\Debug\Obj\meter_initialisation.pbi</file>
+      <file>$PROJ_DIR$\meter_calculations.h</file>
+      <file>$PROJ_DIR$\Debug\Obj\clksys_driver.r90</file>
+      <file>$PROJ_DIR$\Debug\Obj\meter_lcd_module.pbi</file>
+      <file>$PROJ_DIR$\clksys_driver.h</file>
+      <file>$TOOLKIT_DIR$\inc\dlib\c\stdlib.h</file>
+      <file>$TOOLKIT_DIR$\inc\dlib\c\math.h</file>
+      <file>$PROJ_DIR$\Debug\List\clksys_driver.lst</file>
+      <file>$TOOLKIT_DIR$\inc\dlib\c\stdbool.h</file>
+      <file>$TOOLKIT_DIR$\inc\dlib\c\ycheck.h</file>
+      <file>$PROJ_DIR$\adc_driver.c</file>
+      <file>$PROJ_DIR$\adc_driver.h</file>
+      <file>$PROJ_DIR$\Debug\Obj\rtc_driver.r90</file>
+      <file>$PROJ_DIR$\meter_rtc.h</file>
+      <file>$PROJ_DIR$\Debug\Obj\meter_calculations.r90</file>
+      <file>$PROJ_DIR$\Debug\Obj\meter_task.r90</file>
+      <file>$PROJ_DIR$\Debug\Obj\meter_rtc.pbi</file>
+      <file>$TOOLKIT_DIR$\inc\dlib\c\DLib_Product.h</file>
+      <file>$PROJ_DIR$\Debug\List\meter_task.lst</file>
+      <file>$TOOLKIT_DIR$\inc\dlib\c\ymath.h</file>
+      <file>$PROJ_DIR$\Debug\Obj\energy_meter.pbd</file>
+      <file>$PROJ_DIR$\Debug\Obj\meter_calculations.pbi</file>
+      <file>$PROJ_DIR$\Debug\List\meter_main.lst</file>
+      <file>$PROJ_DIR$\Debug\Obj\adc_driver_asm.r90</file>
+      <file>$TOOLKIT_DIR$\inc\dlib\c\xtgmath.h</file>
+      <file>$TOOLKIT_DIR$\inc\dlib\c\stdint.h</file>
+      <file>$TOOLKIT_DIR$\lib\dlib\dlAVR-3s-xmega-sf-n.h</file>
+      <file>$TOOLKIT_DIR$\inc\dlib\c\xencoding_limits.h</file>
+      <file>$PROJ_DIR$\Debug\List\meter_lcd_module.lst</file>
+      <file>$PROJ_DIR$\Debug\List\rtc_driver.lst</file>
+      <file>$TOOLKIT_DIR$\inc\dlib\c\DLib_Defaults.h</file>
+      <file>$PROJ_DIR$\meter_initialisation.h</file>
+      <file>$PROJ_DIR$\Debug\Exe\energy_meter.d90</file>
+      <file>$TOOLKIT_DIR$\src\template\cfgxmega3soimntf.xcl</file>
+      <file>$TOOLKIT_DIR$\inc\dlib\c\ysizet.h</file>
+      <file>$TOOLKIT_DIR$\inc\iomacro.h</file>
+      <file>$TOOLKIT_DIR$\inc\dlib\c\ystdio.h</file>
+      <file>$TOOLKIT_DIR$\inc\dlib\c\stdarg.h</file>
+      <file>$PROJ_DIR$\meter_lcd_module.h</file>
+      <file>$TOOLKIT_DIR$\inc\dlib\c\stdio.h</file>
+      <file>$TOOLKIT_DIR$\inc\Atmel\ATxmega32A4U.h</file>
+      <file>$PROJ_DIR$\clksys_driver.c</file>
+      <file>$TOOLKIT_DIR$\inc\inavr.h</file>
+      <file>$TOOLKIT_DIR$\inc\dlib\c\string.h</file>
+      <file>$TOOLKIT_DIR$\inc\Atmel\iomacro_xmega.h</file>
+      <file>$TOOLKIT_DIR$\inc\dlib\c\pgmspace.h</file>
+      <file>$TOOLKIT_DIR$\src\template\cfgxm32a4u.xcl</file>
+      <file>$TOOLKIT_DIR$\inc\intrinsics.h</file>
+      <file>$PROJ_DIR$\adc_driver_asm.S90</file>
+      <file>$TOOLKIT_DIR$\inc\dlib\c\DLib_Threads.h</file>
+      <file>$PROJ_DIR$\Debug\Obj\meter_task.pbi</file>
+      <file>$PROJ_DIR$\meter.h</file>
+      <file>$PROJ_DIR$\meter_calibration.h</file>
+      <file>$PROJ_DIR$\avr_compiler.h</file>
+      <file>$PROJ_DIR$\rtc_driver.h</file>
+      <file>$PROJ_DIR$\Debug\Obj\adc_driver.r90</file>
+      <file>$PROJ_DIR$\Debug\Obj\meter_main.pbi</file>
+      <file>$PROJ_DIR$\Debug\Obj\rtc_driver.pbi</file>
+      <file>$PROJ_DIR$\Debug\Obj\meter_lcd_module.r90</file>
+      <file>$PROJ_DIR$\Debug\Obj\meter_calibration.r90</file>
+      <file>$PROJ_DIR$\Debug\Obj\meter_main.r90</file>
+      <file>$PROJ_DIR$\Debug\Obj\clksys_driver.pbi</file>
+      <file>$PROJ_DIR$\meter_calculations.c</file>
+      <file>$PROJ_DIR$\meter_calibration.c</file>
+      <file>$PROJ_DIR$\meter_main.c</file>
+      <file>$PROJ_DIR$\meter_lcd_module.c</file>
+      <file>$PROJ_DIR$\meter_task.c</file>
+      <file>$PROJ_DIR$\rtc_driver.c</file>
+      <file>$PROJ_DIR$\Debug\List\meter_rtc.lst</file>
+      <file>$PROJ_DIR$\Debug\Obj\meter_calibration.pbi</file>
+      <file>$PROJ_DIR$\Debug\Obj\meter_rtc.r90</file>
+      <file>$PROJ_DIR$\Debug\List\meter_calculations.lst</file>
+      <file>$TOOLKIT_DIR$\lib\dlib\dlAVR-3s-xmega-sf-n.r90</file>
+    </outputs>
+    <file>
+      <name>$PROJ_DIR$\meter_initialisation.c</name>
+      <outputs>
+        <tool>
+          <name>ICCAVR</name>
+          <file> 5 4</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 10</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICCAVR</name>
+          <file> 61 1 8 45 50 54 16 19 29 9 40 36 27 37 59 34 14 63 35 18 15 44 52 57 55 53 49 46 47 21 64 11 62 41 48 23</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 61 1 8 45 50 54 16 19 29 9 40 27 37 59 34 14 63 35 18 15 44 52 57 55 53 49 46 47 21 64 11 62 41 48 23</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>[ROOT_NODE]</name>
+      <outputs>
+        <tool>
+          <name>XLINK</name>
+          <file> 42</file>
+        </tool>
+      </outputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\meter_rtc.c</name>
+      <outputs>
+        <tool>
+          <name>ICCAVR</name>
+          <file> 78 80</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 26</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICCAVR</name>
+          <file> 61 1 8 45 50 54 16 19 29 9 40 36 27 37 59 34 14 63 35 18 15 44 52 57 55 53 49 46 47 21 64 11 62 41 48 23</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 61 1 8 45 50 54 16 19 29 9 40 27 37 59 34 14 63 35 18 15 44 52 57 55 53 49 46 47 21 64 11 62 41 48 23</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\adc_driver.c</name>
+      <outputs>
+        <tool>
+          <name>ICCAVR</name>
+          <file> 6 65</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 3</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICCAVR</name>
+          <file> 21 63 35 19 9 40 36 27 37 59 18 15 44 52 57 1 8 45 50 54 55 53 49 46 47</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 21 63 35 19 9 40 27 37 59 18 15 44 52 57 1 8 45 50 54 55 53 49 46 47</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\Debug\Obj\energy_meter.pbd</name>
+      <inputs>
+        <tool>
+          <name>BILINK</name>
+          <file> 3 71 31 79 10 13 66 26 60 67</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\Debug\Exe\energy_meter.d90</name>
+      <inputs>
+        <tool>
+          <name>XLINK</name>
+          <file> 56 43 65 33 12 24 69 4 68 70 80 25 22 82</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\clksys_driver.c</name>
+      <outputs>
+        <tool>
+          <name>ICCAVR</name>
+          <file> 17 12</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 71</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICCAVR</name>
+          <file> 14 63 35 19 9 40 36 27 37 59 18 15 44 52 57 1 8 45 50 54 55 53 49 46 47</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 14 63 35 19 9 40 27 37 59 18 15 44 52 57 1 8 45 50 54 55 53 49 46 47</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\adc_driver_asm.S90</name>
+      <outputs>
+        <tool>
+          <name>AAVR</name>
+          <file> 33</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>AAVR</name>
+          <file> 1 8 45 50 54</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\meter_calculations.c</name>
+      <outputs>
+        <tool>
+          <name>ICCAVR</name>
+          <file> 81 24</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 31</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICCAVR</name>
+          <file> 61 1 8 45 50 54 16 19 29 9 40 36 27 37 59 34 14 63 35 18 15 44 52 57 55 53 49 46 47 21 64 11 62 41 48 23</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 61 1 8 45 50 54 16 19 29 9 40 27 37 59 34 14 63 35 18 15 44 52 57 55 53 49 46 47 21 64 11 62 41 48 23</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\meter_calibration.c</name>
+      <outputs>
+        <tool>
+          <name>ICCAVR</name>
+          <file> 7 69</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 79</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICCAVR</name>
+          <file> 61 1 8 45 50 54 16 19 29 9 40 36 27 37 59 34 14 63 35 18 15 44 52 57 55 53 49 46 47 21 64 11 62 41 48 23</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 61 1 8 45 50 54 16 19 29 9 40 27 37 59 34 14 63 35 18 15 44 52 57 55 53 49 46 47 21 64 11 62 41 48 23</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\meter_main.c</name>
+      <outputs>
+        <tool>
+          <name>ICCAVR</name>
+          <file> 32 70</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 66</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICCAVR</name>
+          <file> 61 1 8 45 50 54 16 19 29 9 40 36 27 37 59 34 14 63 35 18 15 44 52 57 55 53 49 46 47 21 64 11 62 41 48 23</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 61 1 8 45 50 54 16 19 29 9 40 27 37 59 34 14 63 35 18 15 44 52 57 55 53 49 46 47 21 64 11 62 41 48 23</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\meter_lcd_module.c</name>
+      <outputs>
+        <tool>
+          <name>ICCAVR</name>
+          <file> 38 68</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 13</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICCAVR</name>
+          <file> 61 1 8 45 50 54 16 19 29 9 40 36 27 37 59 34 14 63 35 18 15 44 52 57 55 53 49 46 47 21 64 11 62 41 48 23</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 61 1 8 45 50 54 16 19 29 9 40 27 37 59 34 14 63 35 18 15 44 52 57 55 53 49 46 47 21 64 11 62 41 48 23</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\meter_task.c</name>
+      <outputs>
+        <tool>
+          <name>ICCAVR</name>
+          <file> 28 25</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 60</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICCAVR</name>
+          <file> 61 1 8 45 50 54 16 19 29 9 40 36 27 37 59 34 14 63 35 18 15 44 52 57 55 53 49 46 47 21 64 11 62 41 48 23</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 61 1 8 45 50 54 16 19 29 9 40 27 37 59 34 14 63 35 18 15 44 52 57 55 53 49 46 47 21 64 11 62 41 48 23</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\rtc_driver.c</name>
+      <outputs>
+        <tool>
+          <name>ICCAVR</name>
+          <file> 39 22</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 67</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICCAVR</name>
+          <file> 64 63 35 19 9 40 36 27 37 59 18 15 44 52 57 1 8 45 50 54 55 53 49 46 47</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 64 63 35 19 9 40 27 37 59 18 15 44 52 57 1 8 45 50 54 55 53 49 46 47</file>
+        </tool>
+      </inputs>
+    </file>
+  </configuration>
+  <configuration>
+    <name>Release</name>
+    <outputs/>
+    <forcedrebuild>
+      <name>[MULTI_TOOL]</name>
+      <tool>XLINK</tool>
+    </forcedrebuild>
+  </configuration>
+</project>
+
+

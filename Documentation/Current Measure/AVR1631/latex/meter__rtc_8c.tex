@@ -1,0 +1,112 @@
+\hypertarget{meter__rtc_8c}{\section{meter\-\_\-rtc.\-c File Reference}
+\label{meter__rtc_8c}\index{meter\-\_\-rtc.\-c@{meter\-\_\-rtc.\-c}}
+}
+
+
+Metering Algorithm implementation.  
+
+
+{\ttfamily \#include \char`\"{}meter.\-h\char`\"{}}\\*
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \hyperlink{meter__rtc_8c_abb4fa397a4a71ad09e3b0df51f40dbe8}{rtc\-\_\-init} ()
+\item 
+\hyperlink{meter__rtc_8c_afabc41ff96b7954d5f4855e99b2eb408}{I\-S\-R} (R\-T\-C\-\_\-\-O\-V\-F\-\_\-vect)
+\item 
+void \hyperlink{meter__rtc_8c_ad61a080e275c71ef3e109c0a28cf9ab7}{update\-\_\-time} ()
+\end{DoxyCompactItemize}
+\subsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{meter__rtc_8c_a522092e3326de9441af20163267848a7}{uint8\-\_\-t \hyperlink{meter__rtc_8c_a522092e3326de9441af20163267848a7}{power\-\_\-status\-\_\-flag} = 0}\label{meter__rtc_8c_a522092e3326de9441af20163267848a7}
+
+\begin{DoxyCompactList}\small\item\em hold the status of mains power supply \end{DoxyCompactList}\item 
+\hypertarget{meter__rtc_8c_a305d6604b5886ce1376fe43349bc07a8}{const uint8\-\_\-t \hyperlink{meter__rtc_8c_a305d6604b5886ce1376fe43349bc07a8}{days\-\_\-lookup} \mbox{[}12\mbox{]} = \{31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31\}}\label{meter__rtc_8c_a305d6604b5886ce1376fe43349bc07a8}
+
+\begin{DoxyCompactList}\small\item\em lookup table for number of days in a month \end{DoxyCompactList}\item 
+\hypertarget{meter__rtc_8c_a1ec85894b66c99e20796efbff934081a}{\hyperlink{meter__rtc_8h_a6165274881d22b282c63690f35ed68e1}{R\-T\-C\-\_\-\-B\-C\-D\-\_\-t} \hyperlink{meter__rtc_8c_a1ec85894b66c99e20796efbff934081a}{rtc\-Time} = \{0,0,0,1,1,2012\}}\label{meter__rtc_8c_a1ec85894b66c99e20796efbff934081a}
+
+\begin{DoxyCompactList}\small\item\em structure for holding the time value \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Metering Algorithm implementation. \begin{DoxyParagraph}{Application note\-:}
+A\-V\-R1631\-: Energy Meter Reference Design with A\-Txmega32\-A4
+\end{DoxyParagraph}
+\begin{DoxyParagraph}{Documentation}
+For comprehensive code documentation, supported compilers, compiler settings and supported devices see readme.\-html
+\end{DoxyParagraph}
+\begin{DoxyAuthor}{Author}
+Atmel Corporation\-: \href{http://www.atmel.com}{\tt http\-://www.\-atmel.\-com} \par
+ Support email\-: \href{mailto:avr@atmel.com}{\tt avr@atmel.\-com}
+\end{DoxyAuthor}
+\$\-Revision\-: 1.\-0 \par
+ \$\-Date\-: 2012-\/07-\/01 10\-:10\-:10 +0530 \par
+
+
+Copyright (c) 2008, Atmel Corporation All rights reserved.
+
+Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met\-:
+
+
+\begin{DoxyEnumerate}
+\item Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+\end{DoxyEnumerate}
+
+
+\begin{DoxyEnumerate}
+\item Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
+\end{DoxyEnumerate}
+
+
+\begin{DoxyEnumerate}
+\item The name of A\-T\-M\-E\-L may not be used to endorse or promote products derived from this software without specific prior written permission.
+\end{DoxyEnumerate}
+
+T\-H\-I\-S S\-O\-F\-T\-W\-A\-R\-E I\-S P\-R\-O\-V\-I\-D\-E\-D B\-Y A\-T\-M\-E\-L \char`\"{}\-A\-S I\-S\char`\"{} A\-N\-D A\-N\-Y E\-X\-P\-R\-E\-S\-S O\-R I\-M\-P\-L\-I\-E\-D W\-A\-R\-R\-A\-N\-T\-I\-E\-S, I\-N\-C\-L\-U\-D\-I\-N\-G, B\-U\-T N\-O\-T L\-I\-M\-I\-T\-E\-D T\-O, T\-H\-E I\-M\-P\-L\-I\-E\-D W\-A\-R\-R\-A\-N\-T\-I\-E\-S O\-F M\-E\-R\-C\-H\-A\-N\-T\-A\-B\-I\-L\-I\-T\-Y A\-N\-D F\-I\-T\-N\-E\-S\-S F\-O\-R A P\-A\-R\-T\-I\-C\-U\-L\-A\-R P\-U\-R\-P\-O\-S\-E A\-R\-E E\-X\-P\-R\-E\-S\-S\-L\-Y A\-N\-D S\-P\-E\-C\-I\-F\-I\-C\-A\-L\-L\-Y D\-I\-S\-C\-L\-A\-I\-M\-E\-D. I\-N N\-O E\-V\-E\-N\-T S\-H\-A\-L\-L A\-T\-M\-E\-L B\-E L\-I\-A\-B\-L\-E F\-O\-R A\-N\-Y D\-I\-R\-E\-C\-T, I\-N\-D\-I\-R\-E\-C\-T, I\-N\-C\-I\-D\-E\-N\-T\-A\-L, S\-P\-E\-C\-I\-A\-L, E\-X\-E\-M\-P\-L\-A\-R\-Y, O\-R C\-O\-N\-S\-E\-Q\-U\-E\-N\-T\-I\-A\-L D\-A\-M\-A\-G\-E\-S (I\-N\-C\-L\-U\-D\-I\-N\-G, B\-U\-T N\-O\-T L\-I\-M\-I\-T\-E\-D T\-O, P\-R\-O\-C\-U\-R\-E\-M\-E\-N\-T O\-F S\-U\-B\-S\-T\-I\-T\-U\-T\-E G\-O\-O\-D\-S O\-R S\-E\-R\-V\-I\-C\-E\-S; L\-O\-S\-S O\-F U\-S\-E, D\-A\-T\-A, O\-R P\-R\-O\-F\-I\-T\-S; O\-R B\-U\-S\-I\-N\-E\-S\-S I\-N\-T\-E\-R\-R\-U\-P\-T\-I\-O\-N) H\-O\-W\-E\-V\-E\-R C\-A\-U\-S\-E\-D A\-N\-D O\-N A\-N\-Y T\-H\-E\-O\-R\-Y O\-F L\-I\-A\-B\-I\-L\-I\-T\-Y, W\-H\-E\-T\-H\-E\-R I\-N C\-O\-N\-T\-R\-A\-C\-T, S\-T\-R\-I\-C\-T L\-I\-A\-B\-I\-L\-I\-T\-Y, O\-R T\-O\-R\-T (I\-N\-C\-L\-U\-D\-I\-N\-G N\-E\-G\-L\-I\-G\-E\-N\-C\-E O\-R O\-T\-H\-E\-R\-W\-I\-S\-E) A\-R\-I\-S\-I\-N\-G I\-N A\-N\-Y W\-A\-Y O\-U\-T O\-F T\-H\-E U\-S\-E O\-F T\-H\-I\-S S\-O\-F\-T\-W\-A\-R\-E, E\-V\-E\-N I\-F A\-D\-V\-I\-S\-E\-D O\-F T\-H\-E P\-O\-S\-S\-I\-B\-I\-L\-I\-T\-Y O\-F S\-U\-C\-H D\-A\-M\-A\-G\-E. 
+
+Definition in file \hyperlink{meter__rtc_8c_source}{meter\-\_\-rtc.\-c}.
+
+
+
+\subsection{Function Documentation}
+\hypertarget{meter__rtc_8c_afabc41ff96b7954d5f4855e99b2eb408}{\index{meter\-\_\-rtc.\-c@{meter\-\_\-rtc.\-c}!I\-S\-R@{I\-S\-R}}
+\index{I\-S\-R@{I\-S\-R}!meter_rtc.c@{meter\-\_\-rtc.\-c}}
+\subsubsection[{I\-S\-R}]{\setlength{\rightskip}{0pt plus 5cm}I\-S\-R (
+\begin{DoxyParamCaption}
+\item[{R\-T\-C\-\_\-\-O\-V\-F\-\_\-vect}]{}
+\end{DoxyParamCaption}
+)}}\label{meter__rtc_8c_afabc41ff96b7954d5f4855e99b2eb408}
+breif The R\-T\-C I\-S\-R occurs in every sec. The time and date is updated in this function and the rtc\-\_\-flag is set update the time and date
+
+check the status of mains power supply
+
+if power is on, set the rtc\-\_\-flag
+
+if power is off, clear the rtc\-\_\-flag 
+
+Definition at line 77 of file meter\-\_\-rtc.\-c.
+
+\hypertarget{meter__rtc_8c_abb4fa397a4a71ad09e3b0df51f40dbe8}{\index{meter\-\_\-rtc.\-c@{meter\-\_\-rtc.\-c}!rtc\-\_\-init@{rtc\-\_\-init}}
+\index{rtc\-\_\-init@{rtc\-\_\-init}!meter_rtc.c@{meter\-\_\-rtc.\-c}}
+\subsubsection[{rtc\-\_\-init}]{\setlength{\rightskip}{0pt plus 5cm}void rtc\-\_\-init (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}}\label{meter__rtc_8c_abb4fa397a4a71ad09e3b0df51f40dbe8}
+brief This function initilize R\-T\-C to external clock and 1 sec interrupt. 
+
+Definition at line 63 of file meter\-\_\-rtc.\-c.
+
+\hypertarget{meter__rtc_8c_ad61a080e275c71ef3e109c0a28cf9ab7}{\index{meter\-\_\-rtc.\-c@{meter\-\_\-rtc.\-c}!update\-\_\-time@{update\-\_\-time}}
+\index{update\-\_\-time@{update\-\_\-time}!meter_rtc.c@{meter\-\_\-rtc.\-c}}
+\subsubsection[{update\-\_\-time}]{\setlength{\rightskip}{0pt plus 5cm}void update\-\_\-time (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}}\label{meter__rtc_8c_ad61a080e275c71ef3e109c0a28cf9ab7}
+breif This function updates the date and time 
+
+Definition at line 106 of file meter\-\_\-rtc.\-c.
+

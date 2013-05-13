@@ -1,0 +1,407 @@
+\hypertarget{meter__calculations_8c}{\section{meter\-\_\-calculations.\-c File Reference}
+\label{meter__calculations_8c}\index{meter\-\_\-calculations.\-c@{meter\-\_\-calculations.\-c}}
+}
+
+
+Metering Algorithm implementation.  
+
+
+{\ttfamily \#include \char`\"{}meter.\-h\char`\"{}}\\*
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{meter__calculations_8c_a392d646875c778bfce12cf6e364d5817}{I\-S\-R} (T\-C\-C1\-\_\-\-O\-V\-F\-\_\-vect)
+\begin{DoxyCompactList}\small\item\em Timer/\-Counter 1 interrupt occur in every 250 u\-Sec, (4\-K\-Hz). The I\-S\-R routine enables A\-D\-C Conversion start on channel 0. This function also perform the pulsing of the led for meter constant of 3200 impulse/kwh. \end{DoxyCompactList}\item 
+\hyperlink{meter__calculations_8c_a544753e4ff62df959e2202025faaa0d9}{I\-S\-R} (A\-D\-C\-A\-\_\-\-C\-H0\-\_\-vect)
+\begin{DoxyCompactList}\small\item\em A\-D\-C I\-S\-R channel 0 interrupt reads the phase value from shunt for Irms and energy calculation. \end{DoxyCompactList}\item 
+\hyperlink{meter__calculations_8c_a8e09128d9373412ab1300891631d01f6}{I\-S\-R} (A\-D\-C\-A\-\_\-\-C\-H1\-\_\-vect)
+\begin{DoxyCompactList}\small\item\em A\-D\-C I\-S\-R channel 1 interrupt reads the voltage value for Vrms and energy calculation The A\-D\-C I\-S\-R also check for the sign change in voltage signal for frequency calucaulation. \end{DoxyCompactList}\item 
+\hyperlink{meter__calculations_8c_a5f79deca3d51b70eae68e7191b4c040b}{I\-S\-R} (A\-D\-C\-A\-\_\-\-C\-H2\-\_\-vect)
+\begin{DoxyCompactList}\small\item\em A\-D\-C I\-S\-R channel 2 interrupt reads the neutral value from C\-T and accumulate it for neutal current calculation. \end{DoxyCompactList}\item 
+int16\-\_\-t \hyperlink{meter__calculations_8c_a8194594ff0ad68aa1bb5e43e3758303f}{lp\-\_\-filter} (int16\-\_\-t $\ast$inp\-\_\-array)
+\item 
+void \hyperlink{meter__calculations_8c_a15f4d5e2ad4c2019d97b46bf228d38da}{calculate} (void)
+\item 
+void \hyperlink{meter__calculations_8c_a652f05506a918e5c9136fc014e1d42b8}{calculate\-\_\-freq} (void)
+\item 
+void \hyperlink{meter__calculations_8c_a5b8277cdae31f3fc56ce77726f5511fb}{get\-\_\-frequency} (void)
+\item 
+void \hyperlink{meter__calculations_8c_a8003ad921b01382fe52068fe6f3b02cb}{meter\-\_\-flush} ()
+\end{DoxyCompactItemize}
+\subsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{meter__calculations_8c_a849b90ef2cde8a80e100f24d6c9105da}{uint8\-\_\-t \hyperlink{meter__calculations_8c_a849b90ef2cde8a80e100f24d6c9105da}{gain\-\_\-stage} = 0}\label{meter__calculations_8c_a849b90ef2cde8a80e100f24d6c9105da}
+
+\begin{DoxyCompactList}\small\item\em variables used in metering calculations \end{DoxyCompactList}\item 
+\hypertarget{meter__calculations_8c_a6ccc79ef66f633cf8691a228c801542e}{uint32\-\_\-t {\bfseries freq\-\_\-sum} = 0}\label{meter__calculations_8c_a6ccc79ef66f633cf8691a228c801542e}
+
+\item 
+\hypertarget{meter__calculations_8c_aea762e0e67fcafaf5b3cd61201769926}{uint16\-\_\-t {\bfseries frequency} = 0}\label{meter__calculations_8c_aea762e0e67fcafaf5b3cd61201769926}
+
+\item 
+\hypertarget{meter__calculations_8c_a8e547707560422632d4b105c32d141f9}{uint16\-\_\-t {\bfseries max\-\_\-demand} = 0}\label{meter__calculations_8c_a8e547707560422632d4b105c32d141f9}
+
+\item 
+\hypertarget{meter__calculations_8c_a882b3f2750e7f1ef5f9a67155e08c229}{uint16\-\_\-t {\bfseries Vrms} \mbox{[}5\mbox{]} = \{0\}}\label{meter__calculations_8c_a882b3f2750e7f1ef5f9a67155e08c229}
+
+\item 
+\hypertarget{meter__calculations_8c_a6747774a33aadf3c6c93c8afe3a99b27}{uint16\-\_\-t {\bfseries Irms} \mbox{[}5\mbox{]} = \{0\}}\label{meter__calculations_8c_a6747774a33aadf3c6c93c8afe3a99b27}
+
+\item 
+\hypertarget{meter__calculations_8c_a8126a7d1168a8c8dc515de68b4eaef5f}{uint16\-\_\-t {\bfseries Nrms} = 0}\label{meter__calculations_8c_a8126a7d1168a8c8dc515de68b4eaef5f}
+
+\item 
+\hypertarget{meter__calculations_8c_a82ff73ce17c127cc2590595c483d4bdc}{int16\-\_\-t {\bfseries p\-\_\-mean} = 0}\label{meter__calculations_8c_a82ff73ce17c127cc2590595c483d4bdc}
+
+\item 
+\hypertarget{meter__calculations_8c_a621d783fed42ebfef564300eac20e9c1}{int16\-\_\-t {\bfseries Vmean} = 0}\label{meter__calculations_8c_a621d783fed42ebfef564300eac20e9c1}
+
+\item 
+\hypertarget{meter__calculations_8c_a2708fdf520660b27b37e321f71e98208}{int16\-\_\-t {\bfseries n\-\_\-mean} = 0}\label{meter__calculations_8c_a2708fdf520660b27b37e321f71e98208}
+
+\item 
+\hypertarget{meter__calculations_8c_a91f968f9e39cdcf03e69bd4518309ea8}{int32\-\_\-t {\bfseries phase\-\_\-mean} = 0}\label{meter__calculations_8c_a91f968f9e39cdcf03e69bd4518309ea8}
+
+\item 
+\hypertarget{meter__calculations_8c_a57dc1afddf754de625fa3061dda99e65}{int32\-\_\-t {\bfseries neutral\-\_\-mean} = 0}\label{meter__calculations_8c_a57dc1afddf754de625fa3061dda99e65}
+
+\item 
+\hypertarget{meter__calculations_8c_a4f0cdefddd1c66ce7735c97ff1b38bb5}{int32\-\_\-t {\bfseries volt\-\_\-mean} = 0}\label{meter__calculations_8c_a4f0cdefddd1c66ce7735c97ff1b38bb5}
+
+\item 
+\hypertarget{meter__calculations_8c_a20ca87b09919397939d31625d3cb1655}{uint64\-\_\-t {\bfseries phase\-\_\-sum} = 0}\label{meter__calculations_8c_a20ca87b09919397939d31625d3cb1655}
+
+\item 
+\hypertarget{meter__calculations_8c_ad8d89265db0861f59b7da320d2db12d7}{uint64\-\_\-t {\bfseries volt\-\_\-sum} = 0}\label{meter__calculations_8c_ad8d89265db0861f59b7da320d2db12d7}
+
+\item 
+\hypertarget{meter__calculations_8c_a05b544eea8fdfb2682c644330a2ef069}{uint64\-\_\-t {\bfseries neutral\-\_\-sum} = 0}\label{meter__calculations_8c_a05b544eea8fdfb2682c644330a2ef069}
+
+\item 
+\hypertarget{meter__calculations_8c_a6fb4bdd69521fa850b5a74c975686cec}{int64\-\_\-t {\bfseries watts\-\_\-sum} = 0}\label{meter__calculations_8c_a6fb4bdd69521fa850b5a74c975686cec}
+
+\item 
+\hypertarget{meter__calculations_8c_a8e937b921835a02cd70cdc887e8843b3}{int64\-\_\-t {\bfseries watts\-\_\-sum\-\_\-neutral} = 0}\label{meter__calculations_8c_a8e937b921835a02cd70cdc887e8843b3}
+
+\item 
+\hypertarget{meter__calculations_8c_ac242952f34a52cca8815e01751a2a9cc}{int64\-\_\-t {\bfseries watts\-\_\-sum\-\_\-calib} = 0}\label{meter__calculations_8c_ac242952f34a52cca8815e01751a2a9cc}
+
+\item 
+\hypertarget{meter__calculations_8c_affc99939ee8f323ea2810bfb0b8e931c}{uint16\-\_\-t {\bfseries adc\-\_\-samples} = 0}\label{meter__calculations_8c_affc99939ee8f323ea2810bfb0b8e931c}
+
+\item 
+\hypertarget{meter__calculations_8c_a97196fc638e5301ed97b30c1ce1a16b0}{int32\-\_\-t {\bfseries active\-\_\-energy\-\_\-signed} = 0}\label{meter__calculations_8c_a97196fc638e5301ed97b30c1ce1a16b0}
+
+\item 
+\hypertarget{meter__calculations_8c_a17303f2b6e2c08701f025019b3d125ac}{int32\-\_\-t {\bfseries neutral\-\_\-power} = 0}\label{meter__calculations_8c_a17303f2b6e2c08701f025019b3d125ac}
+
+\item 
+\hypertarget{meter__calculations_8c_adb64a954e0f44bdffef270d4e191c68c}{uint16\-\_\-t {\bfseries active\-\_\-power} \mbox{[}5\mbox{]} = \{0\}}\label{meter__calculations_8c_adb64a954e0f44bdffef270d4e191c68c}
+
+\item 
+\hypertarget{meter__calculations_8c_ac8969cb517e56f9bd9f064a00fc2e8a6}{uint16\-\_\-t {\bfseries apparent\-\_\-power} = 0}\label{meter__calculations_8c_ac8969cb517e56f9bd9f064a00fc2e8a6}
+
+\item 
+\hypertarget{meter__calculations_8c_aeb3c4f44608b461fdff65ad93439e8e6}{int16\-\_\-t {\bfseries power\-\_\-factor}}\label{meter__calculations_8c_aeb3c4f44608b461fdff65ad93439e8e6}
+
+\item 
+\hypertarget{meter__calculations_8c_aa3ad12f2e7b1f6fb314c9585791c081a}{int16\-\_\-t {\bfseries offset} \mbox{[}7\mbox{]} = \{0\}}\label{meter__calculations_8c_aa3ad12f2e7b1f6fb314c9585791c081a}
+
+\item 
+\hypertarget{meter__calculations_8c_ade34fa214cbf079b08a7bd39d4d61359}{int32\-\_\-t {\bfseries volt\-\_\-temp}}\label{meter__calculations_8c_ade34fa214cbf079b08a7bd39d4d61359}
+
+\item 
+\hypertarget{meter__calculations_8c_a92cd3148ebda6e3afe8f88907c35bf35}{int32\-\_\-t {\bfseries ct\-\_\-temp}}\label{meter__calculations_8c_a92cd3148ebda6e3afe8f88907c35bf35}
+
+\item 
+\hypertarget{meter__calculations_8c_a8fe74f8e82ab49c05b312bd123263744}{int32\-\_\-t {\bfseries shunt\-\_\-temp}}\label{meter__calculations_8c_a8fe74f8e82ab49c05b312bd123263744}
+
+\item 
+\hypertarget{meter__calculations_8c_abb1b0773ec4f8ebf18ce5354cc46163e}{volatile int16\-\_\-t {\bfseries adc\-\_\-read\-\_\-ch0}}\label{meter__calculations_8c_abb1b0773ec4f8ebf18ce5354cc46163e}
+
+\item 
+\hypertarget{meter__calculations_8c_a7ce9159189101542aadca1498edbfed4}{volatile int16\-\_\-t {\bfseries adc\-\_\-read\-\_\-ch1}}\label{meter__calculations_8c_a7ce9159189101542aadca1498edbfed4}
+
+\item 
+\hypertarget{meter__calculations_8c_a5fd8f750b3775b6e4165da3e7f614173}{int16\-\_\-t {\bfseries lp\-\_\-phase} \mbox{[}L\-P\-\_\-\-O\-R\-D\-E\-R\mbox{]} = \{0\}}\label{meter__calculations_8c_a5fd8f750b3775b6e4165da3e7f614173}
+
+\item 
+\hypertarget{meter__calculations_8c_a8784841eac646ba6d9447f004566347c}{int16\-\_\-t {\bfseries lp\-\_\-power} \mbox{[}L\-P\-\_\-\-O\-R\-D\-E\-R\mbox{]} = \{0\}}\label{meter__calculations_8c_a8784841eac646ba6d9447f004566347c}
+
+\item 
+\hypertarget{meter__calculations_8c_a86fb722c698d4835b9bb282e865902cd}{int16\-\_\-t {\bfseries lp\-\_\-volt} \mbox{[}L\-P\-\_\-\-O\-R\-D\-E\-R\mbox{]} = \{0\}}\label{meter__calculations_8c_a86fb722c698d4835b9bb282e865902cd}
+
+\item 
+\hypertarget{meter__calculations_8c_a15996be6abf4deec05adb39a80432120}{uint8\-\_\-t {\bfseries freq\-\_\-cnt}}\label{meter__calculations_8c_a15996be6abf4deec05adb39a80432120}
+
+\item 
+\hypertarget{meter__calculations_8c_a849a64e49bba950e59334741ed063dd9}{uint8\-\_\-t {\bfseries offset\-\_\-cnt} = 0}\label{meter__calculations_8c_a849a64e49bba950e59334741ed063dd9}
+
+\item 
+\hypertarget{meter__calculations_8c_a90526fde8ce7f0898690106cadaa67ca}{const int16\-\_\-t {\bfseries lp\-\_\-coeff} \mbox{[}L\-P\-\_\-\-O\-R\-D\-E\-R\mbox{]} = \{5252, 5568, 5728, 5728, 5568, 5252\}}\label{meter__calculations_8c_a90526fde8ce7f0898690106cadaa67ca}
+
+\item 
+\hypertarget{meter__calculations_8c_a82dfbbef67f3f25bb814c00a05b1983b}{float {\bfseries pulse\-\_\-energy\-\_\-2\-\_\-5ms} = 0}\label{meter__calculations_8c_a82dfbbef67f3f25bb814c00a05b1983b}
+
+\item 
+\hypertarget{meter__calculations_8c_af9e36069f73b8a3642ae276fd3b672a1}{uint8\-\_\-t {\bfseries pulse\-\_\-count} = 0}\label{meter__calculations_8c_af9e36069f73b8a3642ae276fd3b672a1}
+
+\item 
+\hypertarget{meter__calculations_8c_a0ac00f2dcd56e3fd476aacf0fef83882}{uint8\-\_\-t {\bfseries On\-\_\-\-Time\-\_\-counter} = 0}\label{meter__calculations_8c_a0ac00f2dcd56e3fd476aacf0fef83882}
+
+\item 
+\hypertarget{meter__calculations_8c_ab2b2c47e208d42055b258f2a18f4fffa}{float {\bfseries pulse\-\_\-energy\-\_\-acc} = 0}\label{meter__calculations_8c_ab2b2c47e208d42055b258f2a18f4fffa}
+
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Metering Algorithm implementation. \begin{DoxyParagraph}{Application note\-:}
+A\-V\-R1631\-: Energy Meter Reference Design with A\-Txmega32\-A4
+\end{DoxyParagraph}
+\begin{DoxyParagraph}{Documentation}
+For comprehensive code documentation, supported compilers, compiler settings and supported devices see readme.\-html
+\end{DoxyParagraph}
+\begin{DoxyAuthor}{Author}
+Atmel Corporation\-: \href{http://www.atmel.com}{\tt http\-://www.\-atmel.\-com} \par
+ Support email\-: \href{mailto:avr@atmel.com}{\tt avr@atmel.\-com}
+\end{DoxyAuthor}
+\$\-Revision\-: 1.\-0 \par
+ \$\-Date\-: 2012-\/07-\/01 10\-:10\-:10 +0530 \par
+
+
+Copyright (c) 2008, Atmel Corporation All rights reserved.
+
+Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met\-:
+
+
+\begin{DoxyEnumerate}
+\item Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+\end{DoxyEnumerate}
+
+
+\begin{DoxyEnumerate}
+\item Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
+\end{DoxyEnumerate}
+
+
+\begin{DoxyEnumerate}
+\item The name of A\-T\-M\-E\-L may not be used to endorse or promote products derived from this software without specific prior written permission.
+\end{DoxyEnumerate}
+
+T\-H\-I\-S S\-O\-F\-T\-W\-A\-R\-E I\-S P\-R\-O\-V\-I\-D\-E\-D B\-Y A\-T\-M\-E\-L \char`\"{}\-A\-S I\-S\char`\"{} A\-N\-D A\-N\-Y E\-X\-P\-R\-E\-S\-S O\-R I\-M\-P\-L\-I\-E\-D W\-A\-R\-R\-A\-N\-T\-I\-E\-S, I\-N\-C\-L\-U\-D\-I\-N\-G, B\-U\-T N\-O\-T L\-I\-M\-I\-T\-E\-D T\-O, T\-H\-E I\-M\-P\-L\-I\-E\-D W\-A\-R\-R\-A\-N\-T\-I\-E\-S O\-F M\-E\-R\-C\-H\-A\-N\-T\-A\-B\-I\-L\-I\-T\-Y A\-N\-D F\-I\-T\-N\-E\-S\-S F\-O\-R A P\-A\-R\-T\-I\-C\-U\-L\-A\-R P\-U\-R\-P\-O\-S\-E A\-R\-E E\-X\-P\-R\-E\-S\-S\-L\-Y A\-N\-D S\-P\-E\-C\-I\-F\-I\-C\-A\-L\-L\-Y D\-I\-S\-C\-L\-A\-I\-M\-E\-D. I\-N N\-O E\-V\-E\-N\-T S\-H\-A\-L\-L A\-T\-M\-E\-L B\-E L\-I\-A\-B\-L\-E F\-O\-R A\-N\-Y D\-I\-R\-E\-C\-T, I\-N\-D\-I\-R\-E\-C\-T, I\-N\-C\-I\-D\-E\-N\-T\-A\-L, S\-P\-E\-C\-I\-A\-L, E\-X\-E\-M\-P\-L\-A\-R\-Y, O\-R C\-O\-N\-S\-E\-Q\-U\-E\-N\-T\-I\-A\-L D\-A\-M\-A\-G\-E\-S (I\-N\-C\-L\-U\-D\-I\-N\-G, B\-U\-T N\-O\-T L\-I\-M\-I\-T\-E\-D T\-O, P\-R\-O\-C\-U\-R\-E\-M\-E\-N\-T O\-F S\-U\-B\-S\-T\-I\-T\-U\-T\-E G\-O\-O\-D\-S O\-R S\-E\-R\-V\-I\-C\-E\-S; L\-O\-S\-S O\-F U\-S\-E, D\-A\-T\-A, O\-R P\-R\-O\-F\-I\-T\-S; O\-R B\-U\-S\-I\-N\-E\-S\-S I\-N\-T\-E\-R\-R\-U\-P\-T\-I\-O\-N) H\-O\-W\-E\-V\-E\-R C\-A\-U\-S\-E\-D A\-N\-D O\-N A\-N\-Y T\-H\-E\-O\-R\-Y O\-F L\-I\-A\-B\-I\-L\-I\-T\-Y, W\-H\-E\-T\-H\-E\-R I\-N C\-O\-N\-T\-R\-A\-C\-T, S\-T\-R\-I\-C\-T L\-I\-A\-B\-I\-L\-I\-T\-Y, O\-R T\-O\-R\-T (I\-N\-C\-L\-U\-D\-I\-N\-G N\-E\-G\-L\-I\-G\-E\-N\-C\-E O\-R O\-T\-H\-E\-R\-W\-I\-S\-E) A\-R\-I\-S\-I\-N\-G I\-N A\-N\-Y W\-A\-Y O\-U\-T O\-F T\-H\-E U\-S\-E O\-F T\-H\-I\-S S\-O\-F\-T\-W\-A\-R\-E, E\-V\-E\-N I\-F A\-D\-V\-I\-S\-E\-D O\-F T\-H\-E P\-O\-S\-S\-I\-B\-I\-L\-I\-T\-Y O\-F S\-U\-C\-H D\-A\-M\-A\-G\-E. 
+
+Definition in file \hyperlink{meter__calculations_8c_source}{meter\-\_\-calculations.\-c}.
+
+
+
+\subsection{Function Documentation}
+\hypertarget{meter__calculations_8c_a15f4d5e2ad4c2019d97b46bf228d38da}{\index{meter\-\_\-calculations.\-c@{meter\-\_\-calculations.\-c}!calculate@{calculate}}
+\index{calculate@{calculate}!meter_calculations.c@{meter\-\_\-calculations.\-c}}
+\subsubsection[{calculate}]{\setlength{\rightskip}{0pt plus 5cm}void calculate (
+\begin{DoxyParamCaption}
+\item[{void}]{}
+\end{DoxyParamCaption}
+)}}\label{meter__calculations_8c_a15f4d5e2ad4c2019d97b46bf228d38da}
+brief This function is called on every 1sec and perform the calculation of metering paramters
+
+
+\begin{DoxyParams}{Parameters}
+{\em Irms} & contains the root mean square value of current on phase line \\
+\hline
+{\em Vrms} & contains the root mean square value of voltage \\
+\hline
+{\em Nrms} & contains the root mean square value of current on neutral line \\
+\hline
+{\em apparent\-\_\-power} & holds the apparent energy (V\-A) \\
+\hline
+{\em active\-\_\-power} & holds the active energy (Watts) \\
+\hline
+{\em power\-\_\-factor} & hols the power factor(\-P\-F) \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 233 of file meter\-\_\-calculations.\-c.
+
+\hypertarget{meter__calculations_8c_a652f05506a918e5c9136fc014e1d42b8}{\index{meter\-\_\-calculations.\-c@{meter\-\_\-calculations.\-c}!calculate\-\_\-freq@{calculate\-\_\-freq}}
+\index{calculate\-\_\-freq@{calculate\-\_\-freq}!meter_calculations.c@{meter\-\_\-calculations.\-c}}
+\subsubsection[{calculate\-\_\-freq}]{\setlength{\rightskip}{0pt plus 5cm}void calculate\-\_\-freq (
+\begin{DoxyParamCaption}
+\item[{void}]{}
+\end{DoxyParamCaption}
+)}}\label{meter__calculations_8c_a652f05506a918e5c9136fc014e1d42b8}
+brief This function calculate line frequency from the value
+
+
+\begin{DoxyParams}{Parameters}
+{\em frequency} & hold the line frequency. \\
+\hline
+{\em freq\-\_\-avg} & hold the average timer value. \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 396 of file meter\-\_\-calculations.\-c.
+
+\hypertarget{meter__calculations_8c_a5b8277cdae31f3fc56ce77726f5511fb}{\index{meter\-\_\-calculations.\-c@{meter\-\_\-calculations.\-c}!get\-\_\-frequency@{get\-\_\-frequency}}
+\index{get\-\_\-frequency@{get\-\_\-frequency}!meter_calculations.c@{meter\-\_\-calculations.\-c}}
+\subsubsection[{get\-\_\-frequency}]{\setlength{\rightskip}{0pt plus 5cm}void get\-\_\-frequency (
+\begin{DoxyParamCaption}
+\item[{void}]{}
+\end{DoxyParamCaption}
+)}}\label{meter__calculations_8c_a5b8277cdae31f3fc56ce77726f5511fb}
+function check for the sign change in voltage signal for frequency calucaulation.
+
+
+\begin{DoxyParams}{Parameters}
+{\em sign\-\_\-flag} & updated when there is a sign change \par
+ sign\-\_\-flag = 0, during the negative half cycle \par
+ sign\-\_\-flag = 1, during the positive half cycle \par
+ \\
+\hline
+{\em freq\-\_\-val} & hold the timer value of one sine wave \\
+\hline
+{\em freq\-\_\-sum} & hold the accumulated timer counter for frequency calculation \\
+\hline
+{\em freq\-\_\-cnt} & hold the number of sine waves taken for frequency measument \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 420 of file meter\-\_\-calculations.\-c.
+
+\hypertarget{meter__calculations_8c_a392d646875c778bfce12cf6e364d5817}{\index{meter\-\_\-calculations.\-c@{meter\-\_\-calculations.\-c}!I\-S\-R@{I\-S\-R}}
+\index{I\-S\-R@{I\-S\-R}!meter_calculations.c@{meter\-\_\-calculations.\-c}}
+\subsubsection[{I\-S\-R}]{\setlength{\rightskip}{0pt plus 5cm}I\-S\-R (
+\begin{DoxyParamCaption}
+\item[{T\-C\-C1\-\_\-\-O\-V\-F\-\_\-vect}]{}
+\end{DoxyParamCaption}
+)}}\label{meter__calculations_8c_a392d646875c778bfce12cf6e364d5817}
+
+
+Timer/\-Counter 1 interrupt occur in every 250 u\-Sec, (4\-K\-Hz). The I\-S\-R routine enables A\-D\-C Conversion start on channel 0. This function also perform the pulsing of the led for meter constant of 3200 impulse/kwh. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em pulse\-\_\-energy\-\_\-2\-\_\-5ms} & hold the active energy for 2.\-5msec \\
+\hline
+{\em pulse\-\_\-energy\-\_\-acc} & hold the accumulated energy on every 2.\-5msec \\
+\hline
+{\em On\-\_\-\-Time\-\_\-counter} & hold the duration for which the pulse led to be O\-N \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 85 of file meter\-\_\-calculations.\-c.
+
+\hypertarget{meter__calculations_8c_a544753e4ff62df959e2202025faaa0d9}{\index{meter\-\_\-calculations.\-c@{meter\-\_\-calculations.\-c}!I\-S\-R@{I\-S\-R}}
+\index{I\-S\-R@{I\-S\-R}!meter_calculations.c@{meter\-\_\-calculations.\-c}}
+\subsubsection[{I\-S\-R}]{\setlength{\rightskip}{0pt plus 5cm}I\-S\-R (
+\begin{DoxyParamCaption}
+\item[{A\-D\-C\-A\-\_\-\-C\-H0\-\_\-vect}]{}
+\end{DoxyParamCaption}
+)}}\label{meter__calculations_8c_a544753e4ff62df959e2202025faaa0d9}
+
+
+A\-D\-C I\-S\-R channel 0 interrupt reads the phase value from shunt for Irms and energy calculation. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em adc\-\_\-read\-\_\-ch0} & hold the A\-D\-C channel result result register \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 120 of file meter\-\_\-calculations.\-c.
+
+\hypertarget{meter__calculations_8c_a8e09128d9373412ab1300891631d01f6}{\index{meter\-\_\-calculations.\-c@{meter\-\_\-calculations.\-c}!I\-S\-R@{I\-S\-R}}
+\index{I\-S\-R@{I\-S\-R}!meter_calculations.c@{meter\-\_\-calculations.\-c}}
+\subsubsection[{I\-S\-R}]{\setlength{\rightskip}{0pt plus 5cm}I\-S\-R (
+\begin{DoxyParamCaption}
+\item[{A\-D\-C\-A\-\_\-\-C\-H1\-\_\-vect}]{}
+\end{DoxyParamCaption}
+)}}\label{meter__calculations_8c_a8e09128d9373412ab1300891631d01f6}
+
+
+A\-D\-C I\-S\-R channel 1 interrupt reads the voltage value for Vrms and energy calculation The A\-D\-C I\-S\-R also check for the sign change in voltage signal for frequency calucaulation. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em adc\-\_\-read\-\_\-ch1} & hold the A\-D\-C channel result register \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 133 of file meter\-\_\-calculations.\-c.
+
+\hypertarget{meter__calculations_8c_a5f79deca3d51b70eae68e7191b4c040b}{\index{meter\-\_\-calculations.\-c@{meter\-\_\-calculations.\-c}!I\-S\-R@{I\-S\-R}}
+\index{I\-S\-R@{I\-S\-R}!meter_calculations.c@{meter\-\_\-calculations.\-c}}
+\subsubsection[{I\-S\-R}]{\setlength{\rightskip}{0pt plus 5cm}I\-S\-R (
+\begin{DoxyParamCaption}
+\item[{A\-D\-C\-A\-\_\-\-C\-H2\-\_\-vect}]{}
+\end{DoxyParamCaption}
+)}}\label{meter__calculations_8c_a5f79deca3d51b70eae68e7191b4c040b}
+
+
+A\-D\-C I\-S\-R channel 2 interrupt reads the neutral value from C\-T and accumulate it for neutal current calculation. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em p\-\_\-mean} & subtract the D\-C offset value form the A\-D\-C\-\_\-result register. \\
+\hline
+{\em phase\-\_\-sum} & contains the accumulated phase value \\
+\hline
+{\em v\-\_\-mean} & substract the D\-C offset value form the A\-D\-C\-\_\-result register. \\
+\hline
+{\em volt\-\_\-sum} & contains the accumulated volt value \\
+\hline
+{\em n\-\_\-mean} & substract the D\-C offset value form the A\-D\-C\-\_\-result register. \\
+\hline
+{\em neutral\-\_\-sum} & contains the accumulated neutral value \\
+\hline
+{\em watts\-\_\-sum} & contain the accumulated power value of active power calculation \\
+\hline
+{\em lp\-\_\-phase} & array contain the phase signal for low pass filtering \\
+\hline
+{\em lp\-\_\-volt} & array contain the volt signal for low pass filtering \\
+\hline
+{\em lp\-\_\-power} & array contain the instantaneous power signal for low pass filtering \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 155 of file meter\-\_\-calculations.\-c.
+
+\hypertarget{meter__calculations_8c_a8194594ff0ad68aa1bb5e43e3758303f}{\index{meter\-\_\-calculations.\-c@{meter\-\_\-calculations.\-c}!lp\-\_\-filter@{lp\-\_\-filter}}
+\index{lp\-\_\-filter@{lp\-\_\-filter}!meter_calculations.c@{meter\-\_\-calculations.\-c}}
+\subsubsection[{lp\-\_\-filter}]{\setlength{\rightskip}{0pt plus 5cm}int16\-\_\-t lp\-\_\-filter (
+\begin{DoxyParamCaption}
+\item[{int16\-\_\-t $\ast$}]{inp\-\_\-array}
+\end{DoxyParamCaption}
+)}}\label{meter__calculations_8c_a8194594ff0ad68aa1bb5e43e3758303f}
+brief This function performs the low pass filtering of the input array
+
+
+\begin{DoxyParams}{Parameters}
+{\em lp\-\_\-coeff} & contains the coefficients for the low pass filtering \\
+\hline
+{\em lp\-\_\-output} & return the filtered value \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 208 of file meter\-\_\-calculations.\-c.
+
+\hypertarget{meter__calculations_8c_a8003ad921b01382fe52068fe6f3b02cb}{\index{meter\-\_\-calculations.\-c@{meter\-\_\-calculations.\-c}!meter\-\_\-flush@{meter\-\_\-flush}}
+\index{meter\-\_\-flush@{meter\-\_\-flush}!meter_calculations.c@{meter\-\_\-calculations.\-c}}
+\subsubsection[{meter\-\_\-flush}]{\setlength{\rightskip}{0pt plus 5cm}void meter\-\_\-flush (
+\begin{DoxyParamCaption}
+\item[{void}]{}
+\end{DoxyParamCaption}
+)}}\label{meter__calculations_8c_a8003ad921b01382fe52068fe6f3b02cb}
+brief This function clear all the varilable used in for energy calculation 
+
+Definition at line 447 of file meter\-\_\-calculations.\-c.
+

@@ -1,0 +1,26 @@
+var meter_8h =
+[
+    [ "coefficient", "structcoefficient.html", "structcoefficient" ],
+    [ "eeprom", "meter_8h.html#ab45b2bc4583f3a0528cc70aeb1ae4a64", null ],
+    [ "F_CPU", "meter_8h.html#a43bafb28b29491ec7f871319b5a3b2f8", null ],
+    [ "F_SAMPLING", "meter_8h.html#a82c667e21a5795aa646df86ff14431fa", null ],
+    [ "F_TIMER", "meter_8h.html#aca12ec03d86eb5ef061e7a94b02b0ac0", null ],
+    [ "meter", "meter_8h.html#a4acc179ab572ac28a25bce62e686976b", null ],
+    [ "POWER_OFF", "meter_8h.html#ae8131694b06a62416e7b799b129de381", null ],
+    [ "POWER_OFF_DETECTED", "meter_8h.html#a7eea8bdbb07a7ed4f16b145ffb077551", null ],
+    [ "POWER_ON_DETECTED", "meter_8h.html#a7742a2e3c81de16dd55182b04daf453f", null ],
+    [ "POWERED_UP", "meter_8h.html#a38c301e2f57b8800c8ac8c9acf66927c", null ],
+    [ "RTC_CYCLES_1S", "meter_8h.html#ae28e0c2dae7677b14d2547e997bb2a63", null ],
+    [ "TAMPER_CURRENT_REVERSAL", "meter_8h.html#a0db728a697b0c3fe6a12ec0f01c56320", null ],
+    [ "TAMPER_EARTH_FAULT", "meter_8h.html#a860f42298602a26bb3e5869ab4a92d8a", null ],
+    [ "TAMPER_NEUTRAL_CUT", "meter_8h.html#a4ca488f39dca34314574911cb13cde09", null ],
+    [ "adc_iadc_debug", "meter_8h.html#aeadc2cfdb5c65bf2ed7315645a0b8607", null ],
+    [ "adc_vadc_debug", "meter_8h.html#af7b6c57ac314d52b50a26a1346d36c34", null ],
+    [ "tamper_check", "meter_8h.html#a51f29d3417ada33c90f1ebaabad23d36", null ],
+    [ "cover_open_flag", "meter_8h.html#a06eafd0ca356b436dd14f8922d71d55b", null ],
+    [ "debug_count", "meter_8h.html#a88b579aec51c4d8387dce0526846857f", null ],
+    [ "debug_count1", "meter_8h.html#a3c3f848e46f400cadc6fb3d9ff8ebbd3", null ],
+    [ "eeprom_t", "meter_8h.html#a6148b70d5aa88d6f47b7ff1a479f0ef7", null ],
+    [ "meter_t", "meter_8h.html#ab8ce2814e2c1afeb3e21b44ba9af0a4a", null ],
+    [ "rtc_flag", "meter_8h.html#afd360fb9947d32b0ac9aebc77c04d355", null ]
+];

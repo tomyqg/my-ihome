@@ -1,0 +1,1061 @@
+\hypertarget{adc__driver_8h}{\section{adc\-\_\-driver.\-h File Reference}
+\label{adc__driver_8h}\index{adc\-\_\-driver.\-h@{adc\-\_\-driver.\-h}}
+}
+
+
+X\-M\-E\-G\-A A\-D\-C driver header file.  
+
+
+{\ttfamily \#include \char`\"{}avr\-\_\-compiler.\-h\char`\"{}}\\*
+\subsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{adc__driver_8h_a2d855d868aa4430ce5c2a56a40a81ea1}{\#define {\bfseries C\-O\-M\-M\-O\-N\-\_\-\-M\-O\-D\-E\-\_\-\-C\-Y\-C\-L\-E\-S}~16}\label{adc__driver_8h_a2d855d868aa4430ce5c2a56a40a81ea1}
+
+\item 
+\#define \hyperlink{adc__driver_8h_a42a1ce395d3fc496b8a8c4915459ddea}{A\-D\-C\-\_\-\-Enable}(\-\_\-adc)~((\-\_\-adc)-\/$>$C\-T\-R\-L\-A $|$= A\-D\-C\-\_\-\-E\-N\-A\-B\-L\-E\-\_\-bm)
+\begin{DoxyCompactList}\small\item\em This macro enables the selected adc. \end{DoxyCompactList}\item 
+\#define \hyperlink{adc__driver_8h_a85035b72e0f119dd5f464aadb10609e1}{A\-D\-C\-\_\-\-Disable}(\-\_\-adc)~((\-\_\-adc)-\/$>$C\-T\-R\-L\-A = (\-\_\-adc)-\/$>$C\-T\-R\-L\-A \& ($\sim$A\-D\-C\-\_\-\-E\-N\-A\-B\-L\-E\-\_\-bm))
+\begin{DoxyCompactList}\small\item\em This macro disables the selected adc. \end{DoxyCompactList}\item 
+\#define \hyperlink{adc__driver_8h_ae5b856df5f07551b4346e41f9d727ff9}{A\-D\-C\-\_\-\-Pipeline\-\_\-\-Flush}(\-\_\-adc)~((\-\_\-adc)-\/$>$C\-T\-R\-L\-A $|$= A\-D\-C\-\_\-\-F\-L\-U\-S\-H\-\_\-bm)
+\begin{DoxyCompactList}\small\item\em This macro flushes the pipline in the selected adc. \end{DoxyCompactList}\item 
+\#define \hyperlink{adc__driver_8h_afde954e8379f43b5d328422ad0c03a56}{A\-D\-C\-\_\-\-Conv\-Mode\-\_\-and\-\_\-\-Resolution\-\_\-\-Config}(\-\_\-adc, \-\_\-signed\-Mode, \-\_\-resolution)
+\begin{DoxyCompactList}\small\item\em This macro set the conversion mode and resolution in the selected adc. \end{DoxyCompactList}\item 
+\#define \hyperlink{adc__driver_8h_a4a2a86a070aab8d74cb246f670711bb6}{A\-D\-C\-\_\-\-Conv\-Mode\-\_\-\-Signed}~true
+\begin{DoxyCompactList}\small\item\em Helper macro for increased readability with A\-D\-C\-\_\-\-Conv\-Mode\-\_\-and\-\_\-\-Resolution\-\_\-\-Config. \end{DoxyCompactList}\item 
+\#define \hyperlink{adc__driver_8h_a9409b18e0c362f48a8929781acff9df2}{A\-D\-C\-\_\-\-Conv\-Mode\-\_\-\-Unsigned}~false
+\begin{DoxyCompactList}\small\item\em Helper macro for increased readability with A\-D\-C\-\_\-\-Conv\-Mode\-\_\-and\-\_\-\-Resolution\-\_\-\-Config. \end{DoxyCompactList}\item 
+\#define \hyperlink{adc__driver_8h_a65c7ceae3eb03618477310f32705437a}{A\-D\-C\-\_\-\-Prescaler\-\_\-\-Config}(\-\_\-adc, \-\_\-div)~((\-\_\-adc)-\/$>$P\-R\-E\-S\-C\-A\-L\-E\-R = ((\-\_\-adc)-\/$>$P\-R\-E\-S\-C\-A\-L\-E\-R \& ($\sim$A\-D\-C\-\_\-\-P\-R\-E\-S\-C\-A\-L\-E\-R\-\_\-gm)) $|$ \-\_\-div)
+\begin{DoxyCompactList}\small\item\em This macro set the prescaler factor in the selected adc. \end{DoxyCompactList}\item 
+\#define \hyperlink{adc__driver_8h_ab6602f9facc1b7b26ef6044eac803c28}{A\-D\-C\-\_\-\-Reference\-\_\-\-Config}(\-\_\-adc, \-\_\-conv\-Ref)~((\-\_\-adc)-\/$>$R\-E\-F\-C\-T\-R\-L = ((\-\_\-adc)-\/$>$R\-E\-F\-C\-T\-R\-L \& $\sim$(A\-D\-C\-\_\-\-R\-E\-F\-S\-E\-L\-\_\-gm)) $|$ \-\_\-conv\-Ref)
+\begin{DoxyCompactList}\small\item\em This macro set the conversion reference in the selected adc. \end{DoxyCompactList}\item 
+\#define \hyperlink{adc__driver_8h_ad869078fe313a086dd790b08effa4d08}{A\-D\-C\-\_\-\-Sweep\-Channels\-\_\-\-Config}(\-\_\-adc, \-\_\-sweep\-Channels)~((\-\_\-adc)-\/$>$E\-V\-C\-T\-R\-L = ((\-\_\-adc)-\/$>$E\-V\-C\-T\-R\-L \& ($\sim$A\-D\-C\-\_\-\-S\-W\-E\-E\-P\-\_\-gm)) $|$ \-\_\-sweep\-Channels)
+\begin{DoxyCompactList}\small\item\em This macro sets the sweep channel settings. \end{DoxyCompactList}\item 
+\#define \hyperlink{adc__driver_8h_a8b5aedd3cf6e2ba59a90df082ef9e1b6}{A\-D\-C\-\_\-\-Events\-\_\-\-Config}(\-\_\-adc, \-\_\-event\-Channels, \-\_\-event\-Mode)
+\begin{DoxyCompactList}\small\item\em This macro configures the event channels used and the event mode. \end{DoxyCompactList}\item 
+\#define \hyperlink{adc__driver_8h_ae8c5c8a3b09a418ddabd29617583d8e7}{A\-D\-C\-\_\-\-Ch\-\_\-\-Interrupts\-\_\-\-Config}(\-\_\-adc\-\_\-ch, \-\_\-interrupt\-Mode, \-\_\-interrupt\-Level)
+\begin{DoxyCompactList}\small\item\em This macro configures the interrupt mode and level for one channel. \end{DoxyCompactList}\item 
+\#define \hyperlink{adc__driver_8h_acf3a61e2d01adf012853a78e80e1bafb}{A\-D\-C\-\_\-\-Ch\-\_\-\-Input\-Mode\-\_\-and\-\_\-\-Gain\-\_\-\-Config}(\-\_\-adc\-\_\-ch, \-\_\-input\-Mode, \-\_\-gain)
+\begin{DoxyCompactList}\small\item\em This macro configures the input mode and gain to a specific virtual channel. \end{DoxyCompactList}\item 
+\#define \hyperlink{adc__driver_8h_ac5cb1f11ca1ba3e59740d459800af830}{A\-D\-C\-\_\-\-D\-R\-I\-V\-E\-R\-\_\-\-C\-H\-\_\-\-G\-A\-I\-N\-\_\-\-N\-O\-N\-E}~A\-D\-C\-\_\-\-C\-H\-\_\-\-G\-A\-I\-N\-\_\-1\-X\-\_\-gc
+\begin{DoxyCompactList}\small\item\em Helper macro for increased readability with A\-D\-C\-\_\-\-Ch\-\_\-\-Input\-Mode\-\_\-and\-\_\-\-Gain\-\_\-\-Config. \end{DoxyCompactList}\item 
+\#define \hyperlink{adc__driver_8h_a8955bb469b9eb9a8a4771d3f1b6247b3}{A\-D\-C\-\_\-\-Ch\-\_\-\-Input\-Mux\-\_\-\-Config}(\-\_\-adc\-\_\-ch, \-\_\-pos\-Input, \-\_\-neg\-Input)~((\-\_\-adc\-\_\-ch)-\/$>$M\-U\-X\-C\-T\-R\-L = (uint8\-\_\-t) \-\_\-pos\-Input $|$ \-\_\-neg\-Input)
+\begin{DoxyCompactList}\small\item\em This macro configures the Positiv and negativ inputs. \end{DoxyCompactList}\item 
+\#define \hyperlink{adc__driver_8h_ade06ee666ba0d5ea116ed2f4144e595a}{A\-D\-C\-\_\-\-Ch\-\_\-\-Conversion\-\_\-\-Complete}(\-\_\-adc\-\_\-ch)~(((\-\_\-adc\-\_\-ch)-\/$>$I\-N\-T\-F\-L\-A\-G\-S \& A\-D\-C\-\_\-\-C\-H\-\_\-\-C\-H\-I\-F\-\_\-bm) != 0x00)
+\begin{DoxyCompactList}\small\item\em This macro returns the channel conversion complete flag.. \end{DoxyCompactList}\item 
+\#define \hyperlink{adc__driver_8h_acc4b4f50c4639865d4078b47203fcd09}{A\-D\-C\-\_\-\-Compare\-Value\-\_\-\-Set}(\-\_\-adc, \-\_\-value)~((\-\_\-adc)-\/$>$C\-M\-P = \-\_\-value)
+\begin{DoxyCompactList}\small\item\em This macro sets the value in the A\-D\-C compare register. \end{DoxyCompactList}\item 
+\#define \hyperlink{adc__driver_8h_afefc986fb2e6baf59713025ebe11fabe}{A\-D\-C\-\_\-\-Free\-Running\-\_\-\-Enable}(\-\_\-adc)~((\-\_\-adc)-\/$>$C\-T\-R\-L\-B $|$= A\-D\-C\-\_\-\-F\-R\-E\-E\-R\-U\-N\-\_\-bm)
+\begin{DoxyCompactList}\small\item\em This macro enables the Free Running mode in the selected adc. \end{DoxyCompactList}\item 
+\#define \hyperlink{adc__driver_8h_a7b5cd6118f7965589aee07760bb25c69}{A\-D\-C\-\_\-\-Free\-Running\-\_\-\-Disable}(\-\_\-adc)~((\-\_\-adc)-\/$>$C\-T\-R\-L\-B = (\-\_\-adc)-\/$>$C\-T\-R\-L\-B \& ($\sim$A\-D\-C\-\_\-\-F\-R\-E\-E\-R\-U\-N\-\_\-bm))
+\begin{DoxyCompactList}\small\item\em This macro disables the Free Running mode in the selected adc. \end{DoxyCompactList}\item 
+\hypertarget{adc__driver_8h_ab51ddab01f3a91fdf50fb7c801e25aaa}{\#define {\bfseries A\-D\-C\-\_\-\-Low\-\_\-\-Impedance\-\_\-\-Mode}(\-\_\-adc)~((\-\_\-adc)-\/$>$C\-T\-R\-L\-B $|$= A\-D\-C\-\_\-\-I\-M\-P\-M\-O\-D\-E\-\_\-bm)}\label{adc__driver_8h_ab51ddab01f3a91fdf50fb7c801e25aaa}
+
+\item 
+\hypertarget{adc__driver_8h_a51b171b8414b484643a25e43750d81fd}{\#define {\bfseries A\-D\-C\-\_\-\-High\-\_\-\-Impedence\-\_\-\-Mode}(\-\_\-adc)~((\-\_\-adc)-\/$>$C\-T\-R\-L\-B = (\-\_\-adc)-\/$>$C\-T\-R\-L\-B \& ($\sim$A\-D\-C\-\_\-\-I\-M\-P\-M\-O\-D\-E\-\_\-bm))}\label{adc__driver_8h_a51b171b8414b484643a25e43750d81fd}
+
+\item 
+\#define \hyperlink{adc__driver_8h_aa70b0c5cfc14003fcf6d480db1b515ca}{A\-D\-C\-\_\-\-Ch\-\_\-\-Conversion\-\_\-\-Start}(\-\_\-adc\-\_\-ch)~((\-\_\-adc\-\_\-ch)-\/$>$C\-T\-R\-L $|$= A\-D\-C\-\_\-\-C\-H\-\_\-\-S\-T\-A\-R\-T\-\_\-bm)
+\begin{DoxyCompactList}\small\item\em This macro starts one channel conversion. \end{DoxyCompactList}\item 
+\#define \hyperlink{adc__driver_8h_ad3dfd967d734c082dbfbc156cf03d868}{A\-D\-C\-\_\-\-Conversions\-\_\-\-Start}(\-\_\-adc, \-\_\-channel\-Mask)
+\begin{DoxyCompactList}\small\item\em This macro starts multiple channel conversions. \end{DoxyCompactList}\item 
+\#define \hyperlink{adc__driver_8h_a5733db988288715e651d2475339be68a}{A\-D\-C\-\_\-\-Bandgap\-Reference\-\_\-\-Enable}(\-\_\-adc)~((\-\_\-adc)-\/$>$R\-E\-F\-C\-T\-R\-L $|$= A\-D\-C\-\_\-\-B\-A\-N\-D\-G\-A\-P\-\_\-bm)
+\begin{DoxyCompactList}\small\item\em This macro pre enables the Bandgap Reference. \end{DoxyCompactList}\item 
+\#define \hyperlink{adc__driver_8h_ad1ee2808cfef4700927dfc66196e8c03}{A\-D\-C\-\_\-\-Bandgap\-Reference\-\_\-\-Disable}(\-\_\-adc)~((\-\_\-adc)-\/$>$R\-E\-F\-C\-T\-R\-L \&= $\sim$A\-D\-C\-\_\-\-B\-A\-N\-D\-G\-A\-P\-\_\-bm)
+\begin{DoxyCompactList}\small\item\em This macro disables the pre enabled the Bandgap Reference. \end{DoxyCompactList}\item 
+\#define \hyperlink{adc__driver_8h_abe2d03bea64b54b89b11f697cdb9b219}{A\-D\-C\-\_\-\-Temp\-Reference\-\_\-\-Enable}(\-\_\-adc)~((\-\_\-adc)-\/$>$R\-E\-F\-C\-T\-R\-L $|$= A\-D\-C\-\_\-\-T\-E\-M\-P\-R\-E\-F\-\_\-bm)
+\begin{DoxyCompactList}\small\item\em This macro makes sure that the temperature reference circuitry is enabled. \end{DoxyCompactList}\item 
+\#define \hyperlink{adc__driver_8h_a039020dc3d254b9852deba9526b2c88b}{A\-D\-C\-\_\-\-Temp\-Reference\-\_\-\-Disable}(\-\_\-adc)~((\-\_\-adc)-\/$>$R\-E\-F\-C\-T\-R\-L = (\-\_\-adc)-\/$>$R\-E\-F\-C\-T\-R\-L \& ($\sim$A\-D\-C\-\_\-\-T\-E\-M\-P\-R\-E\-F\-\_\-bm))
+\begin{DoxyCompactList}\small\item\em This macro disables the temperature reference. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\begin{Indent}{\bf Deprecated functions}\par
+{\em Deprecated functions\-: Compatibility with previous application note version. These functions will be removed in later releases of the driver }\begin{DoxyCompactItemize}
+\item 
+\hypertarget{adc__driver_8h_aece38a8d259a188d6021f49bde78bc35}{\#define {\bfseries A\-D\-C\-\_\-\-Referance\-\_\-\-Config}(\-\_\-adc, \-\_\-conv\-Ref)~\hyperlink{adc__driver_8h_ab6602f9facc1b7b26ef6044eac803c28}{A\-D\-C\-\_\-\-Reference\-\_\-\-Config}(\-\_\-adc, \-\_\-conv\-Ref)}\label{adc__driver_8h_aece38a8d259a188d6021f49bde78bc35}
+
+\item 
+\hypertarget{adc__driver_8h_ab07f8f2e43c04b00c00a3d610e7bd3af}{\#define {\bfseries A\-D\-C\-\_\-\-Calibration\-Values\-\_\-\-Set}(\-\_\-adc)~\hyperlink{adc__driver_8h_ad134845335cf8c298859372e2c75f03c}{A\-D\-C\-\_\-\-Calibration\-Values\-\_\-\-Load}(\-\_\-adc)}\label{adc__driver_8h_ab07f8f2e43c04b00c00a3d610e7bd3af}
+
+\end{DoxyCompactItemize}
+\end{Indent}
+\begin{Indent}{\bf G\-C\-C compatibility macros}\par
+{\em Offset addresses for production signature row on which is not in current G\-C\-C header files }\begin{DoxyCompactItemize}
+\item 
+\hypertarget{adc__driver_8h_a9f99887b34d7e11bcc5955511d197ae3}{\#define {\bfseries A\-D\-C\-A\-C\-A\-L0\-\_\-offset}~0x20}\label{adc__driver_8h_a9f99887b34d7e11bcc5955511d197ae3}
+
+\item 
+\hypertarget{adc__driver_8h_a041880cfde9799d282343217ad3231ae}{\#define {\bfseries A\-D\-C\-A\-C\-A\-L1\-\_\-offset}~0x21}\label{adc__driver_8h_a041880cfde9799d282343217ad3231ae}
+
+\item 
+\hypertarget{adc__driver_8h_aa90a8e75d7dd4d578facd97059099322}{\#define {\bfseries A\-D\-C\-B\-C\-A\-L0\-\_\-offset}~0x24}\label{adc__driver_8h_aa90a8e75d7dd4d578facd97059099322}
+
+\item 
+\hypertarget{adc__driver_8h_a74f9dbea37f9f0c008fe4b8c54d3a87c}{\#define {\bfseries A\-D\-C\-B\-C\-A\-L1\-\_\-offset}~0x25}\label{adc__driver_8h_a74f9dbea37f9f0c008fe4b8c54d3a87c}
+
+\end{DoxyCompactItemize}
+\end{Indent}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{adc__driver_8h_abcc2ef603c461cd65a0fd08b2d97d78c}{uint8\-\_\-t {\bfseries S\-P\-\_\-\-Read\-Calibration\-Byte} (uint8\-\_\-t index)}\label{adc__driver_8h_abcc2ef603c461cd65a0fd08b2d97d78c}
+
+\item 
+void \hyperlink{adc__driver_8h_ad134845335cf8c298859372e2c75f03c}{A\-D\-C\-\_\-\-Calibration\-Values\-\_\-\-Load} (A\-D\-C\-\_\-t $\ast$adc)
+\begin{DoxyCompactList}\small\item\em This function get the calibration data from the production calibration. \end{DoxyCompactList}\item 
+uint16\-\_\-t \hyperlink{adc__driver_8h_ab06443677d69d9b8aec1627e2ded342b}{A\-D\-C\-\_\-\-Result\-Ch\-\_\-\-Get\-Word\-\_\-\-Unsigned} (A\-D\-C\-\_\-\-C\-H\-\_\-t $\ast$adc\-\_\-ch, uint16\-\_\-t offset)
+\begin{DoxyCompactList}\small\item\em This function clears the interrupt flag and returns the unsigned coversion result. \end{DoxyCompactList}\item 
+int16\-\_\-t \hyperlink{adc__driver_8h_a68966505abcd45fe4722338ebdeac98d}{A\-D\-C\-\_\-\-Result\-Ch\-\_\-\-Get\-Word\-\_\-\-Signed} (A\-D\-C\-\_\-\-C\-H\-\_\-t $\ast$adc\-\_\-ch, int16\-\_\-t offset)
+\begin{DoxyCompactList}\small\item\em This function clears the interrupt flag and returns the signed coversion result. \end{DoxyCompactList}\item 
+uint16\-\_\-t \hyperlink{adc__driver_8h_a19fa19c87f634a69d0739525f30558bb}{A\-D\-C\-\_\-\-Offset\-\_\-\-Get\-\_\-\-Unsigned} (A\-D\-C\-\_\-t $\ast$adc, A\-D\-C\-\_\-\-C\-H\-\_\-t $\ast$ch, bool oversampling)
+\begin{DoxyCompactList}\small\item\em This function gets the offset of the A\-D\-C when it is configured in unsigned mode. \end{DoxyCompactList}\item 
+int16\-\_\-t \hyperlink{adc__driver_8h_a1142ee4ac991fe4e4a4f2270d8bb5acb}{A\-D\-C\-\_\-\-Offset\-\_\-\-Get\-\_\-\-Signed} (A\-D\-C\-\_\-t $\ast$adc, A\-D\-C\-\_\-\-C\-H\-\_\-t $\ast$ch, bool oversampling)
+\begin{DoxyCompactList}\small\item\em This function gets the offset of the A\-D\-C when it is configured in signed mode. \end{DoxyCompactList}\item 
+uint16\-\_\-t \hyperlink{adc__driver_8h_a197015dac5cb134b45b80f8f64a8f918}{A\-D\-C\-\_\-\-Result\-Ch\-\_\-\-Get\-Word} (A\-D\-C\-\_\-\-C\-H\-\_\-t $\ast$adc\-\_\-ch)
+\begin{DoxyCompactList}\small\item\em This function clears the interrupt flag and returns the coversion result without compensating for offset. \end{DoxyCompactList}\item 
+uint8\-\_\-t \hyperlink{adc__driver_8h_a8eaa6001575c54c32584064745065b0b}{A\-D\-C\-\_\-\-Result\-Ch\-\_\-\-Get\-Low\-Byte} (A\-D\-C\-\_\-\-C\-H\-\_\-t $\ast$adc\-\_\-ch)
+\begin{DoxyCompactList}\small\item\em This function clears the interrupt flag and returns the low byte of the coversion result. \end{DoxyCompactList}\item 
+uint8\-\_\-t \hyperlink{adc__driver_8h_a0554ced5fc0eae2df26746dcba581fa4}{A\-D\-C\-\_\-\-Result\-Ch\-\_\-\-Get\-High\-Byte} (A\-D\-C\-\_\-\-C\-H\-\_\-t $\ast$adc\-\_\-ch)
+\begin{DoxyCompactList}\small\item\em This function clears the interrupt flag and returns the high byte of the coversion result. \end{DoxyCompactList}\item 
+void \hyperlink{adc__driver_8h_a98a478448d5c15720de6d517589e974e}{A\-D\-C\-\_\-\-Wait\-\_\-8\-M\-Hz} (A\-D\-C\-\_\-t $\ast$adc)
+\begin{DoxyCompactList}\small\item\em This function waits until the adc common mode is settled. \end{DoxyCompactList}\item 
+void \hyperlink{adc__driver_8h_a0e13135d7b45df0c9c615ed40765c786}{A\-D\-C\-\_\-\-Wait\-\_\-32\-M\-Hz} (A\-D\-C\-\_\-t $\ast$adc)
+\begin{DoxyCompactList}\small\item\em This function waits until the adc common mode is settled. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+X\-M\-E\-G\-A A\-D\-C driver header file. \begin{DoxyVerb} This file contains the function prototypes and enumerator definitions
+ for various configuration parameters for the XMEGA ADC driver that is
+ implemented in C.
+
+ The driver is not intended for size and/or speed critical code, since
+ most functions are just a few lines of code, and the function call
+ overhead would decrease code performance. The driver is intended for
+ rapid prototyping and documentation purposes for getting started with
+ the XMEGA ADC module.
+
+ For size and/or speed critical code, it is recommended to copy the
+ function contents directly into your application instead of making
+ a function call.
+\end{DoxyVerb}
+
+
+\begin{DoxyParagraph}{Application note\-:}
+A\-V\-R1300\-: Using the X\-M\-E\-G\-A A\-D\-C
+\end{DoxyParagraph}
+\begin{DoxyParagraph}{Documentation}
+For comprehensive code documentation, supported compilers, compiler settings and supported devices see readme.\-html
+\end{DoxyParagraph}
+\begin{DoxyAuthor}{Author}
+Atmel Corporation\-: \href{http://www.atmel.com}{\tt http\-://www.\-atmel.\-com} \par
+ Support email\-: \href{mailto:avr@atmel.com}{\tt avr@atmel.\-com}
+\end{DoxyAuthor}
+\begin{DoxyParagraph}{Revision\-:}
+2644 
+\end{DoxyParagraph}
+\begin{DoxyParagraph}{Date\-:}
+2009-\/08-\/04 12\-:37\-:51 +0200 (ti, 04 aug 2009) 
+\end{DoxyParagraph}
+\par
+
+
+Copyright (c) 2008, Atmel Corporation All rights reserved.
+
+Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met\-:
+
+
+\begin{DoxyEnumerate}
+\item Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+\end{DoxyEnumerate}
+
+
+\begin{DoxyEnumerate}
+\item Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
+\end{DoxyEnumerate}
+
+
+\begin{DoxyEnumerate}
+\item The name of A\-T\-M\-E\-L may not be used to endorse or promote products derived from this software without specific prior written permission.
+\end{DoxyEnumerate}
+
+T\-H\-I\-S S\-O\-F\-T\-W\-A\-R\-E I\-S P\-R\-O\-V\-I\-D\-E\-D B\-Y A\-T\-M\-E\-L \char`\"{}\-A\-S I\-S\char`\"{} A\-N\-D A\-N\-Y E\-X\-P\-R\-E\-S\-S O\-R I\-M\-P\-L\-I\-E\-D W\-A\-R\-R\-A\-N\-T\-I\-E\-S, I\-N\-C\-L\-U\-D\-I\-N\-G, B\-U\-T N\-O\-T L\-I\-M\-I\-T\-E\-D T\-O, T\-H\-E I\-M\-P\-L\-I\-E\-D W\-A\-R\-R\-A\-N\-T\-I\-E\-S O\-F M\-E\-R\-C\-H\-A\-N\-T\-A\-B\-I\-L\-I\-T\-Y A\-N\-D F\-I\-T\-N\-E\-S\-S F\-O\-R A P\-A\-R\-T\-I\-C\-U\-L\-A\-R P\-U\-R\-P\-O\-S\-E A\-R\-E E\-X\-P\-R\-E\-S\-S\-L\-Y A\-N\-D S\-P\-E\-C\-I\-F\-I\-C\-A\-L\-L\-Y D\-I\-S\-C\-L\-A\-I\-M\-E\-D. I\-N N\-O E\-V\-E\-N\-T S\-H\-A\-L\-L A\-T\-M\-E\-L B\-E L\-I\-A\-B\-L\-E F\-O\-R A\-N\-Y D\-I\-R\-E\-C\-T, I\-N\-D\-I\-R\-E\-C\-T, I\-N\-C\-I\-D\-E\-N\-T\-A\-L, S\-P\-E\-C\-I\-A\-L, E\-X\-E\-M\-P\-L\-A\-R\-Y, O\-R C\-O\-N\-S\-E\-Q\-U\-E\-N\-T\-I\-A\-L D\-A\-M\-A\-G\-E\-S (I\-N\-C\-L\-U\-D\-I\-N\-G, B\-U\-T N\-O\-T L\-I\-M\-I\-T\-E\-D T\-O, P\-R\-O\-C\-U\-R\-E\-M\-E\-N\-T O\-F S\-U\-B\-S\-T\-I\-T\-U\-T\-E G\-O\-O\-D\-S O\-R S\-E\-R\-V\-I\-C\-E\-S; L\-O\-S\-S O\-F U\-S\-E, D\-A\-T\-A, O\-R P\-R\-O\-F\-I\-T\-S; O\-R B\-U\-S\-I\-N\-E\-S\-S I\-N\-T\-E\-R\-R\-U\-P\-T\-I\-O\-N) H\-O\-W\-E\-V\-E\-R C\-A\-U\-S\-E\-D A\-N\-D O\-N A\-N\-Y T\-H\-E\-O\-R\-Y O\-F L\-I\-A\-B\-I\-L\-I\-T\-Y, W\-H\-E\-T\-H\-E\-R I\-N C\-O\-N\-T\-R\-A\-C\-T, S\-T\-R\-I\-C\-T L\-I\-A\-B\-I\-L\-I\-T\-Y, O\-R T\-O\-R\-T (I\-N\-C\-L\-U\-D\-I\-N\-G N\-E\-G\-L\-I\-G\-E\-N\-C\-E O\-R O\-T\-H\-E\-R\-W\-I\-S\-E) A\-R\-I\-S\-I\-N\-G I\-N A\-N\-Y W\-A\-Y O\-U\-T O\-F T\-H\-E U\-S\-E O\-F T\-H\-I\-S S\-O\-F\-T\-W\-A\-R\-E, E\-V\-E\-N I\-F A\-D\-V\-I\-S\-E\-D O\-F T\-H\-E P\-O\-S\-S\-I\-B\-I\-L\-I\-T\-Y O\-F S\-U\-C\-H D\-A\-M\-A\-G\-E. 
+
+Definition in file \hyperlink{adc__driver_8h_source}{adc\-\_\-driver.\-h}.
+
+
+
+\subsection{Macro Definition Documentation}
+\hypertarget{adc__driver_8h_ad1ee2808cfef4700927dfc66196e8c03}{\index{adc\-\_\-driver.\-h@{adc\-\_\-driver.\-h}!A\-D\-C\-\_\-\-Bandgap\-Reference\-\_\-\-Disable@{A\-D\-C\-\_\-\-Bandgap\-Reference\-\_\-\-Disable}}
+\index{A\-D\-C\-\_\-\-Bandgap\-Reference\-\_\-\-Disable@{A\-D\-C\-\_\-\-Bandgap\-Reference\-\_\-\-Disable}!adc_driver.h@{adc\-\_\-driver.\-h}}
+\subsubsection[{A\-D\-C\-\_\-\-Bandgap\-Reference\-\_\-\-Disable}]{\setlength{\rightskip}{0pt plus 5cm}\#define A\-D\-C\-\_\-\-Bandgap\-Reference\-\_\-\-Disable(
+\begin{DoxyParamCaption}
+\item[{}]{\-\_\-adc}
+\end{DoxyParamCaption}
+)~((\-\_\-adc)-\/$>$R\-E\-F\-C\-T\-R\-L \&= $\sim$A\-D\-C\-\_\-\-B\-A\-N\-D\-G\-A\-P\-\_\-bm)}}\label{adc__driver_8h_ad1ee2808cfef4700927dfc66196e8c03}
+
+
+This macro disables the pre enabled the Bandgap Reference. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em \-\_\-adc} & Pointer to A\-D\-C module register section. \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 328 of file adc\-\_\-driver.\-h.
+
+\hypertarget{adc__driver_8h_a5733db988288715e651d2475339be68a}{\index{adc\-\_\-driver.\-h@{adc\-\_\-driver.\-h}!A\-D\-C\-\_\-\-Bandgap\-Reference\-\_\-\-Enable@{A\-D\-C\-\_\-\-Bandgap\-Reference\-\_\-\-Enable}}
+\index{A\-D\-C\-\_\-\-Bandgap\-Reference\-\_\-\-Enable@{A\-D\-C\-\_\-\-Bandgap\-Reference\-\_\-\-Enable}!adc_driver.h@{adc\-\_\-driver.\-h}}
+\subsubsection[{A\-D\-C\-\_\-\-Bandgap\-Reference\-\_\-\-Enable}]{\setlength{\rightskip}{0pt plus 5cm}\#define A\-D\-C\-\_\-\-Bandgap\-Reference\-\_\-\-Enable(
+\begin{DoxyParamCaption}
+\item[{}]{\-\_\-adc}
+\end{DoxyParamCaption}
+)~((\-\_\-adc)-\/$>$R\-E\-F\-C\-T\-R\-L $|$= A\-D\-C\-\_\-\-B\-A\-N\-D\-G\-A\-P\-\_\-bm)}}\label{adc__driver_8h_a5733db988288715e651d2475339be68a}
+
+
+This macro pre enables the Bandgap Reference. 
+
+\begin{DoxyNote}{Note}
+If the A\-D\-C is enabled the Bandgap Reference is automaticly enabled.
+\end{DoxyNote}
+
+\begin{DoxyParams}{Parameters}
+{\em \-\_\-adc} & Pointer to A\-D\-C module register section. \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 321 of file adc\-\_\-driver.\-h.
+
+\hypertarget{adc__driver_8h_ade06ee666ba0d5ea116ed2f4144e595a}{\index{adc\-\_\-driver.\-h@{adc\-\_\-driver.\-h}!A\-D\-C\-\_\-\-Ch\-\_\-\-Conversion\-\_\-\-Complete@{A\-D\-C\-\_\-\-Ch\-\_\-\-Conversion\-\_\-\-Complete}}
+\index{A\-D\-C\-\_\-\-Ch\-\_\-\-Conversion\-\_\-\-Complete@{A\-D\-C\-\_\-\-Ch\-\_\-\-Conversion\-\_\-\-Complete}!adc_driver.h@{adc\-\_\-driver.\-h}}
+\subsubsection[{A\-D\-C\-\_\-\-Ch\-\_\-\-Conversion\-\_\-\-Complete}]{\setlength{\rightskip}{0pt plus 5cm}\#define A\-D\-C\-\_\-\-Ch\-\_\-\-Conversion\-\_\-\-Complete(
+\begin{DoxyParamCaption}
+\item[{}]{\-\_\-adc\-\_\-ch}
+\end{DoxyParamCaption}
+)~(((\-\_\-adc\-\_\-ch)-\/$>$I\-N\-T\-F\-L\-A\-G\-S \& A\-D\-C\-\_\-\-C\-H\-\_\-\-C\-H\-I\-F\-\_\-bm) != 0x00)}}\label{adc__driver_8h_ade06ee666ba0d5ea116ed2f4144e595a}
+
+
+This macro returns the channel conversion complete flag.. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em \-\_\-adc\-\_\-ch} & Pointer to A\-D\-C Channel register section.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+value of channels conversion complete flag. 
+\end{DoxyReturn}
+
+
+Definition at line 243 of file adc\-\_\-driver.\-h.
+
+\hypertarget{adc__driver_8h_aa70b0c5cfc14003fcf6d480db1b515ca}{\index{adc\-\_\-driver.\-h@{adc\-\_\-driver.\-h}!A\-D\-C\-\_\-\-Ch\-\_\-\-Conversion\-\_\-\-Start@{A\-D\-C\-\_\-\-Ch\-\_\-\-Conversion\-\_\-\-Start}}
+\index{A\-D\-C\-\_\-\-Ch\-\_\-\-Conversion\-\_\-\-Start@{A\-D\-C\-\_\-\-Ch\-\_\-\-Conversion\-\_\-\-Start}!adc_driver.h@{adc\-\_\-driver.\-h}}
+\subsubsection[{A\-D\-C\-\_\-\-Ch\-\_\-\-Conversion\-\_\-\-Start}]{\setlength{\rightskip}{0pt plus 5cm}\#define A\-D\-C\-\_\-\-Ch\-\_\-\-Conversion\-\_\-\-Start(
+\begin{DoxyParamCaption}
+\item[{}]{\-\_\-adc\-\_\-ch}
+\end{DoxyParamCaption}
+)~((\-\_\-adc\-\_\-ch)-\/$>$C\-T\-R\-L $|$= A\-D\-C\-\_\-\-C\-H\-\_\-\-S\-T\-A\-R\-T\-\_\-bm)}}\label{adc__driver_8h_aa70b0c5cfc14003fcf6d480db1b515ca}
+
+
+This macro starts one channel conversion. 
+
+Use the A\-D\-C\-\_\-\-Get\-Word\-Result\-Ch or A\-D\-C\-\_\-\-Get\-Byte\-Result\-Ch functions to retrieve the conversion result. This macro is not to be used when the A\-D\-C is running in free-\/running mode.
+
+
+\begin{DoxyParams}{Parameters}
+{\em \-\_\-adc\-\_\-ch} & Pointer to A\-D\-C Channel module register section. \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 295 of file adc\-\_\-driver.\-h.
+
+\hypertarget{adc__driver_8h_acf3a61e2d01adf012853a78e80e1bafb}{\index{adc\-\_\-driver.\-h@{adc\-\_\-driver.\-h}!A\-D\-C\-\_\-\-Ch\-\_\-\-Input\-Mode\-\_\-and\-\_\-\-Gain\-\_\-\-Config@{A\-D\-C\-\_\-\-Ch\-\_\-\-Input\-Mode\-\_\-and\-\_\-\-Gain\-\_\-\-Config}}
+\index{A\-D\-C\-\_\-\-Ch\-\_\-\-Input\-Mode\-\_\-and\-\_\-\-Gain\-\_\-\-Config@{A\-D\-C\-\_\-\-Ch\-\_\-\-Input\-Mode\-\_\-and\-\_\-\-Gain\-\_\-\-Config}!adc_driver.h@{adc\-\_\-driver.\-h}}
+\subsubsection[{A\-D\-C\-\_\-\-Ch\-\_\-\-Input\-Mode\-\_\-and\-\_\-\-Gain\-\_\-\-Config}]{\setlength{\rightskip}{0pt plus 5cm}\#define A\-D\-C\-\_\-\-Ch\-\_\-\-Input\-Mode\-\_\-and\-\_\-\-Gain\-\_\-\-Config(
+\begin{DoxyParamCaption}
+\item[{}]{\-\_\-adc\-\_\-ch, }
+\item[{}]{\-\_\-input\-Mode, }
+\item[{}]{\-\_\-gain}
+\end{DoxyParamCaption}
+)}}\label{adc__driver_8h_acf3a61e2d01adf012853a78e80e1bafb}
+{\bfseries Value\-:}
+\begin{DoxyCode}
+(\_adc\_ch)->CTRL = ((\_adc\_ch)->CTRL &                                   \(\backslash\)
+                          (~(ADC\_CH\_INPUTMODE\_gm|ADC\_CH\_GAIN\_gm))) |        \(\backslash\)
+                          ((uint8\_t) \_inputMode|\_gain)
+\end{DoxyCode}
+
+
+This macro configures the input mode and gain to a specific virtual channel. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em \-\_\-adc\-\_\-ch} & Pointer to A\-D\-C channel register section. \\
+\hline
+{\em \-\_\-input\-Mode} & Input mode for this channel, differential, single-\/ended, gain etc. Use A\-D\-C\-\_\-\-C\-H\-\_\-\-I\-N\-P\-U\-T\-M\-O\-D\-E\-\_\-t type. \\
+\hline
+{\em \-\_\-gain} & The preamplifiers gain value. Use A\-D\-C\-\_\-\-C\-H\-\_\-\-G\-A\-I\-N\-F\-A\-C\-\_\-t type. \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 210 of file adc\-\_\-driver.\-h.
+
+\hypertarget{adc__driver_8h_a8955bb469b9eb9a8a4771d3f1b6247b3}{\index{adc\-\_\-driver.\-h@{adc\-\_\-driver.\-h}!A\-D\-C\-\_\-\-Ch\-\_\-\-Input\-Mux\-\_\-\-Config@{A\-D\-C\-\_\-\-Ch\-\_\-\-Input\-Mux\-\_\-\-Config}}
+\index{A\-D\-C\-\_\-\-Ch\-\_\-\-Input\-Mux\-\_\-\-Config@{A\-D\-C\-\_\-\-Ch\-\_\-\-Input\-Mux\-\_\-\-Config}!adc_driver.h@{adc\-\_\-driver.\-h}}
+\subsubsection[{A\-D\-C\-\_\-\-Ch\-\_\-\-Input\-Mux\-\_\-\-Config}]{\setlength{\rightskip}{0pt plus 5cm}\#define A\-D\-C\-\_\-\-Ch\-\_\-\-Input\-Mux\-\_\-\-Config(
+\begin{DoxyParamCaption}
+\item[{}]{\-\_\-adc\-\_\-ch, }
+\item[{}]{\-\_\-pos\-Input, }
+\item[{}]{\-\_\-neg\-Input}
+\end{DoxyParamCaption}
+)~((\-\_\-adc\-\_\-ch)-\/$>$M\-U\-X\-C\-T\-R\-L = (uint8\-\_\-t) \-\_\-pos\-Input $|$ \-\_\-neg\-Input)}}\label{adc__driver_8h_a8955bb469b9eb9a8a4771d3f1b6247b3}
+
+
+This macro configures the Positiv and negativ inputs. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em \-\_\-adc\-\_\-ch} & Which A\-D\-C channel to configure. \\
+\hline
+{\em \-\_\-pos\-Input} & Which pin (or internal signal) to connect to positive A\-D\-C input. Use A\-D\-C\-\_\-\-C\-H\-\_\-\-M\-U\-X\-P\-O\-S\-\_\-enum type. \\
+\hline
+{\em \-\_\-neg\-Input} & Which pin to connect to negative A\-D\-C input. Use A\-D\-C\-\_\-\-C\-H\-\_\-\-M\-U\-X\-N\-E\-G\-\_\-t type.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyNote}{Note}
+The negative input is connected to G\-N\-D for single-\/ended and internal input modes. 
+\end{DoxyNote}
+
+
+Definition at line 233 of file adc\-\_\-driver.\-h.
+
+\hypertarget{adc__driver_8h_ae8c5c8a3b09a418ddabd29617583d8e7}{\index{adc\-\_\-driver.\-h@{adc\-\_\-driver.\-h}!A\-D\-C\-\_\-\-Ch\-\_\-\-Interrupts\-\_\-\-Config@{A\-D\-C\-\_\-\-Ch\-\_\-\-Interrupts\-\_\-\-Config}}
+\index{A\-D\-C\-\_\-\-Ch\-\_\-\-Interrupts\-\_\-\-Config@{A\-D\-C\-\_\-\-Ch\-\_\-\-Interrupts\-\_\-\-Config}!adc_driver.h@{adc\-\_\-driver.\-h}}
+\subsubsection[{A\-D\-C\-\_\-\-Ch\-\_\-\-Interrupts\-\_\-\-Config}]{\setlength{\rightskip}{0pt plus 5cm}\#define A\-D\-C\-\_\-\-Ch\-\_\-\-Interrupts\-\_\-\-Config(
+\begin{DoxyParamCaption}
+\item[{}]{\-\_\-adc\-\_\-ch, }
+\item[{}]{\-\_\-interrupt\-Mode, }
+\item[{}]{\-\_\-interrupt\-Level}
+\end{DoxyParamCaption}
+)}}\label{adc__driver_8h_ae8c5c8a3b09a418ddabd29617583d8e7}
+{\bfseries Value\-:}
+\begin{DoxyCode}
+(\_adc\_ch)->INTCTRL = (((\_adc\_ch)->INTCTRL &                            \(\backslash\)
+                              (~(ADC\_CH\_INTMODE\_gm | ADC\_CH\_INTLVL\_gm))) |     
+      \(\backslash\)
+                              ((uint8\_t) \_interruptMode | \_interruptLevel))
+\end{DoxyCode}
+
+
+This macro configures the interrupt mode and level for one channel. 
+
+The interrupt mode affects the interrupt flag for the virtual channel, and thus also affects code that polls this flag instead of using interrupts.
+
+\begin{DoxyNote}{Note}
+When using the result comparator function, the compare value must be set using the A\-D\-C\-\_\-\-Set\-Compare\-Value function.
+\end{DoxyNote}
+
+\begin{DoxyParams}{Parameters}
+{\em \-\_\-adc\-\_\-ch} & Pointer to A\-D\-C channel register section. \\
+\hline
+{\em \-\_\-interrupt\-Mode} & Interrupt mode, flag on complete or above/below compare value. Use A\-D\-C\-\_\-\-C\-H\-\_\-\-I\-N\-T\-M\-O\-D\-E\-\_\-t type. \\
+\hline
+{\em \-\_\-interrupt\-Level} & Disable or set low/med/high priority for this virtual channel. Use A\-D\-C\-\_\-\-C\-H\-\_\-\-I\-N\-T\-L\-V\-L\-\_\-t type. \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 195 of file adc\-\_\-driver.\-h.
+
+\hypertarget{adc__driver_8h_acc4b4f50c4639865d4078b47203fcd09}{\index{adc\-\_\-driver.\-h@{adc\-\_\-driver.\-h}!A\-D\-C\-\_\-\-Compare\-Value\-\_\-\-Set@{A\-D\-C\-\_\-\-Compare\-Value\-\_\-\-Set}}
+\index{A\-D\-C\-\_\-\-Compare\-Value\-\_\-\-Set@{A\-D\-C\-\_\-\-Compare\-Value\-\_\-\-Set}!adc_driver.h@{adc\-\_\-driver.\-h}}
+\subsubsection[{A\-D\-C\-\_\-\-Compare\-Value\-\_\-\-Set}]{\setlength{\rightskip}{0pt plus 5cm}\#define A\-D\-C\-\_\-\-Compare\-Value\-\_\-\-Set(
+\begin{DoxyParamCaption}
+\item[{}]{\-\_\-adc, }
+\item[{}]{\-\_\-value}
+\end{DoxyParamCaption}
+)~((\-\_\-adc)-\/$>$C\-M\-P = \-\_\-value)}}\label{adc__driver_8h_acc4b4f50c4639865d4078b47203fcd09}
+
+
+This macro sets the value in the A\-D\-C compare register. 
+
+The value in the A\-D\-C compare register is used by the result comparator for channels that are configured to notify when result is above or below this value. Even if the A\-D\-C compare value register is always left adjusted, the input to this function is adjusted according to the result presentation setup for the A\-D\-C. This means that the value will be right adjusted unless the \char`\"{}12-\/bit left adjust\char`\"{} result mode is selected with A\-D\-C\-\_\-\-Conv\-Mode\-\_\-and\-\_\-\-Resolution\-\_\-\-Config.
+
+
+\begin{DoxyParams}{Parameters}
+{\em \-\_\-adc} & Pointer to A\-D\-C module register section. \\
+\hline
+{\em \-\_\-value} & 12-\/bit value used by the result comparator. Use uint16\-\_\-t type. \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 260 of file adc\-\_\-driver.\-h.
+
+\hypertarget{adc__driver_8h_ad3dfd967d734c082dbfbc156cf03d868}{\index{adc\-\_\-driver.\-h@{adc\-\_\-driver.\-h}!A\-D\-C\-\_\-\-Conversions\-\_\-\-Start@{A\-D\-C\-\_\-\-Conversions\-\_\-\-Start}}
+\index{A\-D\-C\-\_\-\-Conversions\-\_\-\-Start@{A\-D\-C\-\_\-\-Conversions\-\_\-\-Start}!adc_driver.h@{adc\-\_\-driver.\-h}}
+\subsubsection[{A\-D\-C\-\_\-\-Conversions\-\_\-\-Start}]{\setlength{\rightskip}{0pt plus 5cm}\#define A\-D\-C\-\_\-\-Conversions\-\_\-\-Start(
+\begin{DoxyParamCaption}
+\item[{}]{\-\_\-adc, }
+\item[{}]{\-\_\-channel\-Mask}
+\end{DoxyParamCaption}
+)}}\label{adc__driver_8h_ad3dfd967d734c082dbfbc156cf03d868}
+{\bfseries Value\-:}
+\begin{DoxyCode}
+(\_adc)->CTRLA |= \_channelMask &                                   \(\backslash\)
+                      (ADC\_CH0START\_bm | ADC\_CH1START\_bm |                \(\backslash\)
+                       ADC\_CH2START\_bm | ADC\_CH3START\_bm)
+\end{DoxyCode}
+
+
+This macro starts multiple channel conversions. 
+
+This macro starts a conversion for the channels selected by the channel mask parameter. Use the bit mask defines for each channel and combine them into one byte using bitwise O\-R. The available masks are A\-D\-C\-\_\-\-C\-H0\-S\-T\-A\-R\-T\-\_\-bm, A\-D\-C\-\_\-\-C\-H1\-S\-T\-A\-R\-T\-\_\-bm, A\-D\-C\-\_\-\-C\-H2\-S\-T\-A\-R\-T\-\_\-bm and A\-D\-C\-\_\-\-C\-H3\-S\-T\-A\-R\-T\-\_\-bm.
+
+
+\begin{DoxyParams}{Parameters}
+{\em \-\_\-adc} & Pointer to A\-D\-C module register section. \\
+\hline
+{\em \-\_\-channel\-Mask} & A bitmask selecting which channels to check. \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 309 of file adc\-\_\-driver.\-h.
+
+\hypertarget{adc__driver_8h_afde954e8379f43b5d328422ad0c03a56}{\index{adc\-\_\-driver.\-h@{adc\-\_\-driver.\-h}!A\-D\-C\-\_\-\-Conv\-Mode\-\_\-and\-\_\-\-Resolution\-\_\-\-Config@{A\-D\-C\-\_\-\-Conv\-Mode\-\_\-and\-\_\-\-Resolution\-\_\-\-Config}}
+\index{A\-D\-C\-\_\-\-Conv\-Mode\-\_\-and\-\_\-\-Resolution\-\_\-\-Config@{A\-D\-C\-\_\-\-Conv\-Mode\-\_\-and\-\_\-\-Resolution\-\_\-\-Config}!adc_driver.h@{adc\-\_\-driver.\-h}}
+\subsubsection[{A\-D\-C\-\_\-\-Conv\-Mode\-\_\-and\-\_\-\-Resolution\-\_\-\-Config}]{\setlength{\rightskip}{0pt plus 5cm}\#define A\-D\-C\-\_\-\-Conv\-Mode\-\_\-and\-\_\-\-Resolution\-\_\-\-Config(
+\begin{DoxyParamCaption}
+\item[{}]{\-\_\-adc, }
+\item[{}]{\-\_\-signed\-Mode, }
+\item[{}]{\-\_\-resolution}
+\end{DoxyParamCaption}
+)}}\label{adc__driver_8h_afde954e8379f43b5d328422ad0c03a56}
+{\bfseries Value\-:}
+\begin{DoxyCode}
+((\_adc)->CTRLB = ((\_adc)->CTRLB & (~(ADC\_RESOLUTION\_gm|ADC\_CONMODE\_bm)))|  \(\backslash\)
+                (\_resolution| ( \_signedMode? ADC\_CONMODE\_bm : 0)))
+\end{DoxyCode}
+
+
+This macro set the conversion mode and resolution in the selected adc. 
+
+This macro configures the conversion mode to signed or unsigned and set the resolution in and the way the results are put in the result registers.
+
+
+\begin{DoxyParams}{Parameters}
+{\em \-\_\-adc} & Pointer to A\-D\-C module register section \\
+\hline
+{\em \-\_\-signed\-Mode} & Selects conversion mode\-: signed (true) or unsigned (false). U\-S\-E bool type. \\
+\hline
+{\em \-\_\-resolution} & Resolution and presentation selection. Use A\-D\-C\-\_\-\-R\-E\-S\-O\-L\-U\-T\-I\-O\-N\-\_\-t type. \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 111 of file adc\-\_\-driver.\-h.
+
+\hypertarget{adc__driver_8h_a4a2a86a070aab8d74cb246f670711bb6}{\index{adc\-\_\-driver.\-h@{adc\-\_\-driver.\-h}!A\-D\-C\-\_\-\-Conv\-Mode\-\_\-\-Signed@{A\-D\-C\-\_\-\-Conv\-Mode\-\_\-\-Signed}}
+\index{A\-D\-C\-\_\-\-Conv\-Mode\-\_\-\-Signed@{A\-D\-C\-\_\-\-Conv\-Mode\-\_\-\-Signed}!adc_driver.h@{adc\-\_\-driver.\-h}}
+\subsubsection[{A\-D\-C\-\_\-\-Conv\-Mode\-\_\-\-Signed}]{\setlength{\rightskip}{0pt plus 5cm}\#define A\-D\-C\-\_\-\-Conv\-Mode\-\_\-\-Signed~true}}\label{adc__driver_8h_a4a2a86a070aab8d74cb246f670711bb6}
+
+
+Helper macro for increased readability with A\-D\-C\-\_\-\-Conv\-Mode\-\_\-and\-\_\-\-Resolution\-\_\-\-Config. 
+
+\begin{DoxySeeAlso}{See Also}
+\hyperlink{adc__driver_8h_afde954e8379f43b5d328422ad0c03a56}{A\-D\-C\-\_\-\-Conv\-Mode\-\_\-and\-\_\-\-Resolution\-\_\-\-Config} 
+\end{DoxySeeAlso}
+
+
+Definition at line 119 of file adc\-\_\-driver.\-h.
+
+\hypertarget{adc__driver_8h_a9409b18e0c362f48a8929781acff9df2}{\index{adc\-\_\-driver.\-h@{adc\-\_\-driver.\-h}!A\-D\-C\-\_\-\-Conv\-Mode\-\_\-\-Unsigned@{A\-D\-C\-\_\-\-Conv\-Mode\-\_\-\-Unsigned}}
+\index{A\-D\-C\-\_\-\-Conv\-Mode\-\_\-\-Unsigned@{A\-D\-C\-\_\-\-Conv\-Mode\-\_\-\-Unsigned}!adc_driver.h@{adc\-\_\-driver.\-h}}
+\subsubsection[{A\-D\-C\-\_\-\-Conv\-Mode\-\_\-\-Unsigned}]{\setlength{\rightskip}{0pt plus 5cm}\#define A\-D\-C\-\_\-\-Conv\-Mode\-\_\-\-Unsigned~false}}\label{adc__driver_8h_a9409b18e0c362f48a8929781acff9df2}
+
+
+Helper macro for increased readability with A\-D\-C\-\_\-\-Conv\-Mode\-\_\-and\-\_\-\-Resolution\-\_\-\-Config. 
+
+\begin{DoxySeeAlso}{See Also}
+\hyperlink{adc__driver_8h_afde954e8379f43b5d328422ad0c03a56}{A\-D\-C\-\_\-\-Conv\-Mode\-\_\-and\-\_\-\-Resolution\-\_\-\-Config} 
+\end{DoxySeeAlso}
+
+
+Definition at line 125 of file adc\-\_\-driver.\-h.
+
+\hypertarget{adc__driver_8h_a85035b72e0f119dd5f464aadb10609e1}{\index{adc\-\_\-driver.\-h@{adc\-\_\-driver.\-h}!A\-D\-C\-\_\-\-Disable@{A\-D\-C\-\_\-\-Disable}}
+\index{A\-D\-C\-\_\-\-Disable@{A\-D\-C\-\_\-\-Disable}!adc_driver.h@{adc\-\_\-driver.\-h}}
+\subsubsection[{A\-D\-C\-\_\-\-Disable}]{\setlength{\rightskip}{0pt plus 5cm}\#define A\-D\-C\-\_\-\-Disable(
+\begin{DoxyParamCaption}
+\item[{}]{\-\_\-adc}
+\end{DoxyParamCaption}
+)~((\-\_\-adc)-\/$>$C\-T\-R\-L\-A = (\-\_\-adc)-\/$>$C\-T\-R\-L\-A \& ($\sim$A\-D\-C\-\_\-\-E\-N\-A\-B\-L\-E\-\_\-bm))}}\label{adc__driver_8h_a85035b72e0f119dd5f464aadb10609e1}
+
+
+This macro disables the selected adc. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em \-\_\-adc} & Pointer to A\-D\-C module register section \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 89 of file adc\-\_\-driver.\-h.
+
+\hypertarget{adc__driver_8h_ac5cb1f11ca1ba3e59740d459800af830}{\index{adc\-\_\-driver.\-h@{adc\-\_\-driver.\-h}!A\-D\-C\-\_\-\-D\-R\-I\-V\-E\-R\-\_\-\-C\-H\-\_\-\-G\-A\-I\-N\-\_\-\-N\-O\-N\-E@{A\-D\-C\-\_\-\-D\-R\-I\-V\-E\-R\-\_\-\-C\-H\-\_\-\-G\-A\-I\-N\-\_\-\-N\-O\-N\-E}}
+\index{A\-D\-C\-\_\-\-D\-R\-I\-V\-E\-R\-\_\-\-C\-H\-\_\-\-G\-A\-I\-N\-\_\-\-N\-O\-N\-E@{A\-D\-C\-\_\-\-D\-R\-I\-V\-E\-R\-\_\-\-C\-H\-\_\-\-G\-A\-I\-N\-\_\-\-N\-O\-N\-E}!adc_driver.h@{adc\-\_\-driver.\-h}}
+\subsubsection[{A\-D\-C\-\_\-\-D\-R\-I\-V\-E\-R\-\_\-\-C\-H\-\_\-\-G\-A\-I\-N\-\_\-\-N\-O\-N\-E}]{\setlength{\rightskip}{0pt plus 5cm}\#define A\-D\-C\-\_\-\-D\-R\-I\-V\-E\-R\-\_\-\-C\-H\-\_\-\-G\-A\-I\-N\-\_\-\-N\-O\-N\-E~A\-D\-C\-\_\-\-C\-H\-\_\-\-G\-A\-I\-N\-\_\-1\-X\-\_\-gc}}\label{adc__driver_8h_ac5cb1f11ca1ba3e59740d459800af830}
+
+
+Helper macro for increased readability with A\-D\-C\-\_\-\-Ch\-\_\-\-Input\-Mode\-\_\-and\-\_\-\-Gain\-\_\-\-Config. 
+
+\begin{DoxySeeAlso}{See Also}
+\hyperlink{adc__driver_8h_acf3a61e2d01adf012853a78e80e1bafb}{A\-D\-C\-\_\-\-Ch\-\_\-\-Input\-Mode\-\_\-and\-\_\-\-Gain\-\_\-\-Config} 
+\end{DoxySeeAlso}
+
+
+Definition at line 220 of file adc\-\_\-driver.\-h.
+
+\hypertarget{adc__driver_8h_a42a1ce395d3fc496b8a8c4915459ddea}{\index{adc\-\_\-driver.\-h@{adc\-\_\-driver.\-h}!A\-D\-C\-\_\-\-Enable@{A\-D\-C\-\_\-\-Enable}}
+\index{A\-D\-C\-\_\-\-Enable@{A\-D\-C\-\_\-\-Enable}!adc_driver.h@{adc\-\_\-driver.\-h}}
+\subsubsection[{A\-D\-C\-\_\-\-Enable}]{\setlength{\rightskip}{0pt plus 5cm}\#define A\-D\-C\-\_\-\-Enable(
+\begin{DoxyParamCaption}
+\item[{}]{\-\_\-adc}
+\end{DoxyParamCaption}
+)~((\-\_\-adc)-\/$>$C\-T\-R\-L\-A $|$= A\-D\-C\-\_\-\-E\-N\-A\-B\-L\-E\-\_\-bm)}}\label{adc__driver_8h_a42a1ce395d3fc496b8a8c4915459ddea}
+
+
+This macro enables the selected adc. 
+
+Before the A\-D\-C is enabled the first time the function A\-D\-C\-\_\-\-Calibration\-Values\-\_\-\-Set should be used to reduce the gain error in the A\-D\-C.
+
+\begin{DoxyNote}{Note}
+After the A\-D\-C is enabled the commen mode voltage in the A\-D\-C is ready after 12 A\-D\-C clock cycels. Do one dummy conversion or wait the required number of clock cycles to reasure correct conversion.
+\end{DoxyNote}
+
+\begin{DoxyParams}{Parameters}
+{\em \-\_\-adc} & Pointer to A\-D\-C module register section. \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 83 of file adc\-\_\-driver.\-h.
+
+\hypertarget{adc__driver_8h_a8b5aedd3cf6e2ba59a90df082ef9e1b6}{\index{adc\-\_\-driver.\-h@{adc\-\_\-driver.\-h}!A\-D\-C\-\_\-\-Events\-\_\-\-Config@{A\-D\-C\-\_\-\-Events\-\_\-\-Config}}
+\index{A\-D\-C\-\_\-\-Events\-\_\-\-Config@{A\-D\-C\-\_\-\-Events\-\_\-\-Config}!adc_driver.h@{adc\-\_\-driver.\-h}}
+\subsubsection[{A\-D\-C\-\_\-\-Events\-\_\-\-Config}]{\setlength{\rightskip}{0pt plus 5cm}\#define A\-D\-C\-\_\-\-Events\-\_\-\-Config(
+\begin{DoxyParamCaption}
+\item[{}]{\-\_\-adc, }
+\item[{}]{\-\_\-event\-Channels, }
+\item[{}]{\-\_\-event\-Mode}
+\end{DoxyParamCaption}
+)}}\label{adc__driver_8h_a8b5aedd3cf6e2ba59a90df082ef9e1b6}
+{\bfseries Value\-:}
+\begin{DoxyCode}
+\(\backslash\)                                                                           \(\backslash\)
+        (\_adc)->EVCTRL = ((\_adc)->EVCTRL & (~(ADC\_EVSEL\_gm | ADC\_EVACT\_gm))) | 
+      \(\backslash\)
+                         ((uint8\_t) \_eventChannels | \_eventMode)
+\end{DoxyCode}
+
+
+This macro configures the event channels used and the event mode. 
+
+This macro configures the way events are used to trigger conversions for the virtual channels. Use the event\-Channels parameter to select which event channel to associate with virtual channel 0 or to trigger a conversion sweep, depending on the selected event\-Mode parameter.
+
+
+\begin{DoxyParams}{Parameters}
+{\em \-\_\-adc} & Pointer to A\-D\-C module register section. \\
+\hline
+{\em \-\_\-event\-Channels} & The first event channel to be used for triggering. Use A\-D\-C\-\_\-\-E\-V\-S\-E\-L\-\_\-t type. \\
+\hline
+{\em \-\_\-event\-Mode} & Select event trigger mode. Use A\-D\-C\-\_\-\-E\-V\-A\-C\-T\-\_\-t type. \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 176 of file adc\-\_\-driver.\-h.
+
+\hypertarget{adc__driver_8h_a7b5cd6118f7965589aee07760bb25c69}{\index{adc\-\_\-driver.\-h@{adc\-\_\-driver.\-h}!A\-D\-C\-\_\-\-Free\-Running\-\_\-\-Disable@{A\-D\-C\-\_\-\-Free\-Running\-\_\-\-Disable}}
+\index{A\-D\-C\-\_\-\-Free\-Running\-\_\-\-Disable@{A\-D\-C\-\_\-\-Free\-Running\-\_\-\-Disable}!adc_driver.h@{adc\-\_\-driver.\-h}}
+\subsubsection[{A\-D\-C\-\_\-\-Free\-Running\-\_\-\-Disable}]{\setlength{\rightskip}{0pt plus 5cm}\#define A\-D\-C\-\_\-\-Free\-Running\-\_\-\-Disable(
+\begin{DoxyParamCaption}
+\item[{}]{\-\_\-adc}
+\end{DoxyParamCaption}
+)~((\-\_\-adc)-\/$>$C\-T\-R\-L\-B = (\-\_\-adc)-\/$>$C\-T\-R\-L\-B \& ($\sim$A\-D\-C\-\_\-\-F\-R\-E\-E\-R\-U\-N\-\_\-bm))}}\label{adc__driver_8h_a7b5cd6118f7965589aee07760bb25c69}
+
+
+This macro disables the Free Running mode in the selected adc. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em \-\_\-adc} & Pointer to A\-D\-C module register section. \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 274 of file adc\-\_\-driver.\-h.
+
+\hypertarget{adc__driver_8h_afefc986fb2e6baf59713025ebe11fabe}{\index{adc\-\_\-driver.\-h@{adc\-\_\-driver.\-h}!A\-D\-C\-\_\-\-Free\-Running\-\_\-\-Enable@{A\-D\-C\-\_\-\-Free\-Running\-\_\-\-Enable}}
+\index{A\-D\-C\-\_\-\-Free\-Running\-\_\-\-Enable@{A\-D\-C\-\_\-\-Free\-Running\-\_\-\-Enable}!adc_driver.h@{adc\-\_\-driver.\-h}}
+\subsubsection[{A\-D\-C\-\_\-\-Free\-Running\-\_\-\-Enable}]{\setlength{\rightskip}{0pt plus 5cm}\#define A\-D\-C\-\_\-\-Free\-Running\-\_\-\-Enable(
+\begin{DoxyParamCaption}
+\item[{}]{\-\_\-adc}
+\end{DoxyParamCaption}
+)~((\-\_\-adc)-\/$>$C\-T\-R\-L\-B $|$= A\-D\-C\-\_\-\-F\-R\-E\-E\-R\-U\-N\-\_\-bm)}}\label{adc__driver_8h_afefc986fb2e6baf59713025ebe11fabe}
+
+
+This macro enables the Free Running mode in the selected adc. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em \-\_\-adc} & Pointer to A\-D\-C module register section. \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 267 of file adc\-\_\-driver.\-h.
+
+\hypertarget{adc__driver_8h_ae5b856df5f07551b4346e41f9d727ff9}{\index{adc\-\_\-driver.\-h@{adc\-\_\-driver.\-h}!A\-D\-C\-\_\-\-Pipeline\-\_\-\-Flush@{A\-D\-C\-\_\-\-Pipeline\-\_\-\-Flush}}
+\index{A\-D\-C\-\_\-\-Pipeline\-\_\-\-Flush@{A\-D\-C\-\_\-\-Pipeline\-\_\-\-Flush}!adc_driver.h@{adc\-\_\-driver.\-h}}
+\subsubsection[{A\-D\-C\-\_\-\-Pipeline\-\_\-\-Flush}]{\setlength{\rightskip}{0pt plus 5cm}\#define A\-D\-C\-\_\-\-Pipeline\-\_\-\-Flush(
+\begin{DoxyParamCaption}
+\item[{}]{\-\_\-adc}
+\end{DoxyParamCaption}
+)~((\-\_\-adc)-\/$>$C\-T\-R\-L\-A $|$= A\-D\-C\-\_\-\-F\-L\-U\-S\-H\-\_\-bm)}}\label{adc__driver_8h_ae5b856df5f07551b4346e41f9d727ff9}
+
+
+This macro flushes the pipline in the selected adc. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em \-\_\-adc} & Pointer to A\-D\-C module register section \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 95 of file adc\-\_\-driver.\-h.
+
+\hypertarget{adc__driver_8h_a65c7ceae3eb03618477310f32705437a}{\index{adc\-\_\-driver.\-h@{adc\-\_\-driver.\-h}!A\-D\-C\-\_\-\-Prescaler\-\_\-\-Config@{A\-D\-C\-\_\-\-Prescaler\-\_\-\-Config}}
+\index{A\-D\-C\-\_\-\-Prescaler\-\_\-\-Config@{A\-D\-C\-\_\-\-Prescaler\-\_\-\-Config}!adc_driver.h@{adc\-\_\-driver.\-h}}
+\subsubsection[{A\-D\-C\-\_\-\-Prescaler\-\_\-\-Config}]{\setlength{\rightskip}{0pt plus 5cm}\#define A\-D\-C\-\_\-\-Prescaler\-\_\-\-Config(
+\begin{DoxyParamCaption}
+\item[{}]{\-\_\-adc, }
+\item[{}]{\-\_\-div}
+\end{DoxyParamCaption}
+)~((\-\_\-adc)-\/$>$P\-R\-E\-S\-C\-A\-L\-E\-R = ((\-\_\-adc)-\/$>$P\-R\-E\-S\-C\-A\-L\-E\-R \& ($\sim$A\-D\-C\-\_\-\-P\-R\-E\-S\-C\-A\-L\-E\-R\-\_\-gm)) $|$ \-\_\-div)}}\label{adc__driver_8h_a65c7ceae3eb03618477310f32705437a}
+
+
+This macro set the prescaler factor in the selected adc. 
+
+This macro configures the division factor between the X\-M\-E\-G\-A I\-O-\/clock and the A\-D\-C clock. Given a certain I\-O-\/clock, the prescaler must be configured so the the A\-D\-C clock is within recommended limits. A faster I\-O-\/clock required higher division factors.
+
+\begin{DoxyNote}{Note}
+The maximum A\-D\-C sample rate is always one fourth of the I\-O clock.
+\end{DoxyNote}
+
+\begin{DoxyParams}{Parameters}
+{\em \-\_\-adc} & Pointer to A\-D\-C module register section. \\
+\hline
+{\em \-\_\-div} & A\-D\-C prescaler division factor setting. Use A\-D\-C\-\_\-\-P\-R\-E\-S\-C\-A\-L\-E\-R\-\_\-t type \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 140 of file adc\-\_\-driver.\-h.
+
+\hypertarget{adc__driver_8h_ab6602f9facc1b7b26ef6044eac803c28}{\index{adc\-\_\-driver.\-h@{adc\-\_\-driver.\-h}!A\-D\-C\-\_\-\-Reference\-\_\-\-Config@{A\-D\-C\-\_\-\-Reference\-\_\-\-Config}}
+\index{A\-D\-C\-\_\-\-Reference\-\_\-\-Config@{A\-D\-C\-\_\-\-Reference\-\_\-\-Config}!adc_driver.h@{adc\-\_\-driver.\-h}}
+\subsubsection[{A\-D\-C\-\_\-\-Reference\-\_\-\-Config}]{\setlength{\rightskip}{0pt plus 5cm}\#define A\-D\-C\-\_\-\-Reference\-\_\-\-Config(
+\begin{DoxyParamCaption}
+\item[{}]{\-\_\-adc, }
+\item[{}]{\-\_\-conv\-Ref}
+\end{DoxyParamCaption}
+)~((\-\_\-adc)-\/$>$R\-E\-F\-C\-T\-R\-L = ((\-\_\-adc)-\/$>$R\-E\-F\-C\-T\-R\-L \& $\sim$(A\-D\-C\-\_\-\-R\-E\-F\-S\-E\-L\-\_\-gm)) $|$ \-\_\-conv\-Ref)}}\label{adc__driver_8h_ab6602f9facc1b7b26ef6044eac803c28}
+
+
+This macro set the conversion reference in the selected adc. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em \-\_\-adc} & Pointer to A\-D\-C module register section. \\
+\hline
+{\em \-\_\-conv\-Ref} & Selects reference voltage for all conversions. Use A\-D\-C\-\_\-\-R\-E\-F\-S\-E\-L\-\_\-t type. \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 150 of file adc\-\_\-driver.\-h.
+
+\hypertarget{adc__driver_8h_ad869078fe313a086dd790b08effa4d08}{\index{adc\-\_\-driver.\-h@{adc\-\_\-driver.\-h}!A\-D\-C\-\_\-\-Sweep\-Channels\-\_\-\-Config@{A\-D\-C\-\_\-\-Sweep\-Channels\-\_\-\-Config}}
+\index{A\-D\-C\-\_\-\-Sweep\-Channels\-\_\-\-Config@{A\-D\-C\-\_\-\-Sweep\-Channels\-\_\-\-Config}!adc_driver.h@{adc\-\_\-driver.\-h}}
+\subsubsection[{A\-D\-C\-\_\-\-Sweep\-Channels\-\_\-\-Config}]{\setlength{\rightskip}{0pt plus 5cm}\#define A\-D\-C\-\_\-\-Sweep\-Channels\-\_\-\-Config(
+\begin{DoxyParamCaption}
+\item[{}]{\-\_\-adc, }
+\item[{}]{\-\_\-sweep\-Channels}
+\end{DoxyParamCaption}
+)~((\-\_\-adc)-\/$>$E\-V\-C\-T\-R\-L = ((\-\_\-adc)-\/$>$E\-V\-C\-T\-R\-L \& ($\sim$A\-D\-C\-\_\-\-S\-W\-E\-E\-P\-\_\-gm)) $|$ \-\_\-sweep\-Channels)}}\label{adc__driver_8h_ad869078fe313a086dd790b08effa4d08}
+
+
+This macro sets the sweep channel settings. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em \-\_\-adc} & Pointer to A\-D\-C module register section. \\
+\hline
+{\em \-\_\-sweep\-Channels} & Sweep channel selection. Use A\-D\-C\-\_\-\-S\-W\-E\-E\-P\-\_\-t type \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 159 of file adc\-\_\-driver.\-h.
+
+\hypertarget{adc__driver_8h_a039020dc3d254b9852deba9526b2c88b}{\index{adc\-\_\-driver.\-h@{adc\-\_\-driver.\-h}!A\-D\-C\-\_\-\-Temp\-Reference\-\_\-\-Disable@{A\-D\-C\-\_\-\-Temp\-Reference\-\_\-\-Disable}}
+\index{A\-D\-C\-\_\-\-Temp\-Reference\-\_\-\-Disable@{A\-D\-C\-\_\-\-Temp\-Reference\-\_\-\-Disable}!adc_driver.h@{adc\-\_\-driver.\-h}}
+\subsubsection[{A\-D\-C\-\_\-\-Temp\-Reference\-\_\-\-Disable}]{\setlength{\rightskip}{0pt plus 5cm}\#define A\-D\-C\-\_\-\-Temp\-Reference\-\_\-\-Disable(
+\begin{DoxyParamCaption}
+\item[{}]{\-\_\-adc}
+\end{DoxyParamCaption}
+)~((\-\_\-adc)-\/$>$R\-E\-F\-C\-T\-R\-L = (\-\_\-adc)-\/$>$R\-E\-F\-C\-T\-R\-L \& ($\sim$A\-D\-C\-\_\-\-T\-E\-M\-P\-R\-E\-F\-\_\-bm))}}\label{adc__driver_8h_a039020dc3d254b9852deba9526b2c88b}
+
+
+This macro disables the temperature reference. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em \-\_\-adc} & Pointer to A\-D\-C module register section. \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 344 of file adc\-\_\-driver.\-h.
+
+\hypertarget{adc__driver_8h_abe2d03bea64b54b89b11f697cdb9b219}{\index{adc\-\_\-driver.\-h@{adc\-\_\-driver.\-h}!A\-D\-C\-\_\-\-Temp\-Reference\-\_\-\-Enable@{A\-D\-C\-\_\-\-Temp\-Reference\-\_\-\-Enable}}
+\index{A\-D\-C\-\_\-\-Temp\-Reference\-\_\-\-Enable@{A\-D\-C\-\_\-\-Temp\-Reference\-\_\-\-Enable}!adc_driver.h@{adc\-\_\-driver.\-h}}
+\subsubsection[{A\-D\-C\-\_\-\-Temp\-Reference\-\_\-\-Enable}]{\setlength{\rightskip}{0pt plus 5cm}\#define A\-D\-C\-\_\-\-Temp\-Reference\-\_\-\-Enable(
+\begin{DoxyParamCaption}
+\item[{}]{\-\_\-adc}
+\end{DoxyParamCaption}
+)~((\-\_\-adc)-\/$>$R\-E\-F\-C\-T\-R\-L $|$= A\-D\-C\-\_\-\-T\-E\-M\-P\-R\-E\-F\-\_\-bm)}}\label{adc__driver_8h_abe2d03bea64b54b89b11f697cdb9b219}
+
+
+This macro makes sure that the temperature reference circuitry is enabled. 
+
+\begin{DoxyNote}{Note}
+Enabling the temperature reference automatically enables the bandgap reference.
+\end{DoxyNote}
+
+\begin{DoxyParams}{Parameters}
+{\em \-\_\-adc} & Pointer to A\-D\-C module register section. \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 337 of file adc\-\_\-driver.\-h.
+
+
+
+\subsection{Function Documentation}
+\hypertarget{adc__driver_8h_ad134845335cf8c298859372e2c75f03c}{\index{adc\-\_\-driver.\-h@{adc\-\_\-driver.\-h}!A\-D\-C\-\_\-\-Calibration\-Values\-\_\-\-Load@{A\-D\-C\-\_\-\-Calibration\-Values\-\_\-\-Load}}
+\index{A\-D\-C\-\_\-\-Calibration\-Values\-\_\-\-Load@{A\-D\-C\-\_\-\-Calibration\-Values\-\_\-\-Load}!adc_driver.h@{adc\-\_\-driver.\-h}}
+\subsubsection[{A\-D\-C\-\_\-\-Calibration\-Values\-\_\-\-Load}]{\setlength{\rightskip}{0pt plus 5cm}void A\-D\-C\-\_\-\-Calibration\-Values\-\_\-\-Load (
+\begin{DoxyParamCaption}
+\item[{A\-D\-C\-\_\-t $\ast$}]{adc}
+\end{DoxyParamCaption}
+)}}\label{adc__driver_8h_ad134845335cf8c298859372e2c75f03c}
+
+
+This function get the calibration data from the production calibration. 
+
+The calibration data is loaded from flash and stored in the calibration register. The calibration data reduces the non-\/linearity error in the adc.
+
+
+\begin{DoxyParams}{Parameters}
+{\em adc} & Pointer to A\-D\-C module register section. \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 77 of file adc\-\_\-driver.\-c.
+
+\hypertarget{adc__driver_8h_a1142ee4ac991fe4e4a4f2270d8bb5acb}{\index{adc\-\_\-driver.\-h@{adc\-\_\-driver.\-h}!A\-D\-C\-\_\-\-Offset\-\_\-\-Get\-\_\-\-Signed@{A\-D\-C\-\_\-\-Offset\-\_\-\-Get\-\_\-\-Signed}}
+\index{A\-D\-C\-\_\-\-Offset\-\_\-\-Get\-\_\-\-Signed@{A\-D\-C\-\_\-\-Offset\-\_\-\-Get\-\_\-\-Signed}!adc_driver.h@{adc\-\_\-driver.\-h}}
+\subsubsection[{A\-D\-C\-\_\-\-Offset\-\_\-\-Get\-\_\-\-Signed}]{\setlength{\rightskip}{0pt plus 5cm}int16\-\_\-t A\-D\-C\-\_\-\-Offset\-\_\-\-Get\-\_\-\-Signed (
+\begin{DoxyParamCaption}
+\item[{A\-D\-C\-\_\-t $\ast$}]{adc, }
+\item[{A\-D\-C\-\_\-\-C\-H\-\_\-t $\ast$}]{ch, }
+\item[{bool}]{oversampling}
+\end{DoxyParamCaption}
+)}}\label{adc__driver_8h_a1142ee4ac991fe4e4a4f2270d8bb5acb}
+
+
+This function gets the offset of the A\-D\-C when it is configured in signed mode. 
+
+This function does one or several measurements to determine the offset of the A\-D\-C.
+
+\begin{DoxyNote}{Note}
+The A\-D\-C must be configured and enabled before this function is run.
+
+This function only return the low byte of the 12-\/bit convertion, because the offset should never be more than +-\/8 L\-S\-B off.
+\end{DoxyNote}
+
+\begin{DoxyParams}{Parameters}
+{\em adc} & Pointer to the A\-D\-C to calculate offset from. \\
+\hline
+{\em ch} & Pointer to the A\-D\-C channel to measure on. \\
+\hline
+{\em oversampling} & false for one measurement. true for averaging several measurements.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Offset on the selected A\-D\-C 
+\end{DoxyReturn}
+
+
+Definition at line 320 of file adc\-\_\-driver.\-c.
+
+\hypertarget{adc__driver_8h_a19fa19c87f634a69d0739525f30558bb}{\index{adc\-\_\-driver.\-h@{adc\-\_\-driver.\-h}!A\-D\-C\-\_\-\-Offset\-\_\-\-Get\-\_\-\-Unsigned@{A\-D\-C\-\_\-\-Offset\-\_\-\-Get\-\_\-\-Unsigned}}
+\index{A\-D\-C\-\_\-\-Offset\-\_\-\-Get\-\_\-\-Unsigned@{A\-D\-C\-\_\-\-Offset\-\_\-\-Get\-\_\-\-Unsigned}!adc_driver.h@{adc\-\_\-driver.\-h}}
+\subsubsection[{A\-D\-C\-\_\-\-Offset\-\_\-\-Get\-\_\-\-Unsigned}]{\setlength{\rightskip}{0pt plus 5cm}uint16\-\_\-t A\-D\-C\-\_\-\-Offset\-\_\-\-Get\-\_\-\-Unsigned (
+\begin{DoxyParamCaption}
+\item[{A\-D\-C\-\_\-t $\ast$}]{adc, }
+\item[{A\-D\-C\-\_\-\-C\-H\-\_\-t $\ast$}]{ch, }
+\item[{bool}]{oversampling}
+\end{DoxyParamCaption}
+)}}\label{adc__driver_8h_a19fa19c87f634a69d0739525f30558bb}
+
+
+This function gets the offset of the A\-D\-C when it is configured in unsigned mode. 
+
+This function does one or several measurements to determine the offset of the A\-D\-C.
+
+\begin{DoxyNote}{Note}
+The A\-D\-C must be configured and enabled before this function is run.
+
+This function only return the low byte of the 12-\/bit convertion, because the offset should never be more than +-\/8 L\-S\-B off.
+\end{DoxyNote}
+
+\begin{DoxyParams}{Parameters}
+{\em adc} & Pointer to the A\-D\-C to calculate offset from. \\
+\hline
+{\em ch} & Pointer to the A\-D\-C channel to measure on. \\
+\hline
+{\em oversampling} & false for one measurement. true for averaging several measurements.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Offset on the selected A\-D\-C 
+\end{DoxyReturn}
+
+
+Definition at line 273 of file adc\-\_\-driver.\-c.
+
+\hypertarget{adc__driver_8h_a0554ced5fc0eae2df26746dcba581fa4}{\index{adc\-\_\-driver.\-h@{adc\-\_\-driver.\-h}!A\-D\-C\-\_\-\-Result\-Ch\-\_\-\-Get\-High\-Byte@{A\-D\-C\-\_\-\-Result\-Ch\-\_\-\-Get\-High\-Byte}}
+\index{A\-D\-C\-\_\-\-Result\-Ch\-\_\-\-Get\-High\-Byte@{A\-D\-C\-\_\-\-Result\-Ch\-\_\-\-Get\-High\-Byte}!adc_driver.h@{adc\-\_\-driver.\-h}}
+\subsubsection[{A\-D\-C\-\_\-\-Result\-Ch\-\_\-\-Get\-High\-Byte}]{\setlength{\rightskip}{0pt plus 5cm}uint8\-\_\-t A\-D\-C\-\_\-\-Result\-Ch\-\_\-\-Get\-High\-Byte (
+\begin{DoxyParamCaption}
+\item[{A\-D\-C\-\_\-\-C\-H\-\_\-t $\ast$}]{adc\-\_\-ch}
+\end{DoxyParamCaption}
+)}}\label{adc__driver_8h_a0554ced5fc0eae2df26746dcba581fa4}
+
+
+This function clears the interrupt flag and returns the high byte of the coversion result. 
+
+\begin{DoxyVerb} This funtion should be used together with the ADC_ResultCh_ConversionComplete.
+When the conversion result is ready this function reads out the result.
+\end{DoxyVerb}
+
+
+\begin{DoxyNote}{Note}
+If this function is used with 12-\/bit right adjusted results, it returns the 8 L\-S\-B only. Offset is not compensated.
+\end{DoxyNote}
+
+\begin{DoxyParams}{Parameters}
+{\em adc\-\_\-ch} & Pointer to A\-D\-C channel register section.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+High byte of conversion result. 
+\end{DoxyReturn}
+
+
+Definition at line 188 of file adc\-\_\-driver.\-c.
+
+\hypertarget{adc__driver_8h_a8eaa6001575c54c32584064745065b0b}{\index{adc\-\_\-driver.\-h@{adc\-\_\-driver.\-h}!A\-D\-C\-\_\-\-Result\-Ch\-\_\-\-Get\-Low\-Byte@{A\-D\-C\-\_\-\-Result\-Ch\-\_\-\-Get\-Low\-Byte}}
+\index{A\-D\-C\-\_\-\-Result\-Ch\-\_\-\-Get\-Low\-Byte@{A\-D\-C\-\_\-\-Result\-Ch\-\_\-\-Get\-Low\-Byte}!adc_driver.h@{adc\-\_\-driver.\-h}}
+\subsubsection[{A\-D\-C\-\_\-\-Result\-Ch\-\_\-\-Get\-Low\-Byte}]{\setlength{\rightskip}{0pt plus 5cm}uint8\-\_\-t A\-D\-C\-\_\-\-Result\-Ch\-\_\-\-Get\-Low\-Byte (
+\begin{DoxyParamCaption}
+\item[{A\-D\-C\-\_\-\-C\-H\-\_\-t $\ast$}]{adc\-\_\-ch}
+\end{DoxyParamCaption}
+)}}\label{adc__driver_8h_a8eaa6001575c54c32584064745065b0b}
+
+
+This function clears the interrupt flag and returns the low byte of the coversion result. 
+
+\begin{DoxyVerb} This funtion should be used together with the ADC_Ch_Conversion_Complete.
+When the conversion result is ready this funciton reads out the result.
+\end{DoxyVerb}
+
+
+\begin{DoxyNote}{Note}
+If this function is used with 12-\/bit right adjusted results, it returns the 8 L\-S\-B only. Offset is not compensated.
+\end{DoxyNote}
+
+\begin{DoxyParams}{Parameters}
+{\em adc\-\_\-ch} & Pointer to A\-D\-C channel register section.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Low byte of conversion result. 
+\end{DoxyReturn}
+
+
+Definition at line 168 of file adc\-\_\-driver.\-c.
+
+\hypertarget{adc__driver_8h_a197015dac5cb134b45b80f8f64a8f918}{\index{adc\-\_\-driver.\-h@{adc\-\_\-driver.\-h}!A\-D\-C\-\_\-\-Result\-Ch\-\_\-\-Get\-Word@{A\-D\-C\-\_\-\-Result\-Ch\-\_\-\-Get\-Word}}
+\index{A\-D\-C\-\_\-\-Result\-Ch\-\_\-\-Get\-Word@{A\-D\-C\-\_\-\-Result\-Ch\-\_\-\-Get\-Word}!adc_driver.h@{adc\-\_\-driver.\-h}}
+\subsubsection[{A\-D\-C\-\_\-\-Result\-Ch\-\_\-\-Get\-Word}]{\setlength{\rightskip}{0pt plus 5cm}uint16\-\_\-t A\-D\-C\-\_\-\-Result\-Ch\-\_\-\-Get\-Word (
+\begin{DoxyParamCaption}
+\item[{A\-D\-C\-\_\-\-C\-H\-\_\-t $\ast$}]{adc\-\_\-ch}
+\end{DoxyParamCaption}
+)}}\label{adc__driver_8h_a197015dac5cb134b45b80f8f64a8f918}
+
+
+This function clears the interrupt flag and returns the coversion result without compensating for offset. 
+
+\begin{DoxyVerb} This function should be used together with the ADC_Ch_Conversion_Complete.
+When the conversion result is ready this funciton reads out the result.
+\end{DoxyVerb}
+
+
+
+\begin{DoxyParams}{Parameters}
+{\em adc\-\_\-ch} & Pointer to A\-D\-C channel register section. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Signed conversion result. 
+\end{DoxyReturn}
+
+
+Definition at line 146 of file adc\-\_\-driver.\-c.
+
+\hypertarget{adc__driver_8h_a68966505abcd45fe4722338ebdeac98d}{\index{adc\-\_\-driver.\-h@{adc\-\_\-driver.\-h}!A\-D\-C\-\_\-\-Result\-Ch\-\_\-\-Get\-Word\-\_\-\-Signed@{A\-D\-C\-\_\-\-Result\-Ch\-\_\-\-Get\-Word\-\_\-\-Signed}}
+\index{A\-D\-C\-\_\-\-Result\-Ch\-\_\-\-Get\-Word\-\_\-\-Signed@{A\-D\-C\-\_\-\-Result\-Ch\-\_\-\-Get\-Word\-\_\-\-Signed}!adc_driver.h@{adc\-\_\-driver.\-h}}
+\subsubsection[{A\-D\-C\-\_\-\-Result\-Ch\-\_\-\-Get\-Word\-\_\-\-Signed}]{\setlength{\rightskip}{0pt plus 5cm}int16\-\_\-t A\-D\-C\-\_\-\-Result\-Ch\-\_\-\-Get\-Word\-\_\-\-Signed (
+\begin{DoxyParamCaption}
+\item[{A\-D\-C\-\_\-\-C\-H\-\_\-t $\ast$}]{adc\-\_\-ch, }
+\item[{int16\-\_\-t}]{signed\-Offset}
+\end{DoxyParamCaption}
+)}}\label{adc__driver_8h_a68966505abcd45fe4722338ebdeac98d}
+
+
+This function clears the interrupt flag and returns the signed coversion result. 
+
+\begin{DoxyVerb} This function should be used together with the ADC_Ch_Conversion_Complete.
+When the conversion result is ready this funciton reads out the result.
+\end{DoxyVerb}
+
+
+
+\begin{DoxyParams}{Parameters}
+{\em adc\-\_\-ch} & Pointer to A\-D\-C channel register section. \\
+\hline
+{\em signed\-Offset} & Offset value to subtract. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+The signed Conversion result with the offset substracted. 
+\end{DoxyReturn}
+
+
+Definition at line 125 of file adc\-\_\-driver.\-c.
+
+\hypertarget{adc__driver_8h_ab06443677d69d9b8aec1627e2ded342b}{\index{adc\-\_\-driver.\-h@{adc\-\_\-driver.\-h}!A\-D\-C\-\_\-\-Result\-Ch\-\_\-\-Get\-Word\-\_\-\-Unsigned@{A\-D\-C\-\_\-\-Result\-Ch\-\_\-\-Get\-Word\-\_\-\-Unsigned}}
+\index{A\-D\-C\-\_\-\-Result\-Ch\-\_\-\-Get\-Word\-\_\-\-Unsigned@{A\-D\-C\-\_\-\-Result\-Ch\-\_\-\-Get\-Word\-\_\-\-Unsigned}!adc_driver.h@{adc\-\_\-driver.\-h}}
+\subsubsection[{A\-D\-C\-\_\-\-Result\-Ch\-\_\-\-Get\-Word\-\_\-\-Unsigned}]{\setlength{\rightskip}{0pt plus 5cm}uint16\-\_\-t A\-D\-C\-\_\-\-Result\-Ch\-\_\-\-Get\-Word\-\_\-\-Unsigned (
+\begin{DoxyParamCaption}
+\item[{A\-D\-C\-\_\-\-C\-H\-\_\-t $\ast$}]{adc\-\_\-ch, }
+\item[{uint16\-\_\-t}]{offset}
+\end{DoxyParamCaption}
+)}}\label{adc__driver_8h_ab06443677d69d9b8aec1627e2ded342b}
+
+
+This function clears the interrupt flag and returns the unsigned coversion result. 
+
+\begin{DoxyVerb} This function should be used together with the ADC_Ch_Conversion_Complete.
+When the conversion result is ready this funciton reads out the result.
+\end{DoxyVerb}
+
+
+
+\begin{DoxyParams}{Parameters}
+{\em adc\-\_\-ch} & Pointer to A\-D\-C channel register section. \\
+\hline
+{\em offset} & Unsigned offset value to subtract. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+The unsigned Conversion result with the offset substracted. 
+\end{DoxyReturn}
+
+
+Definition at line 102 of file adc\-\_\-driver.\-c.
+
+\hypertarget{adc__driver_8h_a0e13135d7b45df0c9c615ed40765c786}{\index{adc\-\_\-driver.\-h@{adc\-\_\-driver.\-h}!A\-D\-C\-\_\-\-Wait\-\_\-32\-M\-Hz@{A\-D\-C\-\_\-\-Wait\-\_\-32\-M\-Hz}}
+\index{A\-D\-C\-\_\-\-Wait\-\_\-32\-M\-Hz@{A\-D\-C\-\_\-\-Wait\-\_\-32\-M\-Hz}!adc_driver.h@{adc\-\_\-driver.\-h}}
+\subsubsection[{A\-D\-C\-\_\-\-Wait\-\_\-32\-M\-Hz}]{\setlength{\rightskip}{0pt plus 5cm}void A\-D\-C\-\_\-\-Wait\-\_\-32\-M\-Hz (
+\begin{DoxyParamCaption}
+\item[{A\-D\-C\-\_\-t $\ast$}]{adc}
+\end{DoxyParamCaption}
+)}}\label{adc__driver_8h_a0e13135d7b45df0c9c615ed40765c786}
+
+
+This function waits until the adc common mode is settled. 
+
+After the A\-D\-C clock has been turned on, the common mode voltage in the A\-D\-C need some time to settle. The time it takes equals one dummy conversion. Instead of doing a dummy conversion this function waits until the common mode is settled.
+
+\begin{DoxyNote}{Note}
+The function sets the prescaler to the minimum value possible when the clock speed is larger than 8 M\-Hz to minimize the time it takes the common mode to settle.
+
+The A\-D\-C clock is turned off every time the A\-D\-C i disabled or the device goes into sleep (not Idle sleep mode).
+\end{DoxyNote}
+
+\begin{DoxyParams}{Parameters}
+{\em adc} & Pointer to A\-D\-C module register section. \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 242 of file adc\-\_\-driver.\-c.
+
+\hypertarget{adc__driver_8h_a98a478448d5c15720de6d517589e974e}{\index{adc\-\_\-driver.\-h@{adc\-\_\-driver.\-h}!A\-D\-C\-\_\-\-Wait\-\_\-8\-M\-Hz@{A\-D\-C\-\_\-\-Wait\-\_\-8\-M\-Hz}}
+\index{A\-D\-C\-\_\-\-Wait\-\_\-8\-M\-Hz@{A\-D\-C\-\_\-\-Wait\-\_\-8\-M\-Hz}!adc_driver.h@{adc\-\_\-driver.\-h}}
+\subsubsection[{A\-D\-C\-\_\-\-Wait\-\_\-8\-M\-Hz}]{\setlength{\rightskip}{0pt plus 5cm}void A\-D\-C\-\_\-\-Wait\-\_\-8\-M\-Hz (
+\begin{DoxyParamCaption}
+\item[{A\-D\-C\-\_\-t $\ast$}]{adc}
+\end{DoxyParamCaption}
+)}}\label{adc__driver_8h_a98a478448d5c15720de6d517589e974e}
+
+
+This function waits until the adc common mode is settled. 
+
+After the A\-D\-C clock has been turned on, the common mode voltage in the A\-D\-C need some time to settle. The time it takes equals one dummy conversion. Instead of doing a dummy conversion this function waits until the common mode is settled.
+
+\begin{DoxyNote}{Note}
+The function sets the prescaler to the minimum value to minimize the time it takes the common mode to settle. If the clock speed is higher than 8 M\-Hz use the A\-D\-C\-\_\-wait\-\_\-32\-M\-Hz function.
+\end{DoxyNote}
+
+\begin{DoxyParams}{Parameters}
+{\em adc} & Pointer to A\-D\-C module register section. \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 210 of file adc\-\_\-driver.\-c.
+

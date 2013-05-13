@@ -1,0 +1,400 @@
+\hypertarget{adc__driver_8c}{\section{adc\-\_\-driver.\-c File Reference}
+\label{adc__driver_8c}\index{adc\-\_\-driver.\-c@{adc\-\_\-driver.\-c}}
+}
+
+
+X\-M\-E\-G\-A A\-D\-C driver source file.  
+
+
+{\ttfamily \#include \char`\"{}adc\-\_\-driver.\-h\char`\"{}}\\*
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \hyperlink{adc__driver_8c_ad134845335cf8c298859372e2c75f03c}{A\-D\-C\-\_\-\-Calibration\-Values\-\_\-\-Load} (A\-D\-C\-\_\-t $\ast$adc)
+\begin{DoxyCompactList}\small\item\em This function get the calibration data from the production calibration. \end{DoxyCompactList}\item 
+uint16\-\_\-t \hyperlink{adc__driver_8c_ab06443677d69d9b8aec1627e2ded342b}{A\-D\-C\-\_\-\-Result\-Ch\-\_\-\-Get\-Word\-\_\-\-Unsigned} (A\-D\-C\-\_\-\-C\-H\-\_\-t $\ast$adc\-\_\-ch, uint16\-\_\-t offset)
+\begin{DoxyCompactList}\small\item\em This function clears the interrupt flag and returns the unsigned coversion result. \end{DoxyCompactList}\item 
+int16\-\_\-t \hyperlink{adc__driver_8c_ae085742daee16c4fc739165ee4173ccf}{A\-D\-C\-\_\-\-Result\-Ch\-\_\-\-Get\-Word\-\_\-\-Signed} (A\-D\-C\-\_\-\-C\-H\-\_\-t $\ast$adc\-\_\-ch, int16\-\_\-t signed\-Offset)
+\begin{DoxyCompactList}\small\item\em This function clears the interrupt flag and returns the signed coversion result. \end{DoxyCompactList}\item 
+uint16\-\_\-t \hyperlink{adc__driver_8c_a197015dac5cb134b45b80f8f64a8f918}{A\-D\-C\-\_\-\-Result\-Ch\-\_\-\-Get\-Word} (A\-D\-C\-\_\-\-C\-H\-\_\-t $\ast$adc\-\_\-ch)
+\begin{DoxyCompactList}\small\item\em This function clears the interrupt flag and returns the coversion result without compensating for offset. \end{DoxyCompactList}\item 
+uint8\-\_\-t \hyperlink{adc__driver_8c_a8eaa6001575c54c32584064745065b0b}{A\-D\-C\-\_\-\-Result\-Ch\-\_\-\-Get\-Low\-Byte} (A\-D\-C\-\_\-\-C\-H\-\_\-t $\ast$adc\-\_\-ch)
+\begin{DoxyCompactList}\small\item\em This function clears the interrupt flag and returns the low byte of the coversion result. \end{DoxyCompactList}\item 
+uint8\-\_\-t \hyperlink{adc__driver_8c_a0554ced5fc0eae2df26746dcba581fa4}{A\-D\-C\-\_\-\-Result\-Ch\-\_\-\-Get\-High\-Byte} (A\-D\-C\-\_\-\-C\-H\-\_\-t $\ast$adc\-\_\-ch)
+\begin{DoxyCompactList}\small\item\em This function clears the interrupt flag and returns the high byte of the coversion result. \end{DoxyCompactList}\item 
+void \hyperlink{adc__driver_8c_a98a478448d5c15720de6d517589e974e}{A\-D\-C\-\_\-\-Wait\-\_\-8\-M\-Hz} (A\-D\-C\-\_\-t $\ast$adc)
+\begin{DoxyCompactList}\small\item\em This function waits until the adc common mode is settled. \end{DoxyCompactList}\item 
+void \hyperlink{adc__driver_8c_a0e13135d7b45df0c9c615ed40765c786}{A\-D\-C\-\_\-\-Wait\-\_\-32\-M\-Hz} (A\-D\-C\-\_\-t $\ast$adc)
+\begin{DoxyCompactList}\small\item\em This function waits until the adc common mode is settled. \end{DoxyCompactList}\item 
+uint16\-\_\-t \hyperlink{adc__driver_8c_a19fa19c87f634a69d0739525f30558bb}{A\-D\-C\-\_\-\-Offset\-\_\-\-Get\-\_\-\-Unsigned} (A\-D\-C\-\_\-t $\ast$adc, A\-D\-C\-\_\-\-C\-H\-\_\-t $\ast$ch, bool oversampling)
+\begin{DoxyCompactList}\small\item\em This function gets the offset of the A\-D\-C when it is configured in unsigned mode. \end{DoxyCompactList}\item 
+int16\-\_\-t \hyperlink{adc__driver_8c_a1142ee4ac991fe4e4a4f2270d8bb5acb}{A\-D\-C\-\_\-\-Offset\-\_\-\-Get\-\_\-\-Signed} (A\-D\-C\-\_\-t $\ast$adc, A\-D\-C\-\_\-\-C\-H\-\_\-t $\ast$ch, bool oversampling)
+\begin{DoxyCompactList}\small\item\em This function gets the offset of the A\-D\-C when it is configured in signed mode. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+X\-M\-E\-G\-A A\-D\-C driver source file. \begin{DoxyVerb} This file contains the function implementations the XMEGA ADC driver.
+
+ The driver is not intended for size and/or speed critical code, since
+ most functions are just a few lines of code, and the function call
+ overhead would decrease code performance. The driver is intended for
+ rapid prototyping and documentation purposes for getting started with
+ the XMEGA ADC module.
+
+ For size and/or speed critical code, it is recommended to copy the
+ function contents directly into your application instead of making
+ a function call.
+
+ Several functions use the following construct:
+     "some_register = ... | (some_parameter ? SOME_BIT_bm : 0) | ..."
+ Although the use of the ternary operator ( if ? then : else ) is discouraged,
+ in some occasions the operator makes it possible to write pretty clean and
+ neat code. In this driver, the construct is used to set or not set a
+ configuration bit based on a boolean input parameter, such as
+ the "some_parameter" in the example above.
+\end{DoxyVerb}
+
+
+\begin{DoxyParagraph}{Application note\-:}
+A\-V\-R1300\-: Using the X\-M\-E\-G\-A A\-D\-C
+\end{DoxyParagraph}
+\begin{DoxyParagraph}{Documentation}
+For comprehensive code documentation, supported compilers, compiler settings and supported devices see readme.\-html
+\end{DoxyParagraph}
+\begin{DoxyAuthor}{Author}
+Atmel Corporation\-: \href{http://www.atmel.com}{\tt http\-://www.\-atmel.\-com} \par
+ Support email\-: \href{mailto:avr@atmel.com}{\tt avr@atmel.\-com}
+\end{DoxyAuthor}
+\begin{DoxyParagraph}{Revision\-:}
+2793 
+\end{DoxyParagraph}
+\begin{DoxyParagraph}{Date\-:}
+2009-\/09-\/21 11\-:12\-:00 +0200 (ma, 21 sep 2009) 
+\end{DoxyParagraph}
+\par
+
+
+Copyright (c) 2008, Atmel Corporation All rights reserved.
+
+Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met\-:
+
+
+\begin{DoxyEnumerate}
+\item Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+\end{DoxyEnumerate}
+
+
+\begin{DoxyEnumerate}
+\item Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
+\end{DoxyEnumerate}
+
+
+\begin{DoxyEnumerate}
+\item The name of A\-T\-M\-E\-L may not be used to endorse or promote products derived from this software without specific prior written permission.
+\end{DoxyEnumerate}
+
+T\-H\-I\-S S\-O\-F\-T\-W\-A\-R\-E I\-S P\-R\-O\-V\-I\-D\-E\-D B\-Y A\-T\-M\-E\-L \char`\"{}\-A\-S I\-S\char`\"{} A\-N\-D A\-N\-Y E\-X\-P\-R\-E\-S\-S O\-R I\-M\-P\-L\-I\-E\-D W\-A\-R\-R\-A\-N\-T\-I\-E\-S, I\-N\-C\-L\-U\-D\-I\-N\-G, B\-U\-T N\-O\-T L\-I\-M\-I\-T\-E\-D T\-O, T\-H\-E I\-M\-P\-L\-I\-E\-D W\-A\-R\-R\-A\-N\-T\-I\-E\-S O\-F M\-E\-R\-C\-H\-A\-N\-T\-A\-B\-I\-L\-I\-T\-Y A\-N\-D F\-I\-T\-N\-E\-S\-S F\-O\-R A P\-A\-R\-T\-I\-C\-U\-L\-A\-R P\-U\-R\-P\-O\-S\-E A\-R\-E E\-X\-P\-R\-E\-S\-S\-L\-Y A\-N\-D S\-P\-E\-C\-I\-F\-I\-C\-A\-L\-L\-Y D\-I\-S\-C\-L\-A\-I\-M\-E\-D. I\-N N\-O E\-V\-E\-N\-T S\-H\-A\-L\-L A\-T\-M\-E\-L B\-E L\-I\-A\-B\-L\-E F\-O\-R A\-N\-Y D\-I\-R\-E\-C\-T, I\-N\-D\-I\-R\-E\-C\-T, I\-N\-C\-I\-D\-E\-N\-T\-A\-L, S\-P\-E\-C\-I\-A\-L, E\-X\-E\-M\-P\-L\-A\-R\-Y, O\-R C\-O\-N\-S\-E\-Q\-U\-E\-N\-T\-I\-A\-L D\-A\-M\-A\-G\-E\-S (I\-N\-C\-L\-U\-D\-I\-N\-G, B\-U\-T N\-O\-T L\-I\-M\-I\-T\-E\-D T\-O, P\-R\-O\-C\-U\-R\-E\-M\-E\-N\-T O\-F S\-U\-B\-S\-T\-I\-T\-U\-T\-E G\-O\-O\-D\-S O\-R S\-E\-R\-V\-I\-C\-E\-S; L\-O\-S\-S O\-F U\-S\-E, D\-A\-T\-A, O\-R P\-R\-O\-F\-I\-T\-S; O\-R B\-U\-S\-I\-N\-E\-S\-S I\-N\-T\-E\-R\-R\-U\-P\-T\-I\-O\-N) H\-O\-W\-E\-V\-E\-R C\-A\-U\-S\-E\-D A\-N\-D O\-N A\-N\-Y T\-H\-E\-O\-R\-Y O\-F L\-I\-A\-B\-I\-L\-I\-T\-Y, W\-H\-E\-T\-H\-E\-R I\-N C\-O\-N\-T\-R\-A\-C\-T, S\-T\-R\-I\-C\-T L\-I\-A\-B\-I\-L\-I\-T\-Y, O\-R T\-O\-R\-T (I\-N\-C\-L\-U\-D\-I\-N\-G N\-E\-G\-L\-I\-G\-E\-N\-C\-E O\-R O\-T\-H\-E\-R\-W\-I\-S\-E) A\-R\-I\-S\-I\-N\-G I\-N A\-N\-Y W\-A\-Y O\-U\-T O\-F T\-H\-E U\-S\-E O\-F T\-H\-I\-S S\-O\-F\-T\-W\-A\-R\-E, E\-V\-E\-N I\-F A\-D\-V\-I\-S\-E\-D O\-F T\-H\-E P\-O\-S\-S\-I\-B\-I\-L\-I\-T\-Y O\-F S\-U\-C\-H D\-A\-M\-A\-G\-E. 
+
+Definition in file \hyperlink{adc__driver_8c_source}{adc\-\_\-driver.\-c}.
+
+
+
+\subsection{Function Documentation}
+\hypertarget{adc__driver_8c_ad134845335cf8c298859372e2c75f03c}{\index{adc\-\_\-driver.\-c@{adc\-\_\-driver.\-c}!A\-D\-C\-\_\-\-Calibration\-Values\-\_\-\-Load@{A\-D\-C\-\_\-\-Calibration\-Values\-\_\-\-Load}}
+\index{A\-D\-C\-\_\-\-Calibration\-Values\-\_\-\-Load@{A\-D\-C\-\_\-\-Calibration\-Values\-\_\-\-Load}!adc_driver.c@{adc\-\_\-driver.\-c}}
+\subsubsection[{A\-D\-C\-\_\-\-Calibration\-Values\-\_\-\-Load}]{\setlength{\rightskip}{0pt plus 5cm}void A\-D\-C\-\_\-\-Calibration\-Values\-\_\-\-Load (
+\begin{DoxyParamCaption}
+\item[{A\-D\-C\-\_\-t $\ast$}]{adc}
+\end{DoxyParamCaption}
+)}}\label{adc__driver_8c_ad134845335cf8c298859372e2c75f03c}
+
+
+This function get the calibration data from the production calibration. 
+
+The calibration data is loaded from flash and stored in the calibration register. The calibration data reduces the non-\/linearity error in the adc.
+
+
+\begin{DoxyParams}{Parameters}
+{\em adc} & Pointer to A\-D\-C module register section. \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 77 of file adc\-\_\-driver.\-c.
+
+\hypertarget{adc__driver_8c_a1142ee4ac991fe4e4a4f2270d8bb5acb}{\index{adc\-\_\-driver.\-c@{adc\-\_\-driver.\-c}!A\-D\-C\-\_\-\-Offset\-\_\-\-Get\-\_\-\-Signed@{A\-D\-C\-\_\-\-Offset\-\_\-\-Get\-\_\-\-Signed}}
+\index{A\-D\-C\-\_\-\-Offset\-\_\-\-Get\-\_\-\-Signed@{A\-D\-C\-\_\-\-Offset\-\_\-\-Get\-\_\-\-Signed}!adc_driver.c@{adc\-\_\-driver.\-c}}
+\subsubsection[{A\-D\-C\-\_\-\-Offset\-\_\-\-Get\-\_\-\-Signed}]{\setlength{\rightskip}{0pt plus 5cm}int16\-\_\-t A\-D\-C\-\_\-\-Offset\-\_\-\-Get\-\_\-\-Signed (
+\begin{DoxyParamCaption}
+\item[{A\-D\-C\-\_\-t $\ast$}]{adc, }
+\item[{A\-D\-C\-\_\-\-C\-H\-\_\-t $\ast$}]{ch, }
+\item[{bool}]{oversampling}
+\end{DoxyParamCaption}
+)}}\label{adc__driver_8c_a1142ee4ac991fe4e4a4f2270d8bb5acb}
+
+
+This function gets the offset of the A\-D\-C when it is configured in signed mode. 
+
+This function does one or several measurements to determine the offset of the A\-D\-C.
+
+\begin{DoxyNote}{Note}
+The A\-D\-C must be configured and enabled before this function is run.
+
+This function only return the low byte of the 12-\/bit convertion, because the offset should never be more than +-\/8 L\-S\-B off.
+\end{DoxyNote}
+
+\begin{DoxyParams}{Parameters}
+{\em adc} & Pointer to the A\-D\-C to calculate offset from. \\
+\hline
+{\em ch} & Pointer to the A\-D\-C channel to measure on. \\
+\hline
+{\em oversampling} & false for one measurement. true for averaging several measurements.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Offset on the selected A\-D\-C 
+\end{DoxyReturn}
+
+
+Definition at line 320 of file adc\-\_\-driver.\-c.
+
+\hypertarget{adc__driver_8c_a19fa19c87f634a69d0739525f30558bb}{\index{adc\-\_\-driver.\-c@{adc\-\_\-driver.\-c}!A\-D\-C\-\_\-\-Offset\-\_\-\-Get\-\_\-\-Unsigned@{A\-D\-C\-\_\-\-Offset\-\_\-\-Get\-\_\-\-Unsigned}}
+\index{A\-D\-C\-\_\-\-Offset\-\_\-\-Get\-\_\-\-Unsigned@{A\-D\-C\-\_\-\-Offset\-\_\-\-Get\-\_\-\-Unsigned}!adc_driver.c@{adc\-\_\-driver.\-c}}
+\subsubsection[{A\-D\-C\-\_\-\-Offset\-\_\-\-Get\-\_\-\-Unsigned}]{\setlength{\rightskip}{0pt plus 5cm}uint16\-\_\-t A\-D\-C\-\_\-\-Offset\-\_\-\-Get\-\_\-\-Unsigned (
+\begin{DoxyParamCaption}
+\item[{A\-D\-C\-\_\-t $\ast$}]{adc, }
+\item[{A\-D\-C\-\_\-\-C\-H\-\_\-t $\ast$}]{ch, }
+\item[{bool}]{oversampling}
+\end{DoxyParamCaption}
+)}}\label{adc__driver_8c_a19fa19c87f634a69d0739525f30558bb}
+
+
+This function gets the offset of the A\-D\-C when it is configured in unsigned mode. 
+
+This function does one or several measurements to determine the offset of the A\-D\-C.
+
+\begin{DoxyNote}{Note}
+The A\-D\-C must be configured and enabled before this function is run.
+
+This function only return the low byte of the 12-\/bit convertion, because the offset should never be more than +-\/8 L\-S\-B off.
+\end{DoxyNote}
+
+\begin{DoxyParams}{Parameters}
+{\em adc} & Pointer to the A\-D\-C to calculate offset from. \\
+\hline
+{\em ch} & Pointer to the A\-D\-C channel to measure on. \\
+\hline
+{\em oversampling} & false for one measurement. true for averaging several measurements.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Offset on the selected A\-D\-C 
+\end{DoxyReturn}
+
+
+Definition at line 273 of file adc\-\_\-driver.\-c.
+
+\hypertarget{adc__driver_8c_a0554ced5fc0eae2df26746dcba581fa4}{\index{adc\-\_\-driver.\-c@{adc\-\_\-driver.\-c}!A\-D\-C\-\_\-\-Result\-Ch\-\_\-\-Get\-High\-Byte@{A\-D\-C\-\_\-\-Result\-Ch\-\_\-\-Get\-High\-Byte}}
+\index{A\-D\-C\-\_\-\-Result\-Ch\-\_\-\-Get\-High\-Byte@{A\-D\-C\-\_\-\-Result\-Ch\-\_\-\-Get\-High\-Byte}!adc_driver.c@{adc\-\_\-driver.\-c}}
+\subsubsection[{A\-D\-C\-\_\-\-Result\-Ch\-\_\-\-Get\-High\-Byte}]{\setlength{\rightskip}{0pt plus 5cm}uint8\-\_\-t A\-D\-C\-\_\-\-Result\-Ch\-\_\-\-Get\-High\-Byte (
+\begin{DoxyParamCaption}
+\item[{A\-D\-C\-\_\-\-C\-H\-\_\-t $\ast$}]{adc\-\_\-ch}
+\end{DoxyParamCaption}
+)}}\label{adc__driver_8c_a0554ced5fc0eae2df26746dcba581fa4}
+
+
+This function clears the interrupt flag and returns the high byte of the coversion result. 
+
+\begin{DoxyVerb} This funtion should be used together with the ADC_ResultCh_ConversionComplete.
+When the conversion result is ready this function reads out the result.
+\end{DoxyVerb}
+
+
+\begin{DoxyNote}{Note}
+If this function is used with 12-\/bit right adjusted results, it returns the 8 L\-S\-B only. Offset is not compensated.
+\end{DoxyNote}
+
+\begin{DoxyParams}{Parameters}
+{\em adc\-\_\-ch} & Pointer to A\-D\-C channel register section.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+High byte of conversion result. 
+\end{DoxyReturn}
+
+
+Definition at line 188 of file adc\-\_\-driver.\-c.
+
+\hypertarget{adc__driver_8c_a8eaa6001575c54c32584064745065b0b}{\index{adc\-\_\-driver.\-c@{adc\-\_\-driver.\-c}!A\-D\-C\-\_\-\-Result\-Ch\-\_\-\-Get\-Low\-Byte@{A\-D\-C\-\_\-\-Result\-Ch\-\_\-\-Get\-Low\-Byte}}
+\index{A\-D\-C\-\_\-\-Result\-Ch\-\_\-\-Get\-Low\-Byte@{A\-D\-C\-\_\-\-Result\-Ch\-\_\-\-Get\-Low\-Byte}!adc_driver.c@{adc\-\_\-driver.\-c}}
+\subsubsection[{A\-D\-C\-\_\-\-Result\-Ch\-\_\-\-Get\-Low\-Byte}]{\setlength{\rightskip}{0pt plus 5cm}uint8\-\_\-t A\-D\-C\-\_\-\-Result\-Ch\-\_\-\-Get\-Low\-Byte (
+\begin{DoxyParamCaption}
+\item[{A\-D\-C\-\_\-\-C\-H\-\_\-t $\ast$}]{adc\-\_\-ch}
+\end{DoxyParamCaption}
+)}}\label{adc__driver_8c_a8eaa6001575c54c32584064745065b0b}
+
+
+This function clears the interrupt flag and returns the low byte of the coversion result. 
+
+\begin{DoxyVerb} This funtion should be used together with the ADC_Ch_Conversion_Complete.
+When the conversion result is ready this funciton reads out the result.
+\end{DoxyVerb}
+
+
+\begin{DoxyNote}{Note}
+If this function is used with 12-\/bit right adjusted results, it returns the 8 L\-S\-B only. Offset is not compensated.
+\end{DoxyNote}
+
+\begin{DoxyParams}{Parameters}
+{\em adc\-\_\-ch} & Pointer to A\-D\-C channel register section.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Low byte of conversion result. 
+\end{DoxyReturn}
+
+
+Definition at line 168 of file adc\-\_\-driver.\-c.
+
+\hypertarget{adc__driver_8c_a197015dac5cb134b45b80f8f64a8f918}{\index{adc\-\_\-driver.\-c@{adc\-\_\-driver.\-c}!A\-D\-C\-\_\-\-Result\-Ch\-\_\-\-Get\-Word@{A\-D\-C\-\_\-\-Result\-Ch\-\_\-\-Get\-Word}}
+\index{A\-D\-C\-\_\-\-Result\-Ch\-\_\-\-Get\-Word@{A\-D\-C\-\_\-\-Result\-Ch\-\_\-\-Get\-Word}!adc_driver.c@{adc\-\_\-driver.\-c}}
+\subsubsection[{A\-D\-C\-\_\-\-Result\-Ch\-\_\-\-Get\-Word}]{\setlength{\rightskip}{0pt plus 5cm}uint16\-\_\-t A\-D\-C\-\_\-\-Result\-Ch\-\_\-\-Get\-Word (
+\begin{DoxyParamCaption}
+\item[{A\-D\-C\-\_\-\-C\-H\-\_\-t $\ast$}]{adc\-\_\-ch}
+\end{DoxyParamCaption}
+)}}\label{adc__driver_8c_a197015dac5cb134b45b80f8f64a8f918}
+
+
+This function clears the interrupt flag and returns the coversion result without compensating for offset. 
+
+\begin{DoxyVerb} This function should be used together with the ADC_Ch_Conversion_Complete.
+When the conversion result is ready this funciton reads out the result.
+\end{DoxyVerb}
+
+
+
+\begin{DoxyParams}{Parameters}
+{\em adc\-\_\-ch} & Pointer to A\-D\-C channel register section. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Signed conversion result. 
+\end{DoxyReturn}
+
+
+Definition at line 146 of file adc\-\_\-driver.\-c.
+
+\hypertarget{adc__driver_8c_ae085742daee16c4fc739165ee4173ccf}{\index{adc\-\_\-driver.\-c@{adc\-\_\-driver.\-c}!A\-D\-C\-\_\-\-Result\-Ch\-\_\-\-Get\-Word\-\_\-\-Signed@{A\-D\-C\-\_\-\-Result\-Ch\-\_\-\-Get\-Word\-\_\-\-Signed}}
+\index{A\-D\-C\-\_\-\-Result\-Ch\-\_\-\-Get\-Word\-\_\-\-Signed@{A\-D\-C\-\_\-\-Result\-Ch\-\_\-\-Get\-Word\-\_\-\-Signed}!adc_driver.c@{adc\-\_\-driver.\-c}}
+\subsubsection[{A\-D\-C\-\_\-\-Result\-Ch\-\_\-\-Get\-Word\-\_\-\-Signed}]{\setlength{\rightskip}{0pt plus 5cm}int16\-\_\-t A\-D\-C\-\_\-\-Result\-Ch\-\_\-\-Get\-Word\-\_\-\-Signed (
+\begin{DoxyParamCaption}
+\item[{A\-D\-C\-\_\-\-C\-H\-\_\-t $\ast$}]{adc\-\_\-ch, }
+\item[{int16\-\_\-t}]{signed\-Offset}
+\end{DoxyParamCaption}
+)}}\label{adc__driver_8c_ae085742daee16c4fc739165ee4173ccf}
+
+
+This function clears the interrupt flag and returns the signed coversion result. 
+
+\begin{DoxyVerb} This function should be used together with the ADC_Ch_Conversion_Complete.
+When the conversion result is ready this funciton reads out the result.
+\end{DoxyVerb}
+
+
+
+\begin{DoxyParams}{Parameters}
+{\em adc\-\_\-ch} & Pointer to A\-D\-C channel register section. \\
+\hline
+{\em signed\-Offset} & Offset value to subtract. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+The signed Conversion result with the offset substracted. 
+\end{DoxyReturn}
+
+
+Definition at line 125 of file adc\-\_\-driver.\-c.
+
+\hypertarget{adc__driver_8c_ab06443677d69d9b8aec1627e2ded342b}{\index{adc\-\_\-driver.\-c@{adc\-\_\-driver.\-c}!A\-D\-C\-\_\-\-Result\-Ch\-\_\-\-Get\-Word\-\_\-\-Unsigned@{A\-D\-C\-\_\-\-Result\-Ch\-\_\-\-Get\-Word\-\_\-\-Unsigned}}
+\index{A\-D\-C\-\_\-\-Result\-Ch\-\_\-\-Get\-Word\-\_\-\-Unsigned@{A\-D\-C\-\_\-\-Result\-Ch\-\_\-\-Get\-Word\-\_\-\-Unsigned}!adc_driver.c@{adc\-\_\-driver.\-c}}
+\subsubsection[{A\-D\-C\-\_\-\-Result\-Ch\-\_\-\-Get\-Word\-\_\-\-Unsigned}]{\setlength{\rightskip}{0pt plus 5cm}uint16\-\_\-t A\-D\-C\-\_\-\-Result\-Ch\-\_\-\-Get\-Word\-\_\-\-Unsigned (
+\begin{DoxyParamCaption}
+\item[{A\-D\-C\-\_\-\-C\-H\-\_\-t $\ast$}]{adc\-\_\-ch, }
+\item[{uint16\-\_\-t}]{offset}
+\end{DoxyParamCaption}
+)}}\label{adc__driver_8c_ab06443677d69d9b8aec1627e2ded342b}
+
+
+This function clears the interrupt flag and returns the unsigned coversion result. 
+
+\begin{DoxyVerb} This function should be used together with the ADC_Ch_Conversion_Complete.
+When the conversion result is ready this funciton reads out the result.
+\end{DoxyVerb}
+
+
+
+\begin{DoxyParams}{Parameters}
+{\em adc\-\_\-ch} & Pointer to A\-D\-C channel register section. \\
+\hline
+{\em offset} & Unsigned offset value to subtract. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+The unsigned Conversion result with the offset substracted. 
+\end{DoxyReturn}
+
+
+Definition at line 102 of file adc\-\_\-driver.\-c.
+
+\hypertarget{adc__driver_8c_a0e13135d7b45df0c9c615ed40765c786}{\index{adc\-\_\-driver.\-c@{adc\-\_\-driver.\-c}!A\-D\-C\-\_\-\-Wait\-\_\-32\-M\-Hz@{A\-D\-C\-\_\-\-Wait\-\_\-32\-M\-Hz}}
+\index{A\-D\-C\-\_\-\-Wait\-\_\-32\-M\-Hz@{A\-D\-C\-\_\-\-Wait\-\_\-32\-M\-Hz}!adc_driver.c@{adc\-\_\-driver.\-c}}
+\subsubsection[{A\-D\-C\-\_\-\-Wait\-\_\-32\-M\-Hz}]{\setlength{\rightskip}{0pt plus 5cm}void A\-D\-C\-\_\-\-Wait\-\_\-32\-M\-Hz (
+\begin{DoxyParamCaption}
+\item[{A\-D\-C\-\_\-t $\ast$}]{adc}
+\end{DoxyParamCaption}
+)}}\label{adc__driver_8c_a0e13135d7b45df0c9c615ed40765c786}
+
+
+This function waits until the adc common mode is settled. 
+
+After the A\-D\-C clock has been turned on, the common mode voltage in the A\-D\-C need some time to settle. The time it takes equals one dummy conversion. Instead of doing a dummy conversion this function waits until the common mode is settled.
+
+\begin{DoxyNote}{Note}
+The function sets the prescaler to the minimum value possible when the clock speed is larger than 8 M\-Hz to minimize the time it takes the common mode to settle.
+
+The A\-D\-C clock is turned off every time the A\-D\-C i disabled or the device goes into sleep (not Idle sleep mode).
+\end{DoxyNote}
+
+\begin{DoxyParams}{Parameters}
+{\em adc} & Pointer to A\-D\-C module register section. \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 242 of file adc\-\_\-driver.\-c.
+
+\hypertarget{adc__driver_8c_a98a478448d5c15720de6d517589e974e}{\index{adc\-\_\-driver.\-c@{adc\-\_\-driver.\-c}!A\-D\-C\-\_\-\-Wait\-\_\-8\-M\-Hz@{A\-D\-C\-\_\-\-Wait\-\_\-8\-M\-Hz}}
+\index{A\-D\-C\-\_\-\-Wait\-\_\-8\-M\-Hz@{A\-D\-C\-\_\-\-Wait\-\_\-8\-M\-Hz}!adc_driver.c@{adc\-\_\-driver.\-c}}
+\subsubsection[{A\-D\-C\-\_\-\-Wait\-\_\-8\-M\-Hz}]{\setlength{\rightskip}{0pt plus 5cm}void A\-D\-C\-\_\-\-Wait\-\_\-8\-M\-Hz (
+\begin{DoxyParamCaption}
+\item[{A\-D\-C\-\_\-t $\ast$}]{adc}
+\end{DoxyParamCaption}
+)}}\label{adc__driver_8c_a98a478448d5c15720de6d517589e974e}
+
+
+This function waits until the adc common mode is settled. 
+
+After the A\-D\-C clock has been turned on, the common mode voltage in the A\-D\-C need some time to settle. The time it takes equals one dummy conversion. Instead of doing a dummy conversion this function waits until the common mode is settled.
+
+\begin{DoxyNote}{Note}
+The function sets the prescaler to the minimum value to minimize the time it takes the common mode to settle. If the clock speed is higher than 8 M\-Hz use the A\-D\-C\-\_\-wait\-\_\-32\-M\-Hz function.
+\end{DoxyNote}
+
+\begin{DoxyParams}{Parameters}
+{\em adc} & Pointer to A\-D\-C module register section. \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 210 of file adc\-\_\-driver.\-c.
+
