@@ -15976,7 +15976,7 @@ Jan Kandziora &amp;lt;jjj@gmx.de&amp;gt;</description>
 <part name="R12" library="rcl" deviceset="R-EU_" device="R0603" value="1k"/>
 <part name="R14" library="rcl" deviceset="R-EU_" device="R0603" value="1k"/>
 <part name="C1" library="rcl" deviceset="C-EU" device="C0603" value="4n7"/>
-<part name="C4" library="rcl" deviceset="C-EU" device="C0603" value="4n7"/>
+<part name="C4" library="rcl" deviceset="C-EU" device="C0603" value="4n7 (22n)"/>
 <part name="C7" library="rcl" deviceset="C-EU" device="C0603" value="4n7"/>
 <part name="GND1" library="supply1" deviceset="GND" device=""/>
 <part name="R15" library="rcl" deviceset="R-EU_" device="R0603" value="470k"/>
