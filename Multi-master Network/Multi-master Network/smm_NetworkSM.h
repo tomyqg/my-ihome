@@ -127,6 +127,45 @@ struct mmsn_comm_data_frame {
 
 typedef struct mmsn_comm_data_frame mmsn_comm_data_frame_t;
 
+// Maximum send data size:
+// data_size * DLE + frame_begin (2) + frame_end (2)
+// 12 * 2 + 2 + 2 = 24
+#define MMSN_COMM_SEND_DATA_SIZE (24)
+
+#define MMSN_COMM_SEND_FRAME_SIZE (26)
+
+struct sMMSN_Send_Data_Frame
+{
+	union
+	{
+		struct 
+		{
+			uint8_t u8DataSize;
+			bool	u8IsResponseNeeded;
+			uint8_t u8SendDataBuffer[MMSN_COMM_SEND_DATA_SIZE];
+		};
+	};
+	
+	// Complete frame buffer
+	uint8_t u8SendDataFrame[MMSN_COMM_SEND_FRAME_SIZE];
+};
+
+typedef struct sMMSN_Send_Data_Frame sMMSN_Send_Data_Frame_t;
+
+void _sendData_FrameBuffer_Init(sMMSN_Send_Data_Frame_t *a_pFrameBuffer);
+void _sendData_FrameBuffer_Write(sMMSN_Send_Data_Frame_t *a_pDst, uint8_t a_u8DataSize, bool a_Response, uint8_t * a_pSrcData, uint8_t a_u8SrcDataSize);
+void _sendData_FrameBuffer_Copy(const sMMSN_Send_Data_Frame_t *a_pSrc, sMMSN_Send_Data_Frame_t *a_pDst);
+
+inline uint8_t _sendData_FrameBuffer_Read_DataSize(const sMMSN_Send_Data_Frame_t *a_pSource)
+{
+	return (a_pSource->u8DataSize);
+};
+
+inline bool _sendData_FrameBuffer_Read_ResponseNeed(const sMMSN_Send_Data_Frame_t *a_pSource)
+{
+	return (a_pSource->u8IsResponseNeeded);
+};
+
 /* All the magic need for frame processing macros */
 #define MMSN_ADDRESS_bm	0xFFF0	/* Multi-Master Serial Network Address bit mask */
 #define MMSN_ADDRESS_bp	4		/* Multi-Master Serial Network Address bit position */
@@ -264,33 +303,8 @@ typedef enum eMMSN_FrameStatus
 	
 } eMMSN_FrameStatus_t;
 
-typedef enum eSM_State
-{
-	eSM_Idle = 0,
-	eSM_Receive,
-	eSM_ProcessData,
-	eSM_ExecuteCommand,
-	eSM_Send,
-	eSM_WaitForResend,
-	eSM_Retransmission,
-	eSM_WaitForResponse,
-	eSM_Error
-} eSM_StateType;
-
-/* Function prototypes to handle individual state */
-void fsm_Idle(void);
-void fsm_Receive(void);
-void fsm_ProcessData(void);
-void fsm_ExecuteCommand(void);
-void fsm_Send(void);
-void fsm_WaitForResend(void);
-void fsm_Retransmission(void);
-void fsm_WaitForResponse(void);
-void fsm_Error(void);
-
-
 /* Multi-Master Serial Network FSM states */
-enum eMMSN_FSMState
+typedef enum eMMSN_FSMState
 {
 	MMSN_IDLE_STATE = 0,					// 0
 	MMSN_RECEIVE_STATE,						// 1
@@ -300,10 +314,11 @@ enum eMMSN_FSMState
 	MMSN_WAIT_FOR_RESPONSE_STATE,			// 5
 	MMSN_RECEIVE_RESPONSE_STATE,			// 6
 	MMSN_PROCESS_RESPONSE_STATE,			// 7
-	MMSN_RETRANSMIT_STATE,
+	MMSN_RETRANSMIT_STATE,					// 8
 	MMSN_ERROR_STATE,
+	
 	MMSN_MAX_STATES
-};
+} MMSN_FSMState_t;
 
 /* FSM Events */
 enum eMMSN_FSMEvent
@@ -333,16 +348,17 @@ typedef struct MMSN_SEND_ATTRIBUTES
 {
 	uint8_t u8DataSize;
 	bool	u8IsResponseNeeded;
+	uint8_t *pu8SendDataBuffer;
+	uint8_t u8SendDataCounter;
 } mmsn_send_attributes_t;
 
 typedef struct MMSN_FSM
 {
 	uint8_t						u8LineState;		//! Flag to indicate that the line is busy
-	eSM_StateType				CurrentState;
-	eSM_StateType				PreviousState;
+	MMSN_FSMState_t				CurrentState;
+	MMSN_FSMState_t				PreviousState;
 	mmsn_comm_data_frame_t	    *ptrRxDataFrame;	//! Pointer to structure holding frame being received
-	mmsn_comm_data_frame_t		*ptrTxDataFrame;	//! Pointer to structure holding frame to be transmitted
-	uint8_t						u8TxDataCounter;	//! Transmitted data counter
+	//mmsn_comm_data_frame_t		*ptrTxDataFrame;	//! Pointer to structure holding frame to be transmitted
 	uint8_t						u8RetriesCount;		//! Retransmission counter
 	eMMSN_FrameStatus_t			FrameStatus;		//! Data Frame status
 	uint8_t						u8IsDataToSend;		//! Indicate that data is waiting to be sent
@@ -380,8 +396,8 @@ void mmsn_InitializeStateMachine(MMSN_FSM_t * a_pFSM);
 typedef uint8_t (* mmsnFsmEventHandler) (MMSN_FSM_t * a_pFSM, uint8_t a_u8Event, void * a_pEventArg);
 
 uint8_t mmsn_Idle_DataReceived_Handler(MMSN_FSM_t * a_pFSM, uint8_t a_u8Event, void * a_pEventArg);
-uint8_t mmsn_Idle_CollisionAvoidanceTimeout_Handler(MMSN_FSM_t * a_pFSM, uint8_t a_u8Event, void * a_pEventArg);
-uint8_t mmsn_xxx_CollisionAvoidanceTimeout_Handler(MMSN_FSM_t * a_pFSM, uint8_t a_u8Event, void * a_pEventArg);
+uint8_t mmsn_Idle_CollisionAvoidanceTimeoutEvent_Handler(MMSN_FSM_t * a_pFSM, uint8_t a_u8Event, void * a_pEventArg);
+uint8_t mmsn_xxx_CollisionAvoidanceTimeoutEvent_Handler(MMSN_FSM_t * a_pFSM, uint8_t a_u8Event, void * a_pEventArg);
 uint8_t mmsn_Receive_DataReceived_Handler(MMSN_FSM_t * a_pFSM, uint8_t a_u8Event, void * a_pEventArg);
 uint8_t mmsn_ProcessData_FrameProcess_Handler(MMSN_FSM_t * a_pFSM, uint8_t a_u8Event, void * a_pEventArg);
 uint8_t	mmsn_ExecuteCommand_ExecuteCommandEvent_Handler(MMSN_FSM_t * a_pFSM, uint8_t a_u8Event, void * a_pEventArg);
@@ -391,6 +407,8 @@ uint8_t mmsn_WaitForResponse_DataReceivedEvent_Handler(MMSN_FSM_t * a_pFSM, uint
 uint8_t mmsn_xxx_NoResponseTimeoutEvent_Handler(MMSN_FSM_t * a_pFSM, uint8_t a_u8Event, void * a_pEventArg);
 uint8_t mmsn_ReceiveResponse_DataReceivedEvent_Handler(MMSN_FSM_t * a_pFSM, uint8_t a_u8Event, void * a_pEventArg);
 uint8_t mmsn_Retransmit_RetransmissionEvent_Handler(MMSN_FSM_t * a_pFSM, uint8_t a_u8Event, void * a_pEventArg);
+uint8_t mmsn_Retransmit_CollisionAvoidanceTimeoutEvent_Handler(MMSN_FSM_t * a_pFSM, uint8_t a_u8Event, void * a_pEventArg);
+uint8_t mmsn_ProcessResponse_FrameProcessEvent_Handler(MMSN_FSM_t * a_pFSM, uint8_t a_u8Event, void * a_pEventArg);
 
 uint8_t mmsn_Error_ErrorEvent_Handler(MMSN_FSM_t * a_pFSM, uint8_t a_u8Event, void * a_pEventArg);
 
