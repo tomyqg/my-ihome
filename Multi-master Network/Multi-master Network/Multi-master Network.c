@@ -186,6 +186,9 @@ fifo_desc_t eventQueue_desc;
 // Global variable to store arguments passed to event handler function
 uint8_t g_u8GlobalArgument;
 
+// Global storage for sending data frame buffer
+sMMSN_Send_Data_Frame_t gStorage_SendData;
+
 /************************************************************************/
 /* SYSTEM EVENTS                                                        */
 /************************************************************************/
@@ -205,8 +208,13 @@ uint8_t g_u8GlobalArgument;
 /************************************************************************/
 /* SYSTEM EVENT HANDLERS                                                */
 /************************************************************************/
+
+uint16_t gHeartBeatCounter;
+
 void sys_HeartbeatTimeout_Handler(void)
 {
+	gHeartBeatCounter++;
+	
 	// Clear corresponding event flag
 	FLAG_CLEAR(gSystemEvents, SYSEV_HEARTBEAT_TIMEOUT_bm);
 }
@@ -407,13 +415,13 @@ void syscmd_Module_Serial_Number_Handler(void)
 	printf_P(PSTR("\nShortSN "));
 	
 	// Copy 7 lower bytes to TX frame buffer
-	memcpy((mmsnFSM.ptrTxDataFrame->u8DataBuffer + 1), &xmegaSerialNumber.u8DataArray[4], 7);
+	memcpy((mmsnFSM.SendDataAttr.pu8SendDataBuffer + 1), &xmegaSerialNumber.u8DataArray[4], 7);
 	
 	for (uint8_t u8idx = 0; u8idx < MMSN_DATA_LENGTH; u8idx++)
 	{
-		printf("%u:", mmsnFSM.ptrTxDataFrame->u8DataBuffer[u8idx]);
+		printf("%u:", mmsnFSM.SendDataAttr.pu8SendDataBuffer[u8idx]);
 	}
-}
+};
 
 CommandDescriptor_t CmdDescTable[COMMAND_COUNT] = 
 {
@@ -564,6 +572,8 @@ funcCommandHandler get_CommandFunctionHandler(uint8_t a_u8CommandNumber)
 	}
 };
 
+uint16_t gHeartBeatCounter = 0;
+
 /************************************************************************/
 /* MAIN PROGRAM                                                         */
 /************************************************************************/
@@ -670,8 +680,11 @@ int main(void)
 	// SM_stateTable[eSM_Initialize]();
 	mmsn_InitializeStateMachine(&mmsnFSM);
 	
+	// Initialize global storage for data sending
+	_sendData_FrameBuffer_Init(&gStorage_SendData);
+	
 	// Start heartbeat timer
-	//xmega_tc_select_clock_source(&TIMER_HEARTBEAT, TC_CLKSEL_DIV64_gc);
+	xmega_tc_select_clock_source(&TIMER_HEARTBEAT, TC_CLKSEL_DIV64_gc);
 	
 	xmega_set_usart_rx_interrupt_level(&USART_COMMUNICATION_BUS, USART_RXCINTLVL_HI_gc);
 	
@@ -698,6 +711,29 @@ int main(void)
 			// Heartbeat timer interrupt fired up
 			if (u16EventFlags & SYSEV_HEARTBEAT_TIMEOUT_bm)
 			{
+				if (gHeartBeatCounter > 5000)
+				{
+					// create a message
+					gStorage_SendData.u8DataSize = 7;
+					gStorage_SendData.u8IsResponseNeeded = true;
+					gStorage_SendData.u8SendDataBuffer[0] = 1;
+					gStorage_SendData.u8SendDataBuffer[1] = 3;
+					gStorage_SendData.u8SendDataBuffer[2] = 5;
+					gStorage_SendData.u8SendDataBuffer[3] = 7;
+					gStorage_SendData.u8SendDataBuffer[4] = 9;
+					gStorage_SendData.u8SendDataBuffer[5] = 11;
+					gStorage_SendData.u8SendDataBuffer[6] = 33;
+					
+					// add event to queue
+					ADD_EVENT_TO_QUEUE(&eventQueue_desc, MMSN_SEND_DATA_EVENT);
+					
+					// reset counter
+					gHeartBeatCounter = 0;
+					
+					// Stop timer
+					xmega_tc_select_clock_source(&TIMER_HEARTBEAT, TC_CLKSEL_OFF_gc);
+				}
+				
 				sys_HeartbeatTimeout_Handler();
 			};
 			
