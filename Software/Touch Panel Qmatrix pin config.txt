@@ -1,0 +1,56 @@
+
+
+ 	MCU : ATxmega16D4
+	Kit Technology : QMatrix
+	Max Channels Supported : 32
+	X & Y Lines Config : 8x4
+	SMP :PA4
+	AINO : PA7
+
+	X0:PC0   Y0A:PB3   Y0B:PA3   
+	X1:PC1   Y1A:PB2   Y1B:PA2   
+	X2:PC2   Y2A:PB1   Y2B:PA1   
+	X3:PC3   Y3A:PB0   Y3B:PA0   
+	X4:PC4   
+	X5:PC5   
+	X6:PC6   
+	X7:PC7   
+
+
+	Channel 	X	YA	YB
+	Channel0	PC0	PB3	PA3
+	Channel1	PC1	PB3	PA3
+	Channel2	PC2	PB3	PA3
+	Channel3	PC3	PB3	PA3
+	Channel4	PC4	PB3	PA3
+	Channel5	PC5	PB3	PA3
+	Channel6	PC6	PB3	PA3
+	Channel7	PC7	PB3	PA3
+	Channel8	PC0	PB2	PA2
+	Channel9	PC1	PB2	PA2
+	Channel10	PC2	PB2	PA2
+	Channel11	PC3	PB2	PA2
+	Channel12	PC4	PB2	PA2
+	Channel13	PC5	PB2	PA2
+	Channel14	PC6	PB2	PA2
+	Channel15	PC7	PB2	PA2
+	Channel16	PC0	PB1	PA1
+	Channel17	PC1	PB1	PA1
+	Channel18	PC2	PB1	PA1
+	Channel19	PC3	PB1	PA1
+	Channel20	PC4	PB1	PA1
+	Channel21	PC5	PB1	PA1
+	Channel22	PC6	PB1	PA1
+	Channel23	PC7	PB1	PA1
+	Channel24	PC0	PB0	PA0
+	Channel25	PC1	PB0	PA0
+	Channel26	PC2	PB0	PA0
+	Channel27	PC3	PB0	PA0
+	Channel28	PC4	PB0	PA0
+	Channel29	PC5	PB0	PA0
+	Channel30	PC6	PB0	PA0
+	Channel31	PC7	PB0	PA0
+
+	Recommended Library : 
+	IAR  : libv3xmsf_32qm_8x_4y_k_0rs.r90
+	GCC  : libavrxmega2_32qm_8x_4y_k_0rs.a
