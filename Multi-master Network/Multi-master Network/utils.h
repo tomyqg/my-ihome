@@ -135,6 +135,11 @@ void xmega_usart_configure(void);
 #define port_outset_(arg1, arg2)	arg1.OUTSET = arg2
 
 
+// Length of Xmega short serial number in bytes
+#define XMEGA_SHORT_SERIAL_NUM_LEN	  (7)
+// Offset of original data array where Xmega short serial starts
+#define XMEGA_SHORT_SERIAL_NUM_OFFSET (4)
+
 /**
  * \brief Structure containing the xmega shortened serial number.
  *
@@ -155,7 +160,8 @@ typedef struct xmega_shortened_serial_number
 			uint8_t coordy0;
 			uint8_t coordy1;
 		};
-		uint8_t u8DataArray[7];
+		
+		uint8_t u8DataArray[XMEGA_SHORT_SERIAL_NUM_LEN];
 	};
 } xmega_shortened_serial_number_t;
 
