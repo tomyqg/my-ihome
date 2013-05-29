@@ -408,19 +408,61 @@ inline void xmega_save_configuration_data(void)
 
 void syscmd_Module_Serial_Number_Handler(void)
 {
-	/* XMEGA device short version of serial number
-	 * is comprised of 7 lower bytes of full serial number.
+	/* XMEGA device short version of serial number.
+	 * It is comprised of 7 lower bytes of full serial number.
 	 */
+	uint8_t u8Value		= 0;
+	uint16_t u16Value	= 0;
+	mmsn_comm_data_frame_t u8Message;
 	
-	printf_P(PSTR("\nShortSN "));
+	// printf_P(PSTR("\nShortSN "));
 	
-	// Copy 7 lower bytes to TX frame buffer
-	memcpy((mmsnFSM.SendDataAttr.pu8SendDataBuffer + 1), &xmegaSerialNumber.u8DataArray[4], 7);
+	// Clear temporary buffer for message
+	memset(&u8Message, 0, MMSN_COMM_FRAME_SIZE);
 	
-	for (uint8_t u8idx = 0; u8idx < MMSN_DATA_LENGTH; u8idx++)
+	/*** Compose sending data frame ***/
+	
+	// Set my device type
+	set_MMSN_DeviceType(MY_DEVICE_TYPE, u16Value);
+	
+	// Set my logical address
+	set_MMSN_DeviceNumber(ConfigurationData.u8LogicalNetworkAddr, u16Value);
+	
+	// Set Remote Transmission Request
+	set_MMSN_RTR(eRTR_DataFrame, u16Value);
+
+	// Don't care about Control Field
+	
+	// Put communication header bytes into sending storage place
+	//MMSN_WORD_2_BYTES(u16Value, u8Message[0], u8Message[1]);
+	u8Message.u16Identifier = u16Value;
+		
+	// Provide Do byte stuffing if needed
+		
+	// Copy 7 consecutive lower bytes to the message buffer
+	// memcpy(&(u8Message[2]), &(xmegaSerialNumber.u8DataArray[4]), 7);
+	memcpy(u8Message.u8DataBuffer, (xmegaSerialNumber.u8DataArray + XMEGA_SHORT_SERIAL_NUM_OFFSET), XMEGA_SHORT_SERIAL_NUM_LEN);
+	
+	// Add Logical Address at the end of the message
+	u8Message.u8DataBuffer[MMSN_DATA_LENGTH] = ConfigurationData.u8LogicalNetworkAddr;
+	
+	// Calculate CRC-16 (CRC-CCITT) using XMEGA hardware CRC peripheral
+	u16Value = xmega_calculate_checksum_crc16(u8Message.u8FrameBuffer, MMSN_FRAME_NOCRC_LENGTH);
+	
+	// Add CRC-16 into the message buffer
+	// MMSN_WORD_2_BYTES(u16Value, u8Message[10], u8Message[11]);
+	u8Message.u16CRC16 = u16Value;
+	
+	u8Value = _composeSendDataFrame(&u8Message, &gStorage_SendData, false);
+	
+	// Testing purposes
+	printf("\n Sending data size = %u", gStorage_SendData.u8DataSize);
+	printf("\n Sending response  = %c\n", (gStorage_SendData.u8IsResponseNeeded == true) ? 'y' : 'n');
+	
+	for (u8Value = 0; u8Value < MMSN_COMM_SEND_DATA_BUFFER_SIZE; u8Value++)
 	{
-		printf("%u:", mmsnFSM.SendDataAttr.pu8SendDataBuffer[u8idx]);
-	}
+		printf("%u:", gStorage_SendData.u8SendDataBuffer[u8Value]);
+	};
 };
 
 CommandDescriptor_t CmdDescTable[COMMAND_COUNT] = 
@@ -530,9 +572,9 @@ CommandDescriptor_t CmdDescTable[COMMAND_COUNT] =
 	{ SYSCMD_GROUP_RESTART_REQ,			NULL },		// 101
 	{ SYSCMD_MODULE_RESTART_REQ,		NULL },		// 102
 	{ SYSCMD_GROUP_SERIAL_NUMBER_REQ,	NULL },		// 103
-	{ SYSCMD_MODULE_SERIAL_NUMBER_REQ,	syscmd_Module_Serial_Number_Handler },		// 104
-	{ 0,								NULL },		// 105
-	{ 0,								NULL },		// 106
+	{ SYSCMD_MODULE_SERIAL_NUMBER_REQ,			syscmd_Module_Serial_Number_Handler },		// 104
+	{ SYSCMD_BROADCAST_SERIAL_NUMBER_REQ,		NULL },		// 105
+	{ SYSCMD_MODULE_SET_LOGICAL_ADDRESS_REQ,	NULL },		// 106
 	{ 0,								NULL },		// 107
 	{ 0,								NULL },		// 108
 	{ 0,								NULL },		// 109
@@ -579,6 +621,8 @@ uint16_t gHeartBeatCounter = 0;
 /************************************************************************/
 int main(void)
 {
+	syscmd_Module_Serial_Number_Handler();
+	
 	// Configure CPU and peripherals clock
 	xmega_set_cpu_clock_to_32MHz();
 	
@@ -620,6 +664,10 @@ int main(void)
 
 	// Read configuration data from EEPROM
 	xmega_read_configuration_data();
+
+
+	
+
 
 	// Check if logical address was already assigned
 	if (true == _isLogicalNetworkAddrAssigned(&ConfigurationData.u8LogicalNetworkAddr))

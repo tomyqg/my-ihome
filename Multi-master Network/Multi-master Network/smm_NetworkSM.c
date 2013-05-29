@@ -1341,14 +1341,108 @@ void mmsn_InitializeStateMachine(MMSN_FSM_t * a_pFSM)
 	xmega_set_usart_dre_interrupt_level(&USART_COMMUNICATION_BUS, USART_DREINTLVL_OFF_gc);
 };
 
-// Determine if Logical Network Address was assigned to the device
+/**
+ *  \brief Function to determine if Logical Network Address was assigned to the device.
+ */
 bool _isLogicalNetworkAddrAssigned(uint8_t *a_pu8LogicalNetworkAddr)
 {
 	return (!(MMSN_DEFAULT_LOGICAL_NETWORK_ADDRESS == (*a_pu8LogicalNetworkAddr)));
 };
 
-// Function generates random logical network address.
+/**
+ *  \brief Function to generate random logical network address.
+ */
 uint8_t xmega_generate_random_logical_network_address(void)
 {
 	return ((rand() % 127) + 1);
+};
+
+/**
+ *  \brief KISS function for byte stuffing.
+ */
+uint8_t doByteStuffing(uint8_t *a_pDstBuf, uint8_t a_DstBufLen, const uint8_t *a_pSrcBuf, uint8_t a_SrcBufLen)
+{
+	const uint8_t *endOfSrcBufPtr = a_pSrcBuf + a_SrcBufLen;	//! Set pointer to end of source buffer
+	uint8_t *endOfDstBufPtr		  = a_pDstBuf + a_DstBufLen;	//! Set pointer to end of destination buffer
+	uint8_t *writingPtr			  = a_pDstBuf;					//! Set writing pointer to the beginning of destination buffer
+	uint8_t u8SrcByte;											//! Source data byte
+	
+	// Check if there is anything to do
+	if (a_SrcBufLen == 0)
+	{
+		return 0;
+	};
+	
+	// Walk through all bytes from source buffer
+	for(;;)
+	{
+		// Check if destination buffer still has enough space to store two data bytes (with stuffing)
+		if ((writingPtr + 1) > endOfDstBufPtr)
+		{
+			// Finish stuffing here
+			break;
+		};
+		
+		// Get another data byte
+		u8SrcByte = *a_pSrcBuf++;
+		
+		// Check another byte for DLE value
+		if (FSMR_DLE_BYTE_VALUE == u8SrcByte)
+		{
+			// DLE data byte found in source buffer
+			// Do the stuff
+			*writingPtr++ = FSMR_DLE_BYTE_VALUE;
+			*writingPtr++ = FSMR_DLE_BYTE_VALUE;
+			
+			// Check for completeness
+			if (a_pSrcBuf >= endOfSrcBufPtr)
+			{
+				break;
+			}
+		}
+		else
+		{
+			// Copy source data
+			*writingPtr++ = u8SrcByte;
+			
+			// Check for completeness
+			if (a_pSrcBuf >= endOfSrcBufPtr)
+			{
+				break;
+			}
+		}
+	}; // for(;;)
+	
+	// Return length of the buffer
+	return (writingPtr - a_pDstBuf);
+};
+
+/**
+ *  \brief KISS function to compose complete sending data frame.
+ */
+uint8_t _composeSendDataFrame(const mmsn_comm_data_frame_t *a_pSrcBuf, sMMSN_Send_Data_Frame_t *a_pDstBuf, bool a_IsResponseNeeded)
+{
+	uint8_t u8MessageSize = 0;
+	
+	// Clear destination buffer
+	memset(a_pDstBuf, 0, sizeof(sMMSN_Send_Data_Frame_t));
+	
+	// Add Start of Transmission special characters: (DLE|STX)
+	a_pDstBuf->u8SendDataBuffer[0] = FSMR_DLE_BYTE_VALUE;
+	a_pDstBuf->u8SendDataBuffer[1] = FSMR_STX_BYTE_VALUE;
+	
+	// Do byte stuffing on source data starting after two leading special characters
+	u8MessageSize = doByteStuffing(&a_pDstBuf->u8SendDataBuffer[2], MMSN_COMM_SEND_DATA_SIZE, a_pSrcBuf->u8FrameBuffer, MMSN_COMM_FRAME_SIZE);
+	
+	// Increase sending message size after byte stuffing by two. Due to leading characters.
+	u8MessageSize += 2;
+	
+	// Add End of Transmission special characters: (DLE|ETX)
+	a_pDstBuf->u8SendDataBuffer[u8MessageSize++] = FSMR_DLE_BYTE_VALUE;
+	a_pDstBuf->u8SendDataBuffer[u8MessageSize] = FSMR_STX_BYTE_VALUE;
+	
+	// Increase sending message size by one to get correct length value and not array index
+	u8MessageSize++;
+	
+	return u8MessageSize;
 };

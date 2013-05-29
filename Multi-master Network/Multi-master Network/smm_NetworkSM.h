@@ -22,41 +22,6 @@ do {	\
 		};	\
 } while(0)
 
-
-//! Interrupt type events
-//! Received data from serial bus
-#define EVENT_IRQ_RECEIVE_COMPLETE_bm				(1 << 0)
-//! Data register empty
-#define EVENT_IRQ_DATA_REGISTER_EMPTY_bm			(1 << 1)
-//! Frame completely transmitted
-#define EVENT_IRQ_TRANSMIT_COMPLETE_bm				(1 << 2)
-//! Data is ready to be sent
-#define EVENT_SW_DATA_READY_TO_SEND_bm				(1 << 3)
-//! Busy line timer time out
-#define EVENT_IRQ_COLLISION_AVOIDANCE_TIMEOUT_bm	(1 << 4)
-//! Waiting for response timer time out
-#define EVENT_IRQ_WAIT_FOR_RESPONSE_TIMEOUT_bm		(1 << 5)
-//! System heartbeat timer time out
-#define EVENT_IRQ_HEARTBEAT_TIMEOUT_bm				(1 << 6)
-
-//! Software events
-//! Received data is error free
-#define EVENT_SW_RECEIVE_DATA_NO_ERROR_bm			(1 << 7)
-//! Received data is erroneous
-#define EVENT_SW_RECEIVE_DATA_ERROR_bm				(1 << 8)
-//! Communication frame data integrity error
-#define EVENT_SW_COMM_FRAME_CRC_ERROR_bm			(1 << 9)
-//! Communication frame complete
-#define EVENT_SW_COMM_FRAME_COMPLETE_bm				(1 << 10)
-//! Communication frame incomplete
-#define EVENT_SW_COMM_FRAME_INCOMPLETE_bm			(1 << 11)
-//! Communication frame was executed
-#define EVENT_SW_COMM_FRAME_RETRANSMIT_bm			(1 << 12)
-//! Communication frame was executed
-#define EVENT_SW_MAX_RETRIES_COUNT_REACHED_bm		(1 << 13)
-//! Communication frame without processing
-#define EVENT_SW_UNEXPECTED_EVENT_RECEIVED_bm		(1 << 14)
-
 //! Maximum retries count
 #define MMSN_MAX_RETRIES	(5)
 
@@ -127,12 +92,17 @@ struct mmsn_comm_data_frame {
 
 typedef struct mmsn_comm_data_frame mmsn_comm_data_frame_t;
 
-// Maximum send data size:
-// data_size * DLE + frame_begin (2) + frame_end (2)
-// 12 * 2 + 2 + 2 = 24
-#define MMSN_COMM_SEND_DATA_SIZE (24)
+// Maximum size of sending data buffer: 12 * 2
+#define MMSN_COMM_SEND_DATA_SIZE (MMSN_COMM_FRAME_SIZE * 2)
 
-#define MMSN_COMM_SEND_FRAME_SIZE (26)
+/* Maximum size of sending data buffer
+ * frame_begin (2) + data_size * DLE + frame_end (2)
+ * 2 + 12*2 + 2 = 28
+ */
+#define MMSN_COMM_SEND_DATA_BUFFER_SIZE (28)
+
+// Size of complete sending data frame buffer
+#define MMSN_COMM_SEND_FRAME_BUFFER_SIZE (30)
 
 struct sMMSN_Send_Data_Frame
 {
@@ -142,12 +112,12 @@ struct sMMSN_Send_Data_Frame
 		{
 			uint8_t u8DataSize;
 			bool	u8IsResponseNeeded;
-			uint8_t u8SendDataBuffer[MMSN_COMM_SEND_DATA_SIZE];
+			uint8_t u8SendDataBuffer[MMSN_COMM_SEND_DATA_BUFFER_SIZE];
 		};
 	};
 	
 	// Complete frame buffer
-	uint8_t u8SendDataFrame[MMSN_COMM_SEND_FRAME_SIZE];
+	uint8_t u8SendDataFrameBuffer[MMSN_COMM_SEND_FRAME_BUFFER_SIZE];
 };
 
 typedef struct sMMSN_Send_Data_Frame sMMSN_Send_Data_Frame_t;
@@ -166,6 +136,22 @@ inline bool _sendData_FrameBuffer_Read_ResponseNeed(const sMMSN_Send_Data_Frame_
 	return (a_pSource->u8IsResponseNeeded);
 };
 
+/**
+ *  \brief KISS function to compose complete sending data frame.
+ *		   Function takes source data buffer as an input and transfers it into the destination
+ *		   data buffer applying byte stuffing if necessary.
+ *		   Returned value is a size of complete sending data frame.
+ *
+ *  \Note Destination buffer must be capable of storing at least twice amount of source data.
+ *
+ *  \param a_pSrcBuf			Pointer to buffer with source data.
+ *	\param a_pDstBuf			Pointer to destination buffer with storage space.
+ *  \param a_IsResponseNeeded	Boolean value to indicate that response message is needed.
+ *
+ *  \return Total sending data frame size.
+ */
+uint8_t _composeSendDataFrame(const mmsn_comm_data_frame_t *a_pSrcBuf, sMMSN_Send_Data_Frame_t *a_pDstBuf, bool a_IsResponseNeeded);
+
 /* All the magic need for frame processing macros */
 #define MMSN_ADDRESS_bm	0xFFF0	/* Multi-Master Serial Network Address bit mask */
 #define MMSN_ADDRESS_bp	4		/* Multi-Master Serial Network Address bit position */
@@ -173,6 +159,8 @@ inline bool _sendData_FrameBuffer_Read_ResponseNeed(const sMMSN_Send_Data_Frame_
 #define MMSN_DEVTYPE_bp	12		/* Multi-Master Serial Network Device Type bit position */
 #define MMSN_DEVNUM_bm  0x0FE0	/* Multi-Master Serial Network Device Number bit mask */
 #define MMSN_DEVNUM_bp  5		/* Multi-Master Serial Network Device Number bit position */
+#define MMSN_SYSCMD_bm  0x0FE0	/* Multi-Master Serial Network System Command bit mask */
+#define MMSN_SYSCMD_bp  5		/* Multi-Master Serial Network System Command bit position */
 #define MMSN_RTR_bm		0x0010	/* Multi-Master Serial Network Remote Transmission Request bit mask */
 #define MMSN_RTR_bp		4		/* Multi-Master Serial Network Remote Transmission Request bit position */
 #define MMSN_CTRLF_bm	0x000F	/* Multi-Master Serial Network Control Field bit mask */
@@ -197,6 +185,12 @@ inline bool _sendData_FrameBuffer_Read_ResponseNeed(const sMMSN_Send_Data_Frame_
 #define set_MMSN_DeviceNumber(_u8DeviceNum, _u16Identifier)	\
 	_u16Identifier = (_u16Identifier & (~MMSN_DEVNUM_bm)) | ((_u8DeviceNum & 0x7F) << MMSN_DEVNUM_bp)
 	
+#define get_MMSN_SysCommand(_u16Identifier, _u8SysCmd)	\
+_u8SysCmd = ((_u16Identifier & MMSN_SYSCMD_bm) >> MMSN_SYSCMD_bp)
+
+#define set_MMSN_SysCommand(_u8SysCmd, _u16Identifier)	\
+_u16Identifier = (_u16Identifier & (~MMSN_SYSCMD_bm)) | ((_u8SysCmd & 0x7F) << MMSN_SYSCMD_bp)
+	
 #define get_MMSN_RTR(_u16Identifier, _u8RTR)	\
 	_u8RTR = ((_u16Identifier & MMSN_RTR_bm) >> MMSN_RTR_bp)
 
@@ -212,6 +206,14 @@ inline bool _sendData_FrameBuffer_Read_ResponseNeed(const sMMSN_Send_Data_Frame_
 #define MMSN_BYTES_2_WORD(_InByte1, _InByte2, _OutWord)	\
 do {	\
 	_OutWord = (((_InByte1 << 8) & 0xFF00) | (_InByte2));	\
+} while (0);
+
+// _OutByte1 - high byte
+// _OutByte2 - low byte
+#define MMSN_WORD_2_BYTES(_InWord, _OutByte1, _OutByte2)	\
+do {									\
+_OutByte1 = ((_InWord & 0xFF00) >> 8);	\
+_OutByte2 = (_InWord & 0x00FF);			\
 } while (0);
 
 // Global argument macros
@@ -287,12 +289,6 @@ enum eMMSN_DeviceType
 	eMMSN_Reserved_5		= 0x0F,
 	eMMSN_Reserved_6		= 0x10,
 }; */
-
-// Processing routines prototypes
-void processCommand_Status(void);
-
-// Establish table of pointers to processing functions
-// void (* processingFunctions[])(void) = { processCommand_Status };
 
 typedef enum eMMSN_FrameStatus
 {
@@ -429,10 +425,12 @@ uint8_t mmsn_Error_ErrorEvent_Handler(MMSN_FSM_t * a_pFSM, uint8_t a_u8Event, vo
 // (127 - 101) = 26
 #define SYSTEM_COMMAND_COUNT (26)
 
-#define SYSCMD_GROUP_RESTART_REQ		(0x65)
-#define SYSCMD_MODULE_RESTART_REQ		(0x66)
-#define SYSCMD_GROUP_SERIAL_NUMBER_REQ	(0x67)
-#define SYSCMD_MODULE_SERIAL_NUMBER_REQ	(0x68)
+#define SYSCMD_GROUP_RESTART_REQ				(0x65)	// 101
+#define SYSCMD_MODULE_RESTART_REQ				(0x66)	// 102
+#define SYSCMD_GROUP_SERIAL_NUMBER_REQ			(0x67)	// 103
+#define SYSCMD_MODULE_SERIAL_NUMBER_REQ			(0x68)	// 104
+#define SYSCMD_BROADCAST_SERIAL_NUMBER_REQ		(0x69)	// 105
+#define SYSCMD_MODULE_SET_LOGICAL_ADDRESS_REQ	(0x70)	// 106
 
 // Command function handler
 typedef void (* funcCommandHandler)(void);
@@ -532,5 +530,23 @@ bool _isLogicalNetworkAddrAssigned(uint8_t *a_pu8LogicalNetworkAddr);
  *  \return unsigned 8bit random value within range <1..127>
  */
 uint8_t xmega_generate_random_logical_network_address(void);
+
+/**
+ *  \brief KISS function for byte stuffing.
+ *		   Function iterates through entire source buffer and checks for DataLinkEscape (DLE) occurrence.
+ *		   Whenever escape data byte is spotted than it is supplemented with additional DLE in destination buffer.
+ *		   Example: IN data  {0xA, 0x1, DLE, 0xB, 0x2, DLE}
+ *					OUT data {0xA, 0x1, DLE, DLE, 0xB, 0x2, DLE, DLE}
+ *
+ *  \Note Destination buffer must be capable of storing at least twice amount of source data.
+ *
+ *  \param a_pDstBuf	Pointer to destination buffer.
+ *  \param a_DstBufLen	Length of destination buffer.
+ *  \param a_pSrcBuf	Pointer to source buffer.
+ *	\param a_SrcBufLen	Length of source buffer.
+ *
+ *  \return none.
+ */
+uint8_t doByteStuffing(uint8_t *a_pDstBuf, uint8_t a_DstBufLen, const uint8_t *a_pSrcBuf, uint8_t a_SrcBufLen);
 
 #endif /* SMM_NETWORKSM_H_ */
