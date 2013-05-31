@@ -413,7 +413,7 @@ void syscmd_Module_Serial_Number_Handler(void)
 	 */
 	uint8_t u8Value		= 0;
 	uint16_t u16Value	= 0;
-	mmsn_comm_data_frame_t u8Message;
+	mmsn_receive_data_frame_t u8Message;
 	
 	// printf_P(PSTR("\nShortSN "));
 	
@@ -434,13 +434,9 @@ void syscmd_Module_Serial_Number_Handler(void)
 	// Don't care about Control Field
 	
 	// Put communication header bytes into sending storage place
-	//MMSN_WORD_2_BYTES(u16Value, u8Message[0], u8Message[1]);
-	u8Message.u16Identifier = u16Value;
-		
-	// Provide Do byte stuffing if needed
-		
+	MMSN_WORD_2_BYTES(u16Value, u8Message.u8HeaderHiByte, u8Message.u8HeaderLoByte);
+	
 	// Copy 7 consecutive lower bytes to the message buffer
-	// memcpy(&(u8Message[2]), &(xmegaSerialNumber.u8DataArray[4]), 7);
 	memcpy(u8Message.u8DataBuffer, (xmegaSerialNumber.u8DataArray + XMEGA_SHORT_SERIAL_NUM_OFFSET), XMEGA_SHORT_SERIAL_NUM_LEN);
 	
 	// Add Logical Address at the end of the message
@@ -450,19 +446,22 @@ void syscmd_Module_Serial_Number_Handler(void)
 	u16Value = xmega_calculate_checksum_crc16(u8Message.u8FrameBuffer, MMSN_FRAME_NOCRC_LENGTH);
 	
 	// Add CRC-16 into the message buffer
-	// MMSN_WORD_2_BYTES(u16Value, u8Message[10], u8Message[11]);
-	u8Message.u16CRC16 = u16Value;
+	MMSN_WORD_2_BYTES(u16Value, u8Message.u8HeaderHiByte, u8Message.u8CRC16LoByte);
 	
-	u8Value = _composeSendDataFrame(&u8Message, &gStorage_SendData, false);
+	// Compose message which is to be sent applying byte stuffing if needed
+	u8Value = _composeSendDataFrame(&u8Message, &gStorage_SendData, true);
 	
 	// Testing purposes
-	printf("\n Sending data size = %u", gStorage_SendData.u8DataSize);
-	printf("\n Sending response  = %c\n", (gStorage_SendData.u8IsResponseNeeded == true) ? 'y' : 'n');
+	/* printf_P(PSTR("\n Sending data size = %u"), gStorage_SendData.u8DataSize);
+	printf_P(PSTR("\n Sending response  = %c\n"), (gStorage_SendData.u8IsResponseNeeded == true) ? 'y' : 'n'); */
 	
-	for (u8Value = 0; u8Value < MMSN_COMM_SEND_DATA_BUFFER_SIZE; u8Value++)
+	for (u8Value = 0; u8Value < gStorage_SendData.u8DataSize; u8Value++)
 	{
-		printf("%u:", gStorage_SendData.u8SendDataBuffer[u8Value]);
+		printf_P(PSTR("%u:"), gStorage_SendData.u8SendDataBuffer[u8Value]);
 	};
+	
+	// Add event to queue
+	ADD_EVENT_TO_QUEUE(&eventQueue_desc, MMSN_SEND_DATA_EVENT);
 };
 
 CommandDescriptor_t CmdDescTable[COMMAND_COUNT] = 
@@ -621,8 +620,6 @@ uint16_t gHeartBeatCounter = 0;
 /************************************************************************/
 int main(void)
 {
-	syscmd_Module_Serial_Number_Handler();
-	
 	// Configure CPU and peripherals clock
 	xmega_set_cpu_clock_to_32MHz();
 	
@@ -664,10 +661,6 @@ int main(void)
 
 	// Read configuration data from EEPROM
 	xmega_read_configuration_data();
-
-
-	
-
 
 	// Check if logical address was already assigned
 	if (true == _isLogicalNetworkAddrAssigned(&ConfigurationData.u8LogicalNetworkAddr))
@@ -778,7 +771,7 @@ int main(void)
 					// reset counter
 					gHeartBeatCounter = 0;
 					
-					// Stop timer
+					// Stop heartbeat timer
 					xmega_tc_select_clock_source(&TIMER_HEARTBEAT, TC_CLKSEL_OFF_gc);
 				}
 				
