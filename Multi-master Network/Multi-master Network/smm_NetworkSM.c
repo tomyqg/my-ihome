@@ -6,6 +6,7 @@ Serial Multi-Master Network State Machine
 #include "fsm_Receiver.h"
 
 #include <avr/io.h>
+#include <avr/pgmspace.h>
 #include <util/atomic.h>
 #include <stdio.h>
 #include <string.h>
@@ -70,7 +71,7 @@ extern volatile uint16_t gSystemEvents;
 extern uint16_t u16EventFlags;
 
 // Structure for storing received frame
-mmsn_comm_data_frame_t g_RxCommFrameBuffer;
+mmsn_receive_data_frame_t g_RxCommFrameBuffer;
 // Structure for storing frame to be transmitted
 // mmsn_comm_data_frame_t g_TxCommFrameBuffer;
 
@@ -247,25 +248,25 @@ static inline void _restartCollisionAvoidanceTimer(void)
  *
  *  \param none.
  */
-void _copyDataFrame(fifo_desc_t * a_pFifoDesc, mmsn_comm_data_frame_t * a_pDstDataFrame)
+void _copyDataFrame(fifo_desc_t * a_pFifoDesc, mmsn_receive_data_frame_t * a_pDstDataFrame)
 {
-	uint8_t u8Tmp1, u8Tmp2;
-	
-	// Pull out first two bytes with packed Address and Control Field
-	u8Tmp1 = fifo_pull_uint8_nocheck(a_pFifoDesc);
-	u8Tmp2 = fifo_pull_uint8_nocheck(a_pFifoDesc);
-	MMSN_BYTES_2_WORD(u8Tmp1, u8Tmp2, a_pDstDataFrame->u16Identifier);
+	/* Pull out first two bytes with packed Header.
+	 * Dev_Type:4 | LAddr:7 | RTR:1 | Control_Field:4 |
+	 */
+	a_pDstDataFrame->u8HeaderHiByte = fifo_pull_uint8_nocheck(a_pFifoDesc);
+	a_pDstDataFrame->u8HeaderLoByte = fifo_pull_uint8_nocheck(a_pFifoDesc);
 	
 	// Pull out all data bytes
-	for (u8Tmp1 = 0; u8Tmp1 < MMSN_DATA_LENGTH; u8Tmp1++)
+	for (uint8_t u8Idx = 0; u8Idx < MMSN_DATA_LENGTH; u8Idx++)
 	{
-		a_pDstDataFrame->u8DataBuffer[u8Tmp1] = fifo_pull_uint8_nocheck(a_pFifoDesc);
+		a_pDstDataFrame->u8DataBuffer[u8Idx] = fifo_pull_uint8_nocheck(a_pFifoDesc);
 	};
 	
-	// Pull out 2 bytes with CRC-16 16bit value
-	u8Tmp1 = fifo_pull_uint8_nocheck(a_pFifoDesc);
-	u8Tmp2 = fifo_pull_uint8_nocheck(a_pFifoDesc);
-	MMSN_BYTES_2_WORD(u8Tmp1, u8Tmp2, a_pDstDataFrame->u16CRC16);
+	/* Pull out 2 bytes with CRC-16 16bit value.
+	 * This value is send over the Network using big endian order CRC16 = (Hi_byte|Lo_byte)
+	 */
+	a_pDstDataFrame->u8CRC16HiByte = fifo_pull_uint8_nocheck(a_pFifoDesc);
+	a_pDstDataFrame->u8CRC16LoByte = fifo_pull_uint8_nocheck(a_pFifoDesc);
 } // _copyDataFrame()
 
 /**
@@ -283,6 +284,12 @@ void _ClearRxResources(MMSN_FSM_t * a_pFSM)
 	
 	// Reset Receiver FSM
 	fsmReceiverInitialize(&a_pFSM->ReceiverFSM);
+	
+	// Reset bus state
+	a_pFSM->u8LineState = MMSN_FREE_BUS;
+	
+	// Reset frame status
+	a_pFSM->FrameStatus = MMSN_FrameUnknown;
 }
 
 /**
@@ -573,12 +580,16 @@ uint8_t	mmsn_ExecuteCommand_ExecuteCommandEvent_Handler(MMSN_FSM_t * a_pFSM, uin
 	funcCommandHandler	commandHandlerPtr = NULL;
 	uint8_t				u8DeviceType;
 	uint8_t				u8DeviceNumber = 0;
-		
+	uint16_t			u16Header;	
+	
+	// Convert two bytes in big endian order to 16bit variable
+	MMSN_BYTES_2_WORD(a_pFSM->ptrRxDataFrame->u8HeaderHiByte, a_pFSM->ptrRxDataFrame->u8HeaderLoByte, u16Header);
+	
 	// Retrieve device type from the message
-	get_MMSN_DeviceType(a_pFSM->ptrRxDataFrame->u16Identifier, u8DeviceType);
+	get_MMSN_DeviceType(u16Header, u8DeviceType);
 		
-	// Retrieve device number/command from the message
-	get_MMSN_DeviceNumber(a_pFSM->ptrRxDataFrame->u16Identifier, u8DeviceNumber);
+	// Retrieve device number or system command from the message
+	get_MMSN_DeviceNumber(u16Header, u8DeviceNumber);
 		
 #ifdef MMSN_DEBUG
 	printf("\nExec:dev_typ = %d", u8DeviceType);
@@ -995,10 +1006,11 @@ uint8_t mmsn_Retransmit_CollisionAvoidanceTimeoutEvent_Handler(MMSN_FSM_t * a_pF
 
 uint8_t mmsn_ProcessResponse_FrameProcessEvent_Handler(MMSN_FSM_t * a_pFSM, uint8_t a_u8Event, void * a_pEventArg)
 {
-	uint16_t u16CRC16;
+	uint16_t u16CalculatedCRC;
+	uint16_t u16ResponseCRC;
 	uint8_t  u8ResponseSize;
 	
-	// Get Rx buffer size
+	// Get size of received response
 	u8ResponseSize = fifo_get_used_size(&fifo_receive_buffer_desc);
 	
 #ifdef MMSN_DEBUG
@@ -1019,10 +1031,16 @@ uint8_t mmsn_ProcessResponse_FrameProcessEvent_Handler(MMSN_FSM_t * a_pFSM, uint
 		/* Calculate CRC-16 (CRC-CCITT) using XMEGA hardware CRC peripheral
 		 * excluding last 2 bytes with CRC-16.
 		 */
-		u16CRC16 = xmega_calculate_checksum_crc16(a_pFSM->ptrRxDataFrame->u8FrameBuffer, MMSN_FRAME_NOCRC_LENGTH);
+		u16CalculatedCRC = xmega_calculate_checksum_crc16(a_pFSM->ptrRxDataFrame->u8FrameBuffer, MMSN_FRAME_NOCRC_LENGTH);
+
+		/* Retrieve CRC-16 from the response message.
+		 * Note that received CRC16 value is transmitted in big endian order.
+		 * AVR architecture is little endian, so received bytes should be changed.
+		 */
+		MMSN_BYTES_2_WORD(a_pFSM->ptrRxDataFrame->u8CRC16LoByte, a_pFSM->ptrRxDataFrame->u8CRC16HiByte, u16ResponseCRC);
 
 		// Check received data integrity
-		if (u16CRC16 == a_pFSM->ptrRxDataFrame->u16CRC16)
+		if (u16CalculatedCRC == u16ResponseCRC)
 		{
 			// Calculated and received CRC-16 value matched.
 
@@ -1092,6 +1110,17 @@ uint8_t mmsn_Error_ErrorEvent_Handler(MMSN_FSM_t * a_pFSM, uint8_t a_u8Event, vo
 			_ClearRxResources(a_pFSM);
 		break;
 		
+		case NE_MaximumRetries:
+			// Clear Rx resources
+			_ClearRxResources(a_pFSM);
+			
+			// Clear sending data attributes
+			_resetSendDataAttributes(a_pFSM);
+			
+			// Reset sending parameters of MMSN
+			a_pFSM->u8RetriesCount	= 0;
+			a_pFSM->u8IsDataToSend  = false;
+		
 		default:
 		/* Your code here */
 		break;
@@ -1108,13 +1137,16 @@ uint8_t mmsn_Error_ErrorEvent_Handler(MMSN_FSM_t * a_pFSM, uint8_t a_u8Event, vo
 
 uint8_t mmsn_ProcessData_FrameProcess_Handler(MMSN_FSM_t * a_pFSM, uint8_t a_u8Event, void * a_pEventArg)
 {
-	uint16_t u16CRC16;
+	uint16_t u16CalculatedCRC;
+	uint16_t u16ReceivedCRC;
 	uint8_t  u8FrameSize;
 	
 	// Get RX buffer size
 	u8FrameSize = fifo_get_used_size(&fifo_receive_buffer_desc);
-	
-	printf("\nProcessData: %d", u8FrameSize);
+
+#ifdef MMSN_DEBUG
+	printf_P(PSTR("\nProcessData: %d"), u8FrameSize);
+#endif	
 	
 	// Check if expected data size was collected
 	if (MMSN_COMM_FRAME_SIZE == u8FrameSize)
@@ -1133,7 +1165,7 @@ uint8_t mmsn_ProcessData_FrameProcess_Handler(MMSN_FSM_t * a_pFSM, uint8_t a_u8E
 		printf("\nCopied data = ");
 		for (uint8_t u8idx = 0; u8idx < MMSN_COMM_FRAME_SIZE; u8idx++)
 		{
-			printf("%u, ", a_pFSM->ptrRXDataFrame->u8FrameBuffer[u8idx]);
+			printf("%u, ", a_pFSM->ptrRxDataFrame->u8FrameBuffer[u8idx]);
 		} */
 		
 		// Clear receiving FIFO
@@ -1142,16 +1174,19 @@ uint8_t mmsn_ProcessData_FrameProcess_Handler(MMSN_FSM_t * a_pFSM, uint8_t a_u8E
 		/* Calculate CRC-16 (CRC-CCITT) using XMEGA hardware CRC peripheral
 		 * excluding last 2 bytes with CRC-16.
 		 */
-		u16CRC16 = xmega_calculate_checksum_crc16(a_pFSM->ptrRxDataFrame->u8FrameBuffer, MMSN_FRAME_NOCRC_LENGTH);
+		u16CalculatedCRC = xmega_calculate_checksum_crc16(a_pFSM->ptrRxDataFrame->u8FrameBuffer, MMSN_FRAME_NOCRC_LENGTH);
 		
-		// printf("\nCRC-16=%u", u16CRC16);
-
 		/* printf("\nmsg.CRC-16=%u", a_pFSM->ptrRXDataFrame->u16CRC16);
 		printf("\nCRC-16=%u", u16CRC16); */
 		
-		// Check received data integrity
+		/* Retrieve CRC-16 from the response message.
+		 * Note that received CRC16 value is transmitted in big endian order.
+		 * AVR architecture is little endian, so received bytes should be swapped.
+		 */
+		MMSN_BYTES_2_WORD(a_pFSM->ptrRxDataFrame->u8CRC16LoByte, a_pFSM->ptrRxDataFrame->u8CRC16HiByte, u16ReceivedCRC);
 		
-		if (u16CRC16 == a_pFSM->ptrRxDataFrame->u16CRC16)
+		// Check received data integrity
+		if (u16CalculatedCRC == u16ReceivedCRC)
 		{
 			// Calculated and received CRC-16 value matched. Go to command execution state.
 
@@ -1294,7 +1329,6 @@ void mmsn_InitializeStateMachine(MMSN_FSM_t * a_pFSM)
 	a_pFSM->CurrentState		= MMSN_IDLE_STATE;		//! Set current state to \ref eSM_Initialize
 	a_pFSM->PreviousState		= MMSN_IDLE_STATE;		//! Set previous state to \ref eSM_Initialize
 	a_pFSM->ptrRxDataFrame		= &g_RxCommFrameBuffer;	//! Pointer to internal copy of received data frame
-	//a_pFSM->ptrTxDataFrame		= &g_TxCommFrameBuffer;	//! Pointer to internal copy of transmitted data frame
 	a_pFSM->u8RetriesCount		= 0;					//! Retries counter
 	a_pFSM->FrameStatus			= MMSN_FrameUnknown;	//! Start with an unknown frame state
 	a_pFSM->ptrEventQueueDesc	= &eventQueue_desc;		//! Store pointer to event queue
@@ -1420,7 +1454,7 @@ uint8_t doByteStuffing(uint8_t *a_pDstBuf, uint8_t a_DstBufLen, const uint8_t *a
 /**
  *  \brief KISS function to compose complete sending data frame.
  */
-uint8_t _composeSendDataFrame(const mmsn_comm_data_frame_t *a_pSrcBuf, sMMSN_Send_Data_Frame_t *a_pDstBuf, bool a_IsResponseNeeded)
+uint8_t _composeSendDataFrame(const mmsn_receive_data_frame_t *a_pSrcBuf, sMMSN_Send_Data_Frame_t *a_pDstBuf, bool a_IsResponseNeeded)
 {
 	uint8_t u8MessageSize = 0;
 	
@@ -1443,6 +1477,10 @@ uint8_t _composeSendDataFrame(const mmsn_comm_data_frame_t *a_pSrcBuf, sMMSN_Sen
 	
 	// Increase sending message size by one to get correct length value and not array index
 	u8MessageSize++;
+	
+	// Add data size and response indication
+	a_pDstBuf->u8DataSize = u8MessageSize;
+	a_pDstBuf->u8IsResponseNeeded = a_IsResponseNeeded;
 	
 	return u8MessageSize;
 };
