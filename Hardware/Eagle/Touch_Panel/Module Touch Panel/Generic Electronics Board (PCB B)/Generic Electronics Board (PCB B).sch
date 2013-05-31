@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE eagle SYSTEM "eagle.dtd">
-<eagle version="6.1">
+<eagle version="6.4">
 <drawing>
 <settings>
 <setting alwaysvectorfont="no"/>
@@ -16564,7 +16564,7 @@ Jan Kandziora &amp;lt;jjj@gmx.de&amp;gt;</description>
 <junction x="198.12" y="27.94"/>
 </segment>
 </net>
-<net name="N$7" class="0">
+<net name="PDI_DATA" class="0">
 <segment>
 <pinref part="U1" gate="G$1" pin="PDI-DATA"/>
 <wire x1="68.58" y1="-35.56" x2="33.02" y2="-35.56" width="0.1524" layer="91"/>
@@ -16573,7 +16573,7 @@ Jan Kandziora &amp;lt;jjj@gmx.de&amp;gt;</description>
 <wire x1="33.02" y1="-43.18" x2="40.64" y2="-43.18" width="0.1524" layer="91"/>
 </segment>
 </net>
-<net name="N$8" class="0">
+<net name="PDI_CLK" class="0">
 <segment>
 <pinref part="U1" gate="G$1" pin="PDI-CLK/!RESET"/>
 <wire x1="68.58" y1="-38.1" x2="63.5" y2="-38.1" width="0.1524" layer="91"/>
@@ -16612,14 +16612,14 @@ Jan Kandziora &amp;lt;jjj@gmx.de&amp;gt;</description>
 <wire x1="66.04" y1="-15.24" x2="68.58" y2="-15.24" width="0.1524" layer="91"/>
 </segment>
 </net>
-<net name="N$3" class="0">
+<net name="PC2" class="0">
 <segment>
 <pinref part="R3" gate="G$1" pin="1"/>
 <pinref part="U1" gate="G$1" pin="PC2(OC0C/RXD0)"/>
 <wire x1="66.04" y1="-17.78" x2="68.58" y2="-17.78" width="0.1524" layer="91"/>
 </segment>
 </net>
-<net name="N$9" class="0">
+<net name="PC3" class="0">
 <segment>
 <pinref part="R4" gate="G$1" pin="1"/>
 <pinref part="U1" gate="G$1" pin="PC3(OC0D/TXD0)"/>
