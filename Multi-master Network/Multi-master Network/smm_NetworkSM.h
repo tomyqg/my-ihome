@@ -79,18 +79,21 @@ typedef enum eConfigStatus
  *
  * This structure can be used to store the communication frame.
  */
-struct mmsn_comm_data_frame {
+struct mmsn_receive_data_frame {
 	union {
 		struct {
-			uint16_t u16Identifier;
+			uint8_t  u8HeaderHiByte;
+			uint8_t  u8HeaderLoByte;
 			uint8_t	 u8DataBuffer[MMSN_DATA_LENGTH];
-			uint16_t u16CRC16;
+			uint8_t  u8CRC16HiByte;
+			uint8_t  u8CRC16LoByte;
 		};
+		
 		uint8_t u8FrameBuffer[MMSN_COMM_FRAME_SIZE];
 	};
 };
 
-typedef struct mmsn_comm_data_frame mmsn_comm_data_frame_t;
+typedef struct mmsn_receive_data_frame mmsn_receive_data_frame_t;
 
 // Maximum size of sending data buffer: 12 * 2
 #define MMSN_COMM_SEND_DATA_SIZE (MMSN_COMM_FRAME_SIZE * 2)
@@ -150,7 +153,7 @@ inline bool _sendData_FrameBuffer_Read_ResponseNeed(const sMMSN_Send_Data_Frame_
  *
  *  \return Total sending data frame size.
  */
-uint8_t _composeSendDataFrame(const mmsn_comm_data_frame_t *a_pSrcBuf, sMMSN_Send_Data_Frame_t *a_pDstBuf, bool a_IsResponseNeeded);
+uint8_t _composeSendDataFrame(const mmsn_receive_data_frame_t *a_pSrcBuf, sMMSN_Send_Data_Frame_t *a_pDstBuf, bool a_IsResponseNeeded);
 
 /* All the magic need for frame processing macros */
 #define MMSN_ADDRESS_bm	0xFFF0	/* Multi-Master Serial Network Address bit mask */
@@ -353,7 +356,7 @@ typedef struct MMSN_FSM
 	uint8_t						u8LineState;		//! Flag to indicate that the line is busy
 	MMSN_FSMState_t				CurrentState;
 	MMSN_FSMState_t				PreviousState;
-	mmsn_comm_data_frame_t	    *ptrRxDataFrame;	//! Pointer to structure holding frame being received
+	mmsn_receive_data_frame_t	    *ptrRxDataFrame;	//! Pointer to structure holding frame being received
 	//mmsn_comm_data_frame_t		*ptrTxDataFrame;	//! Pointer to structure holding frame to be transmitted
 	uint8_t						u8RetriesCount;		//! Retransmission counter
 	eMMSN_FrameStatus_t			FrameStatus;		//! Data Frame status
