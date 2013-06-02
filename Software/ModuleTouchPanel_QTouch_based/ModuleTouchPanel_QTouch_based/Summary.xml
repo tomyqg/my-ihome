@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+                                             <?xml-stylesheet type='text/xsl' href='Summary.xslt'?><SUMMARY>
+  <DeviceInformation>
+    <DeviceName>ATxmega32D4</DeviceName>
+    <DeviceVariant>44</DeviceVariant>
+    <Technology>QMatrix</Technology>
+  </DeviceInformation>
+  <SensorInformation TotalSensors="32">
+    <NumberOfButtons>32</NumberOfButtons>
+    <NumberOfWheels>0</NumberOfWheels>
+    <NumberOfSliders>0</NumberOfSliders>
+  </SensorInformation>
+  <ChannelInformation>
+    <TotalChannelsConsumed>32</TotalChannelsConsumed>
+  </ChannelInformation>
+  <PinConfiguration>
+    <AvailablePorts>A,B,C,D,E</AvailablePorts>
+    <TotalPinsUsed>18</TotalPinsUsed>
+    <PinConfig>
+      <XYLinesConfig>8x4</XYLinesConfig>
+      <XLines>PC0,PC1,PC2,PC3,PC4,PC5,PC6,PC7,</XLines>
+      <YALines>PB3,PB2,PB1,PB0,</YALines>
+      <YBLines>PA3,PA2,PA1,PA0,</YBLines>
+      <SMPPort>PA4</SMPPort>
+      <AINOPort>PA7</AINOPort>
+      <Sensors>
+        <Sensor Name="Button0" ChannelName="Channel0" X="PC0" YA="PB3" YB="PA3" />
+        <Sensor Name="Button1" ChannelName="Channel1" X="PC1" YA="PB3" YB="PA3" />
+        <Sensor Name="Button2" ChannelName="Channel2" X="PC2" YA="PB3" YB="PA3" />
+        <Sensor Name="Button3" ChannelName="Channel3" X="PC3" YA="PB3" YB="PA3" />
+        <Sensor Name="Button4" ChannelName="Channel4" X="PC4" YA="PB3" YB="PA3" />
+        <Sensor Name="Button5" ChannelName="Channel5" X="PC5" YA="PB3" YB="PA3" />
+        <Sensor Name="Button6" ChannelName="Channel6" X="PC6" YA="PB3" YB="PA3" />
+        <Sensor Name="Button7" ChannelName="Channel7" X="PC7" YA="PB3" YB="PA3" />
+        <Sensor Name="Button8" ChannelName="Channel8" X="PC0" YA="PB2" YB="PA2" />
+        <Sensor Name="Button9" ChannelName="Channel9" X="PC1" YA="PB2" YB="PA2" />
+        <Sensor Name="Button10" ChannelName="Channel10" X="PC2" YA="PB2" YB="PA2" />
+        <Sensor Name="Button11" ChannelName="Channel11" X="PC3" YA="PB2" YB="PA2" />
+        <Sensor Name="Button12" ChannelName="Channel12" X="PC4" YA="PB2" YB="PA2" />
+        <Sensor Name="Button13" ChannelName="Channel13" X="PC5" YA="PB2" YB="PA2" />
+        <Sensor Name="Button14" ChannelName="Channel14" X="PC6" YA="PB2" YB="PA2" />
+        <Sensor Name="Button15" ChannelName="Channel15" X="PC7" YA="PB2" YB="PA2" />
+        <Sensor Name="Button16" ChannelName="Channel16" X="PC0" YA="PB1" YB="PA1" />
+        <Sensor Name="Button17" ChannelName="Channel17" X="PC1" YA="PB1" YB="PA1" />
+        <Sensor Name="Button18" ChannelName="Channel18" X="PC2" YA="PB1" YB="PA1" />
+        <Sensor Name="Button19" ChannelName="Channel19" X="PC3" YA="PB1" YB="PA1" />
+        <Sensor Name="Button20" ChannelName="Channel20" X="PC4" YA="PB1" YB="PA1" />
+        <Sensor Name="Button21" ChannelName="Channel21" X="PC5" YA="PB1" YB="PA1" />
+        <Sensor Name="Button22" ChannelName="Channel22" X="PC6" YA="PB1" YB="PA1" />
+        <Sensor Name="Button23" ChannelName="Channel23" X="PC7" YA="PB1" YB="PA1" />
+        <Sensor Name="Button24" ChannelName="Channel24" X="PC0" YA="PB0" YB="PA0" />
+        <Sensor Name="Button25" ChannelName="Channel25" X="PC1" YA="PB0" YB="PA0" />
+        <Sensor Name="Button26" ChannelName="Channel26" X="PC2" YA="PB0" YB="PA0" />
+        <Sensor Name="Button27" ChannelName="Channel27" X="PC3" YA="PB0" YB="PA0" />
+        <Sensor Name="Button28" ChannelName="Channel28" X="PC4" YA="PB0" YB="PA0" />
+        <Sensor Name="Button29" ChannelName="Channel29" X="PC5" YA="PB0" YB="PA0" />
+        <Sensor Name="Button30" ChannelName="Channel30" X="PC6" YA="PB0" YB="PA0" />
+        <Sensor Name="Button31" ChannelName="Channel31" X="PC7" YA="PB0" YB="PA0" />
+      </Sensors>
+    </PinConfig>
+  </PinConfiguration>
+  <LibraryInformation ToolChainName="GCC">
+    <DefaultLibrary>libavrxmega2_32qm_8x_4y_k_0rs.a</DefaultLibrary>
+  </LibraryInformation>
+  <MemoryInformation>
+    <DataMemory>
+      <TotalDataMemory>4096</TotalDataMemory>
+      <DataMemoryUsed>417</DataMemoryUsed>
+      <DataMemoryFree>3679</DataMemoryFree>
+    </DataMemory>
+    <CodeMemory>
+      <TotalCodeMemory>36864</TotalCodeMemory>
+      <CodeMemoryUsed>2880</CodeMemoryUsed>
+      <CodeMemoryFree>33984</CodeMemoryFree>
+    </CodeMemory>
+  </MemoryInformation>
+  <OtherOptions>
+    <DelayCycle>3</DelayCycle>
+  </OtherOptions>
+  <ComponentID>qtlib.generic.tmx.qm.avrxmega</ComponentID>
+</SUMMARY>

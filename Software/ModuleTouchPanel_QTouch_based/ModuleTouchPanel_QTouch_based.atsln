@@ -1,0 +1,20 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Atmel Studio Solution File, Format Version 11.00
+Project("{54F91283-7BC4-4236-8FF9-10F437C3AD48}") = "ModuleTouchPanel_QTouch_based", "ModuleTouchPanel_QTouch_based\ModuleTouchPanel_QTouch_based.cproj", "{124028C0-C622-408B-945D-F31AEFE0180B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|AVR = Debug|AVR
+		Release|AVR = Release|AVR
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{124028C0-C622-408B-945D-F31AEFE0180B}.Debug|AVR.ActiveCfg = Debug|AVR
+		{124028C0-C622-408B-945D-F31AEFE0180B}.Debug|AVR.Build.0 = Debug|AVR
+		{124028C0-C622-408B-945D-F31AEFE0180B}.Release|AVR.ActiveCfg = Release|AVR
+		{124028C0-C622-408B-945D-F31AEFE0180B}.Release|AVR.Build.0 = Release|AVR
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
