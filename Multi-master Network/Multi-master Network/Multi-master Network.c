@@ -2,7 +2,7 @@
  * Multi_master_Network.c
  *
  * Created: 2013-01-23 18:08:26
- *  Author: fidectom
+ *  Author: Tomasz Fidecki, t.fidecki@gmail.com
  */ 
 
 #include <avr/io.h>
@@ -23,7 +23,6 @@
 // #include "crc_driver/crc.h"
 //#include <util/crc16.h>
 
-
 #ifdef MMSN_DEBUG
 
 /* STDOUT */
@@ -39,10 +38,12 @@ static int uart_putchar(char a_inChar, FILE *stream)
 	}
 	
 	// Wait for the transmit buffer to be empty
-	while ( !(USART_TERMINAL.STATUS & USART_DREIF_bm) );
+	// while ( !(USART_TERMINAL.STATUS & USART_DREIF_bm) );
+	while ( !(USART_COMMUNICATION_BUS.STATUS & USART_DREIF_bm) );
 	
 	// Put our character into the transmit buffer
-	USART_TERMINAL.DATA = a_inChar;
+	// USART_TERMINAL.DATA = a_inChar;
+	USART_COMMUNICATION_BUS.DATA = a_inChar;
 	
 	return 0;
 }
@@ -633,7 +634,24 @@ int main(void)
 
 #ifdef MMSN_DEBUG	
 	// Initialize serial communication terminal
-	usartCommTerminalInit();
+	//usartCommTerminalInit();
+	
+	// Configure and initialize communication bus usart
+	xmega_usart_configure();
+	
+	/* RS-485 PHYSICAL DEVICE CONFIGURATION */
+	// Initialize GPIO related to RS-485 interface
+	rs485_driver_gpio_initialize();
+	// Initially go LOW to enable receiver and start listening
+	rs485_driver_enable();
+	
+	/* USART INTERRUPTS CONFIGURATION - RECEIVING */
+	// Turn on USART RXC interrupt
+	xmega_set_usart_rx_interrupt_level(&USART_COMMUNICATION_BUS, USART_RXCINTLVL_HI_gc);
+	
+	// Turn off TXC and DRE interrupts
+	xmega_set_usart_tx_interrupt_level(&USART_COMMUNICATION_BUS, USART_TXCINTLVL_OFF_gc);
+	xmega_set_usart_dre_interrupt_level(&USART_COMMUNICATION_BUS, USART_DREINTLVL_OFF_gc);
 	
 	// Redirect stream to standard output
 	stdout = &mystdout;
@@ -719,7 +737,7 @@ int main(void)
 	/* Initialize Multi-Master Serial Network State Machine                 */
 	/************************************************************************/
 	// SM_stateTable[eSM_Initialize]();
-	mmsn_InitializeStateMachine(&mmsnFSM);
+	//mmsn_InitializeStateMachine(&mmsnFSM);
 	
 	// Initialize global storage for data sending
 	_sendData_FrameBuffer_Init(&gStorage_SendData);
@@ -731,7 +749,7 @@ int main(void)
 	
 	// Turn on global interrupts
 	sei();
-
+	
 	/************************************************************************/
 	/* Start infinite main loop, go to sleep and wait for interruption      */
 	/************************************************************************/
