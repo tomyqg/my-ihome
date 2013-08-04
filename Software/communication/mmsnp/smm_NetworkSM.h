@@ -1,6 +1,12 @@
 /*
-Serial Multi-Master Network State Machine
-*/
+ * smm_NetworkSM.h
+ *
+ * Multi-Master Serial Network Protocol State Machine
+ *
+ * Created: 2013-07-23 21:09:19
+ *  Author: Tomasz Fidecki t.fidecki@gmail.com
+ */ 
+
 
 #ifndef SMM_NETWORKSM_H_
 #define SMM_NETWORKSM_H_
@@ -23,7 +29,7 @@ do {	\
 } while(0)
 
 //! Maximum retries count
-#define MMSN_MAX_RETRIES	(5)
+#define MMSNP_MAX_RETRIES	(5)
 
 /* Line free/busy indicators */
 enum eBusyLine
@@ -56,7 +62,11 @@ typedef enum eConfigStatus
 /** Default device logical address in the network (DeviceNumber, 7bit value).
  *  Every device has default address after startup.
  */
-#define MMSN_DEFAULT_LOGICAL_NETWORK_ADDRESS	(0xFF)
+#define MMSNP_DEFAULT_LOGICAL_NETWORK_ADDRESS	(0xFF)
+
+/* Count of maximum devices on the bus */
+#define MMSNP_MAX_DEVICES_COUNT	(127)
+
 
 // Multi-Master Serial Network Destination Address offset
 //#define MMSN_DST_ADDRESS_OFFSET	(0)
@@ -107,7 +117,7 @@ typedef struct mmsn_receive_data_frame mmsn_receive_data_frame_t;
 // Size of complete sending data frame buffer
 #define MMSN_COMM_SEND_FRAME_BUFFER_SIZE (30)
 
-struct sMMSN_Send_Data_Frame
+struct mmsnp_Send_Data_Frame
 {
 	union
 	{
@@ -117,24 +127,24 @@ struct sMMSN_Send_Data_Frame
 			bool	u8IsResponseNeeded;
 			uint8_t u8SendDataBuffer[MMSN_COMM_SEND_DATA_BUFFER_SIZE];
 		};
+		
+		// Complete frame buffer for data sending
+		uint8_t u8SendDataFrameBuffer[MMSN_COMM_SEND_FRAME_BUFFER_SIZE];
 	};
-	
-	// Complete frame buffer
-	uint8_t u8SendDataFrameBuffer[MMSN_COMM_SEND_FRAME_BUFFER_SIZE];
 };
 
-typedef struct sMMSN_Send_Data_Frame sMMSN_Send_Data_Frame_t;
+typedef struct mmsnp_Send_Data_Frame mmsnp_send_data_frame_t;
 
-void _sendData_FrameBuffer_Init(sMMSN_Send_Data_Frame_t *a_pFrameBuffer);
-void _sendData_FrameBuffer_Write(sMMSN_Send_Data_Frame_t *a_pDst, uint8_t a_u8DataSize, bool a_Response, uint8_t * a_pSrcData, uint8_t a_u8SrcDataSize);
-void _sendData_FrameBuffer_Copy(const sMMSN_Send_Data_Frame_t *a_pSrc, sMMSN_Send_Data_Frame_t *a_pDst);
+void _sendData_FrameBuffer_Init(mmsnp_send_data_frame_t *a_pFrameBuffer);
+void _sendData_FrameBuffer_Write(mmsnp_send_data_frame_t *a_pDst, uint8_t a_u8DataSize, bool a_Response, uint8_t * a_pSrcData, uint8_t a_u8SrcDataSize);
+void _sendData_FrameBuffer_Copy(const mmsnp_send_data_frame_t *a_pSrc, mmsnp_send_data_frame_t *a_pDst);
 
-inline uint8_t _sendData_FrameBuffer_Read_DataSize(const sMMSN_Send_Data_Frame_t *a_pSource)
+inline uint8_t _sendData_FrameBuffer_Read_DataSize(const mmsnp_send_data_frame_t *a_pSource)
 {
 	return (a_pSource->u8DataSize);
 };
 
-inline bool _sendData_FrameBuffer_Read_ResponseNeed(const sMMSN_Send_Data_Frame_t *a_pSource)
+inline bool _sendData_FrameBuffer_Read_ResponseNeed(const mmsnp_send_data_frame_t *a_pSource)
 {
 	return (a_pSource->u8IsResponseNeeded);
 };
@@ -153,7 +163,7 @@ inline bool _sendData_FrameBuffer_Read_ResponseNeed(const sMMSN_Send_Data_Frame_
  *
  *  \return Total sending data frame size.
  */
-uint8_t _composeSendDataFrame(const mmsn_receive_data_frame_t *a_pSrcBuf, sMMSN_Send_Data_Frame_t *a_pDstBuf, bool a_IsResponseNeeded);
+uint8_t _composeSendDataFrame(const mmsn_receive_data_frame_t *a_pSrcBuf, mmsnp_send_data_frame_t *a_pDstBuf, bool a_IsResponseNeeded);
 
 /* All the magic need for frame processing macros */
 #define MMSN_ADDRESS_bm	0xFFF0	/* Multi-Master Serial Network Address bit mask */
@@ -214,9 +224,9 @@ do {	\
 // _OutByte1 - high byte
 // _OutByte2 - low byte
 #define MMSN_WORD_2_BYTES(_InWord, _OutByte1, _OutByte2)	\
-do {									\
-_OutByte1 = ((_InWord & 0xFF00) >> 8);	\
-_OutByte2 = (_InWord & 0x00FF);			\
+do {										\
+	_OutByte1 = ((_InWord & 0xFF00) >> 8);	\
+	_OutByte2 = (_InWord & 0x00FF);			\
 } while (0);
 
 // Global argument macros
@@ -320,7 +330,7 @@ typedef enum eMMSN_FSMState
 } MMSN_FSMState_t;
 
 /* FSM Events */
-enum eMMSN_FSMEvent
+enum eMMSNP_FSM_Event
 {
 	MMSN_DATA_RECEIVED_EVENT = 0,				// 0
 	MMSN_COLLISION_AVOIDANCE_TIMEOUT,			// 1
@@ -332,23 +342,23 @@ enum eMMSN_FSMEvent
 	MMSN_NO_RESPONSE_TIMEOUT_EVENT,				// 7
 	MMSN_RETRANSMISSION_EVENT,					// 8
 	
-	MMSN_MAX_EVENTS
+	MMSNP_MAX_EVENTS
 };
 
 /* MMSN FSM return codes */
-enum eMMSN_FSMReturnCode
+enum MMSNP_RETURN_CODE
 {
-	MMSN_OK = 0,
-	MMSN_ERROR = 0xFF	//! Error during processing
+	MMSNP_OK	   = 0,
+	MMSNP_ERROR = 0xFF	//! Error during processing
 	
-} eMMSN_FSMReturnCode_t;
+} MMSNP_RETURN_CODE_t;
 
 typedef struct MMSN_SEND_ATTRIBUTES 
 {
-	uint8_t u8DataSize;
+	volatile uint8_t u8DataSize;
 	bool	u8IsResponseNeeded;
-	uint8_t *pu8SendDataBuffer;
-	uint8_t u8SendDataCounter;
+	volatile uint8_t *pu8DataBuffer;
+	volatile uint8_t u8DataCounter;
 } mmsn_send_attributes_t;
 
 typedef struct MMSN_FSM
@@ -356,8 +366,8 @@ typedef struct MMSN_FSM
 	uint8_t						u8LineState;		//! Flag to indicate that the line is busy
 	MMSN_FSMState_t				CurrentState;
 	MMSN_FSMState_t				PreviousState;
-	mmsn_receive_data_frame_t	    *ptrRxDataFrame;	//! Pointer to structure holding frame being received
-	//mmsn_comm_data_frame_t		*ptrTxDataFrame;	//! Pointer to structure holding frame to be transmitted
+	mmsn_receive_data_frame_t	*ptrRxDataFrame;	//! Pointer to structure holding frame being received
+	//mmsn_comm_data_frame_t	*ptrTxDataFrame;	//! Pointer to structure holding frame to be transmitted
 	uint8_t						u8RetriesCount;		//! Retransmission counter
 	eMMSN_FrameStatus_t			FrameStatus;		//! Data Frame status
 	uint8_t						u8IsDataToSend;		//! Indicate that data is waiting to be sent
@@ -378,7 +388,7 @@ typedef struct MMSN_FSM
 (* (fsmActionTablePtr + fsm.u8State))[event](&fsm, event, &arg)
 
 
-void mmsn_InitializeStateMachine(MMSN_FSM_t * a_pFSM);
+void mmsn_Initialize(MMSN_FSM_t * a_pFSM);
 
 /**
  * \brief Definition of Multi-Master Serial Network FSM event handler function.
@@ -392,7 +402,7 @@ void mmsn_InitializeStateMachine(MMSN_FSM_t * a_pFSM);
  * \retval returned value encoded with eMMSN_FSMReturnCode enumeration.
  * \retval MMSN_ERROR in case of processing error.
  */
-typedef uint8_t (* mmsnFsmEventHandler) (MMSN_FSM_t * a_pFSM, uint8_t a_u8Event, void * a_pEventArg);
+typedef uint8_t (* mmsnFsmEventHandler)(MMSN_FSM_t * a_pFSM, uint8_t a_u8Event, void * a_pEventArg);
 
 uint8_t mmsn_Idle_DataReceived_Handler(MMSN_FSM_t * a_pFSM, uint8_t a_u8Event, void * a_pEventArg);
 uint8_t mmsn_Idle_CollisionAvoidanceTimeoutEvent_Handler(MMSN_FSM_t * a_pFSM, uint8_t a_u8Event, void * a_pEventArg);
@@ -435,7 +445,7 @@ uint8_t mmsn_Error_ErrorEvent_Handler(MMSN_FSM_t * a_pFSM, uint8_t a_u8Event, vo
 #define SYSCMD_BROADCAST_SERIAL_NUMBER_REQ		(0x69)	// 105
 #define SYSCMD_MODULE_SET_LOGICAL_ADDRESS_REQ	(0x70)	// 106
 
-// Command function handler
+/* Command function handler type definition */
 typedef void (* funcCommandHandler)(void);
 
 typedef struct CommandDescriptor
@@ -551,5 +561,20 @@ uint8_t xmega_generate_random_logical_network_address(void);
  *  \return none.
  */
 uint8_t doByteStuffing(uint8_t *a_pDstBuf, uint8_t a_DstBufLen, const uint8_t *a_pSrcBuf, uint8_t a_SrcBufLen);
+
+//////////////////////////////////////////////////////////////////////////
+// Roller Blinder
+//////////////////////////////////////////////////////////////////////////
+#define MMSNP_ROLLER_BLINDER_STATE_NO_ACTION	(0x00)
+#define MMSNP_ROLLER_BLINDER_STATE_UP			(0x01)
+#define MMSNP_ROLLER_BLINDER_STATE_DOWN			(0x02)
+
+//////////////////////////////////////////////////////////////////////////
+// Recuperator
+//////////////////////////////////////////////////////////////////////////
+#define MMSNP_RECUPERATOR_STATE_NO_ACTION	(0x00)
+#define MMSNP_RECUPERATOR_STATE_SPEED_LOW	(0x01)
+#define MMSNP_RECUPERATOR_STATE_SPEED_MED	(0x02)
+#define MMSNP_RECUPERATOR_STATE_SPEED_HIGH	(0x03)
 
 #endif /* SMM_NETWORKSM_H_ */
