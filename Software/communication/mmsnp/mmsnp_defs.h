@@ -25,11 +25,31 @@
 #define A8CH_SET_UPTIME2_DATA_BYTE		(4)
 #define A8CH_SET_UPTIME3_DATA_BYTE		(5)
 
+/************************************************************************/
+/* Touch Panel Device                                                   */
+/************************************************************************/
+/* Data order */
+#define MMSNP_TP_BUTTON_SENSOR_STATE_INDEX_DATA_BYTE	(0x00)
+#define MMSNP_TP_SCENE_SENSOR_STATE_INDEX_DATA_BYTE		(0x01)
+#define MMSNP_TP_TEMPERATURE_INDEX_DATA_BYTE			(0x02)
+#define MMSNP_TP_ROLLER_BLINDER_STATE_INDEX_DATA_BYTE	(0x03)
+#define MMSNP_TP_RECUPERATOR_STATE_INDEX_DATA_BYTE		(0x04)
+
+/* Bit positions */
+#define MMSNP_TP_BUTTON_SENSOR_STATE_MAX_bp	(0x05)
+#define MMSNP_TP_SCENE_SENSOR_STATE_MAX_bp	(0x02)
+
 typedef enum MMSNP_A8CH_RelayStates
 {
-	MYHOME_A8CH_RELAY_OFF = 0,
-	MYHOME_A8CH_RELAY_ON  = 1 
+	MMSNP_A8CH_RELAY_OFF = 0,
+	MMSNP_A8CH_RELAY_ON  = 1
 	
 } MMSNP_A8CH_RelayStates_t;
+
+typedef enum MMSNP_TOUCH_PANEL_SENSOR_STATE
+{
+	MMSNP_TP_SENSOR_OFF = 0,
+	MMSNP_TP_SENSOR_ON  = 1
+} MMSNP_TOUCH_PANEL_SENSOR_STATE_t;
 
 #endif /* MMSNP_DEFS_H_ */
