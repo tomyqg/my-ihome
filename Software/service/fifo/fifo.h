@@ -53,7 +53,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include "../utils.h"
+#include "../utils/utils.h"
 
 /**
  * \defgroup fifo_group First-In-First-Out Buffer (FIFO)
