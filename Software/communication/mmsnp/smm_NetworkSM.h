@@ -431,7 +431,7 @@ uint8_t mmsn_Error_ErrorEvent_Handler(MMSN_FSM_t * a_pFSM, uint8_t a_u8Event, vo
 // 0X7F (127) Last Command Number
 #define MMSNP_COMMAND_NUMBER_LAST	(0x7F)
 // Commands count
-#define MMSNP_COMMAND_COUNT			(0X80)
+#define MMSNP_COMMAND_COUNT			(0x80)
 
 // 0x65 (101) First System Command Number
 #define SYSTEM_COMMAND_NUMBER_FIRST 0x65

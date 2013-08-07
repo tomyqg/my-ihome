@@ -673,7 +673,7 @@ uint8_t mmsn_Send_DataRegEmptyEvent_Handler(MMSN_FSM_t *a_pFSM, uint8_t a_u8Even
 			USART_COMMUNICATION_BUS.STATUS |= USART_TXCIF_bm;
 			
 			// Wait a while for data to bit shifted out from physical device
-			_delay_us(300);
+			_delay_us(500);
 			
 			/* Set RS-485 transceiver for receiving */
 			RS485_RECEIVER_ENABLE();
