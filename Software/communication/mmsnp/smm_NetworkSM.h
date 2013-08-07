@@ -4,7 +4,8 @@
  * Multi-Master Serial Network Protocol State Machine
  *
  * Created: 2013-07-23 21:09:19
- *  Author: Tomasz Fidecki t.fidecki@gmail.com
+ *  Author: Tomasz Fidecki
+ *  Email: t.fidecki@gmail.com
  */ 
 
 
@@ -13,19 +14,20 @@
 
 #include <stdbool.h>
 #include <stdlib.h>
-#include "nvm_driver/nvm_driver.h"
-#include "fifo/fifo.h"
+
+#include <fifo.h>
+#include <nvm_driver.h>
 #include "fsm_Receiver.h"
 
 /** EVENT definitions */
 
-// Add event to the queue
-#define ADD_EVENT_TO_QUEUE(p_eventQDesc, _event)	\
-do {	\
-		ATOMIC_BLOCK(ATOMIC_FORCEON)	\
-		{	\
+/* Add event to the queue */
+#define ADD_EVENT_TO_QUEUE(p_eventQDesc, _event)			\
+do {														\
+		ATOMIC_BLOCK(ATOMIC_FORCEON)						\
+		{													\
 			fifo_push_uint8_nocheck(p_eventQDesc, _event);	\
-		};	\
+		};													\
 } while(0)
 
 //! Maximum retries count
@@ -34,8 +36,8 @@ do {	\
 /* Line free/busy indicators */
 enum eBusyLine
 {
-	MMSN_FREE_BUS = 0,
-	MMSN_BUSY_BUS = 1
+	MMSNP_FREE_BUS = 0,
+	MMSNP_BUSY_BUS = 1
 };
 
 /* Device configuration status */
@@ -46,10 +48,10 @@ typedef enum eConfigStatus
 } eConfigStatus_t;
 
 /* Size of Network receiving FIFO buffer */
-#define FIFO_RECEIVE_BUFFER_SIZE	(16)
+#define MMSNP_FIFO_RECEIVE_BUFFER_SIZE	(16)
 
 /* Size of Network receiving FIFO buffer */
-#define FIFO_SEND_BUFFER_SIZE		(16)
+#define MMSNP_FIFO_SEND_BUFFER_SIZE		(16)
 
 /* Communication staff temporarily here */
 
@@ -57,7 +59,7 @@ typedef enum eConfigStatus
 // [12b]	[4b]		   [8B]  [2B]
 // [Address][Control Field][DATA][CRC-16]
 // [Address] = [12bits] = [DeviceType, 4bits][DeviceNumber/SystemCommand, 7bits][RemoteTransmissionRequest (RTR), 1bit]
-#define MMSN_COMM_FRAME_SIZE	(12)
+#define MMSNP_COMM_FRAME_SIZE	(12)
 
 /** Default device logical address in the network (DeviceNumber, 7bit value).
  *  Every device has default address after startup.
@@ -82,7 +84,7 @@ typedef enum eConfigStatus
 // CRC-16 data length
 #define MMSN_CRC_LENGTH			(2)
 // Multi-Master Serial Network frame without CRC-16 value length
-#define MMSN_FRAME_NOCRC_LENGTH	(MMSN_COMM_FRAME_SIZE - MMSN_CRC_LENGTH)
+#define MMSN_FRAME_NOCRC_LENGTH	(MMSNP_COMM_FRAME_SIZE - MMSN_CRC_LENGTH)
 
 /**
  * \brief Structure containing the Multi-Master Serial Network Communication Data Frame
@@ -99,14 +101,14 @@ struct mmsn_receive_data_frame {
 			uint8_t  u8CRC16LoByte;
 		};
 		
-		uint8_t u8FrameBuffer[MMSN_COMM_FRAME_SIZE];
+		uint8_t u8FrameBuffer[MMSNP_COMM_FRAME_SIZE];
 	};
 };
 
 typedef struct mmsn_receive_data_frame mmsn_receive_data_frame_t;
 
 // Maximum size of sending data buffer: 12 * 2
-#define MMSN_COMM_SEND_DATA_SIZE (MMSN_COMM_FRAME_SIZE * 2)
+#define MMSN_COMM_SEND_DATA_SIZE (MMSNP_COMM_FRAME_SIZE * 2)
 
 /* Maximum size of sending data buffer
  * frame_begin (2) + data_size * DLE + frame_end (2)
@@ -216,42 +218,42 @@ _u16Identifier = (_u16Identifier & (~MMSN_SYSCMD_bm)) | ((_u8SysCmd & 0x7F) << M
 #define set_MMSN_CTRLF(_u8CtrlF, _u16Identifier)	\
 	_u16Identifier = (_u16Identifier & (~MMSN_CTRLF_bm)) | (_u8CtrlF << MMSN_CTRLF_bp)
 
-#define MMSN_BYTES_2_WORD(_InByte1, _InByte2, _OutWord)	\
-do {	\
+#define MMSN_BYTES_2_WORD(_InByte1, _InByte2, _OutWord)		\
+do {														\
 	_OutWord = (((_InByte1 << 8) & 0xFF00) | (_InByte2));	\
 } while (0);
 
 // _OutByte1 - high byte
 // _OutByte2 - low byte
 #define MMSN_WORD_2_BYTES(_InWord, _OutByte1, _OutByte2)	\
-do {										\
-	_OutByte1 = ((_InWord & 0xFF00) >> 8);	\
-	_OutByte2 = (_InWord & 0x00FF);			\
+do {														\
+	_OutByte1 = ((_InWord & 0xFF00) >> 8);					\
+	_OutByte2 = (_InWord & 0x00FF);							\
 } while (0);
 
 // Global argument macros
 
 // Get data size waiting to be sent. Encoded with 7 lower bits.
 #define get_MMSN_SEND_DATA_SIZE(_InByte, _OutByte)	\
-do {	\
-	_OutByte = (_InByte & 0x7F);	\
+do {												\
+	_OutByte = (_InByte & 0x7F);					\
 } while (0);
 
 // Set data size waiting to be sent. Encoded with 7 lower bits.
-#define set_MMSN_SEND_DATA_SIZE(_InByte, _OutByte)	\
-do {	\
+#define set_MMSN_SEND_DATA_SIZE(_InByte, _OutByte)			\
+do {														\
 	_OutByte = ((_OutByte & (~0x7F)) | (_InByte & 0x7F));	\
 } while (0);
 
 // Get data size waiting to be sent. Encoded with 7 lower bits.
 #define get_MMSN_SEND_RESPONSE_NEEDED(_InByte, _OutByte)	\
-do {	\
-	_OutByte = ((_InByte & 0x80) >> 7);	\
+do {														\
+	_OutByte = ((_InByte & 0x80) >> 7);						\
 } while (0);
 
 // Set data size waiting to be sent. Encoded with 7 lower bits.
-#define set_MMSN_SEND_RESPONSE_NEEDED(_InByte, _OutByte)	\
-do {	\
+#define set_MMSN_SEND_RESPONSE_NEEDED(_InByte, _OutByte)			\
+do {																\
 	_OutByte = ((_OutByte & (~0x80)) | ((_InByte & 0x80) << 7));	\
 } while (0);
 
@@ -425,11 +427,11 @@ uint8_t mmsn_Error_ErrorEvent_Handler(MMSN_FSM_t * a_pFSM, uint8_t a_u8Event, vo
 /* COMMUNICATION                                                        */
 /************************************************************************/
 // 0x00 (0) First Command Number
-#define COMMAND_NUMBER_FIRST	(0)
+#define MMSNP_COMMAND_NUMBER_FIRST	(0)
 // 0X7F (127) Last Command Number
-#define COMMAND_NUMBER_LAST		(0x7F)
+#define MMSNP_COMMAND_NUMBER_LAST	(0x7F)
 // Commands count
-#define COMMAND_COUNT			(0X80)
+#define MMSNP_COMMAND_COUNT			(0X80)
 
 // 0x65 (101) First System Command Number
 #define SYSTEM_COMMAND_NUMBER_FIRST 0x65
@@ -437,6 +439,10 @@ uint8_t mmsn_Error_ErrorEvent_Handler(MMSN_FSM_t * a_pFSM, uint8_t a_u8Event, vo
 #define SYSTEM_COMMAND_NUMBER_LAST 0x7F
 // (127 - 101) = 26
 #define SYSTEM_COMMAND_COUNT (26)
+
+
+/* Command definitions */
+#define DEVCMD_STATE_CHANGE_EVENT				(0x01)	// 001
 
 #define SYSCMD_GROUP_RESTART_REQ				(0x65)	// 101
 #define SYSCMD_MODULE_RESTART_REQ				(0x66)	// 102
@@ -446,13 +452,13 @@ uint8_t mmsn_Error_ErrorEvent_Handler(MMSN_FSM_t * a_pFSM, uint8_t a_u8Event, vo
 #define SYSCMD_MODULE_SET_LOGICAL_ADDRESS_REQ	(0x70)	// 106
 
 /* Command function handler type definition */
-typedef void (* funcCommandHandler)(void);
+typedef void (* funcCommandHandler)(mmsn_receive_data_frame_t * a_pRxDataFrame);
 
-typedef struct CommandDescriptor
+typedef struct MMSNP_COMMAND_DESCRIPTOR
 {
 	uint8_t			   u8SysCmdNumber;	// System Command Number
 	funcCommandHandler ptrCmdHandler;	// Pointer to function handler
-} CommandDescriptor_t;
+} MMSNP_COMMAND_DESCRIPTOR_t;
 
 
 /**
@@ -472,10 +478,10 @@ funcCommandHandler get_CommandFunctionHandler(uint8_t a_u8CommandNumber);
 /************************************************************************/
 
 // Size of network error storage table. Power of 2 for easier size management.
-#define NETWORK_ERROR_TABLE_SIZE 64
+#define NETWORK_ERROR_TABLE_SIZE (64)
 // Create a mask to speed up the table management (index swapping).
 // mask = (2 * size) - 1 => mask = 63 (0x3F)
-#define NETWORK_ERROR_TABLE_SIZE_MASK 0x3F
+#define NETWORK_ERROR_TABLE_SIZE_MASK (0x3F)
 
 /* Network Error types */
 typedef enum eNetworkError
