@@ -6,10 +6,10 @@
  */ 
 
 #include "utils.h"
-#include "nvm_driver/nvm_driver.h"
+#include <nvm_driver.h>
 #include <stddef.h>
 #include "board_config.h"
-#include "usart_driver/usart_driver.h"
+#include <usart_driver.h>
 
 // Configure XMEGA oscillator and clock source.
 void xmega_set_cpu_clock_to_8MHz(void)
