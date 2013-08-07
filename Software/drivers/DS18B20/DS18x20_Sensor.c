@@ -143,59 +143,80 @@ int16_t DS18B20_Manager_convertRawToCelsius(DS18B20_Manager_t *a_pMe)
 	uint8_t u8Resolution;
 	bool	bNegative = false;
 	uint8_t u8IntPart;
-	uint8_t u8FractPart;
+	uint8_t u8FractPart = 0;
 	int16_t i16RetVal;
 	
-	/* Get raw temperature from scratchpad
+	/* Get raw temperature data from the scratchpad memory
 	 * Byte[0]: temperature LSB
 	 * Byte[1]: temperature MSB
 	 */
 	u16RawTemp = (a_pMe->scratchpad[1] << 8) | a_pMe->scratchpad[0];
 	
-	// Get actual resolution from scratchpad
-	u8Resolution = (a_pMe->scratchpad[RESOLUTION_BYTEPOS_DS18B20] & RESOLUTION_BITMASK_DS18B20);
+	// Get family code from the ROM Code and clear undefined bits if needed
+	if (FAMILY_CODE_DS18S20 != a_pMe->ROMCode[0])
+	{
+		// Get actual resolution from scratchpad
+		u8Resolution = (a_pMe->scratchpad[RESOLUTION_BYTEPOS_DS18B20] & RESOLUTION_BITMASK_DS18B20);
 	
-	// Clear undefined bits when resolution is not 12-bit	
-	if (RESOLUTION_9BITS_DS18B20 == u8Resolution)
-	{
-		// 9-bit resolution, bits 2, 1, 0 are undefined
-		u16RawTemp &= ~(UNDEFINED_9BITS_RES_18B20);
-	} 
-	else if (RESOLUTION_10BITS_DS18B20 == u8Resolution)
-	{
-		// 10-bit resolution, bits 1, 0 are undefined
-		u16RawTemp &= ~(UNDEFINED_10BITS_RES_18B20);
-	}
-	else if (RESOLUTION_11BITS_DS18B20 == u8Resolution)
-	{
-		// 11-bit resolution, bit 0 is undefined
-		u16RawTemp &= ~(UNDEFINED_11BITS_RES_18B20);
-	}
-	else
-	{
-		// 12-bit resolution all bits are relevant
-	}
+		// Clear undefined bits when resolution is not 12-bit	
+		if (RESOLUTION_9BITS_DS18B20 == u8Resolution)
+		{
+			// 9-bit resolution, bits 2, 1, 0 are undefined
+			u16RawTemp &= ~(UNDEFINED_9BITS_RES_18B20);
+		} 
+		else if (RESOLUTION_10BITS_DS18B20 == u8Resolution)
+		{
+			// 10-bit resolution, bits 1, 0 are undefined
+			u16RawTemp &= ~(UNDEFINED_10BITS_RES_18B20);
+		}
+		else if (RESOLUTION_11BITS_DS18B20 == u8Resolution)
+		{
+			// 11-bit resolution, bit 0 is undefined
+			u16RawTemp &= ~(UNDEFINED_11BITS_RES_18B20);
+		}
+		else
+		{
+			// 12-bit resolution all bits are relevant
+		}
+	}		
 	
 	// Check raw temperature for negative sign
 	if (u16RawTemp & 0x8000)
 	{
 		bNegative = true;
 		u16RawTemp ^= 0xFFFF;	// two's complement
-		u16RawTemp += 1;	
+		u16RawTemp += 1;
 	}
 	
-	// Make conversion to the following format [+/- xxx.xx]
-	u8IntPart = (uint8_t)((u16RawTemp >> 4) & 0x7F);			// integer part
-	u8FractPart = (uint8_t)(((u16RawTemp & 0x0F) * 625) / 100);	// fractional part
+	if (FAMILY_CODE_DS18S20 == a_pMe->ROMCode[0])
+	{
+		// Discard sign and divide by 0.5 to get correct value
+		// Use shift right bitwise operation for performance reasons
+		u8IntPart = (uint8_t)((u16RawTemp & 0xFF) >> 1);
+		
+		// Round up if 0.5C bit is present
+		if (u16RawTemp & 0x0001)
+		{
+			u8IntPart++;
+		}
+	}
+	else
+	{
+		// Make conversion to the following format [+/- xxx.xx]
+		u8IntPart = (uint8_t)((u16RawTemp >> 4) & 0x7F);			// integer part
+		u8FractPart = (uint8_t)(((u16RawTemp & 0x0F) * 625) / 100);	// fractional part
+	}
 	
+	// Make final computations
 	i16RetVal = u8IntPart;
-	
+		
 	// Rounding
 	if (u8FractPart > 50)
 	{
 		i16RetVal++;
 	}
 	
+	// Add sign
 	if (bNegative)
 	{
 		i16RetVal = -i16RetVal;
