@@ -11,10 +11,10 @@ Serial Multi-Master Network State Machine
 #include <stdio.h>
 #include <string.h>
 #include <stdbool.h>
-#include "board_config.h"
-#include "tc_driver.h"
-#include "usart_driver/usart_driver.h"
-#include "utils.h"
+#include <board_config.h>
+#include <tc_driver.h>
+#include <usart_driver.h>
+#include <utils.h>
 #include <util/crc16.h>
 
 #include <util/delay.h>
@@ -25,7 +25,7 @@ Serial Multi-Master Network State Machine
  * This buffer consists of \ref FIFO_RECEIVE_BUFFER_SIZE elements
  * capable of holding a byte
  */
-uint8_t fifo_receive_buffer [FIFO_RECEIVE_BUFFER_SIZE];
+uint8_t fifo_receive_buffer [MMSNP_FIFO_RECEIVE_BUFFER_SIZE];
 
 /**
  * \brief Network receiving FIFO buffer descriptor.
@@ -283,7 +283,7 @@ void _copyDataFrame(fifo_desc_t * a_pFifoDesc, mmsn_receive_data_frame_t * a_pDs
 void _ClearRxResources(MMSN_FSM_t * a_pFSM)
 {
 	// Clear working RX buffer
-	memset(a_pFSM->ptrRxDataFrame->u8FrameBuffer, 0, MMSN_COMM_FRAME_SIZE);
+	memset(a_pFSM->ptrRxDataFrame->u8FrameBuffer, 0, MMSNP_COMM_FRAME_SIZE);
 	
 	// Flush receiving FIFO
 	fifo_flush(&fifo_receive_buffer_desc);
@@ -292,7 +292,7 @@ void _ClearRxResources(MMSN_FSM_t * a_pFSM)
 	fsmReceiverInitialize(&a_pFSM->ReceiverFSM);
 	
 	// Reset bus state
-	a_pFSM->u8LineState = MMSN_FREE_BUS;
+	a_pFSM->u8LineState = MMSNP_FREE_BUS;
 	
 	// Reset frame status
 	a_pFSM->FrameStatus = MMSN_FrameUnknown;
@@ -341,7 +341,7 @@ uint8_t mmsn_Idle_DataReceived_Handler(MMSN_FSM_t * a_pFSM, uint8_t a_u8Event, v
 		_restartCollisionAvoidanceTimer();
 
 		// Set bus to busy state
-		a_pFSM->u8LineState = MMSN_BUSY_BUS;
+		a_pFSM->u8LineState = MMSNP_BUSY_BUS;
 
 		// In this state no other than DLE data is expected and ignore return from Receiver FSM.
 	
@@ -392,7 +392,7 @@ uint8_t mmsn_xxx_CollisionAvoidanceTimeoutEvent_Handler(MMSN_FSM_t * a_pFSM, uin
 		xmega_tc_select_clock_source(&TIMER_COLLISION_AVOIDANCE, TC_CLKSEL_OFF_gc);
 
 		/* Clear busy line flag */
-		a_pFSM->u8LineState = MMSN_FREE_BUS;
+		a_pFSM->u8LineState = MMSNP_FREE_BUS;
 	};
 	
 	return MMSNP_OK;
@@ -411,7 +411,7 @@ uint8_t mmsn_Idle_CollisionAvoidanceTimeoutEvent_Handler(MMSN_FSM_t * a_pFSM, ui
 		xmega_tc_select_clock_source(&TIMER_COLLISION_AVOIDANCE, TC_CLKSEL_OFF_gc);
 
 		// Clear busy line flag.
-		a_pFSM->u8LineState = MMSN_FREE_BUS;
+		a_pFSM->u8LineState = MMSNP_FREE_BUS;
 	
 		// Check if there is data pending to be sent
 		if (true == a_pFSM->u8IsDataToSend)
@@ -464,7 +464,7 @@ uint8_t mmsn_Receive_DataReceived_Handler(MMSN_FSM_t * a_pFSM, uint8_t a_u8Event
 		_restartCollisionAvoidanceTimer();
 	
 		// Set bus to busy state
-		a_pFSM->u8LineState = MMSN_BUSY_BUS;
+		a_pFSM->u8LineState = MMSNP_BUSY_BUS;
 	
 		// Obtain received data
 		uint8_t u8Data = (*(uint8_t *)a_pEventArg);
@@ -476,7 +476,7 @@ uint8_t mmsn_Receive_DataReceived_Handler(MMSN_FSM_t * a_pFSM, uint8_t a_u8Event
 		
 			u8RetCode = CALL_EV_HDL(a_pFSM->pFSMRActionTable, a_pFSM->ReceiverFSM, FSMR_DATA_RECEIVED, u8Data);
 		
-			// Check if data should be stored in RX fifo buffer
+			/* Check if data should be stored in RX fifo buffer */
 			switch (u8RetCode)
 			{
 				case FSMR_FRAME_BEGIN:
@@ -628,11 +628,11 @@ uint8_t	mmsn_ExecuteCommand_ExecuteCommandEvent_Handler(MMSN_FSM_t * a_pFSM, uin
 			// printf("\nExecute: YES");
 		
 			/* Command is handled by this device. */
-			commandHandlerPtr();
-		}
+			commandHandlerPtr(a_pFSM->ptrRxDataFrame);
+		};
 
-		// Clear internal receiving data buffer
-		memset(a_pFSM->ptrRxDataFrame, 0, MMSN_COMM_FRAME_SIZE);
+		/* Clear internal receiving data buffer */
+		memset(a_pFSM->ptrRxDataFrame, 0, MMSNP_COMM_FRAME_SIZE);
 	
 		/* All clean-up done. Go to \ref MMSN_IDLE_STATE state */
 		a_pFSM->CurrentState = MMSN_IDLE_STATE;
@@ -731,7 +731,7 @@ uint8_t mmsn_WaitForResponse_DataReceivedEvent_Handler(MMSN_FSM_t *a_pFSM, uint8
 		_restartCollisionAvoidanceTimer();
 
 		// Set bus to busy state
-		a_pFSM->u8LineState = MMSN_BUSY_BUS;
+		a_pFSM->u8LineState = MMSNP_BUSY_BUS;
 
 		// In this state no other than DLE data is expected and ignore return value from Receiver FSM.
 	
@@ -811,7 +811,7 @@ uint8_t mmsn_ReceiveResponse_DataReceivedEvent_Handler(MMSN_FSM_t * a_pFSM, uint
 		_restartCollisionAvoidanceTimer();
 	
 		// Set bus to busy state
-		a_pFSM->u8LineState = MMSN_BUSY_BUS;
+		a_pFSM->u8LineState = MMSNP_BUSY_BUS;
 	
 		// Obtain received data byte from event argument
 		uint8_t u8Data = (*(uint8_t *)a_pEventArg);
@@ -984,7 +984,7 @@ uint8_t mmsn_Retransmit_RetransmissionEvent_Handler(MMSN_FSM_t * a_pFSM, uint8_t
 			 * - send the first byte
 			 * - go to SEND state, the rest will be handled by DRE interrupt
 			 */
-			if (MMSN_BUSY_BUS == a_pFSM->u8LineState)
+			if (MMSNP_BUSY_BUS == a_pFSM->u8LineState)
 			{
 				// Indicate that there is data waiting to be sent.
 				a_pFSM->u8IsDataToSend = true;
@@ -1046,18 +1046,18 @@ uint8_t mmsn_ProcessResponse_FrameProcessEvent_Handler(MMSN_FSM_t * a_pFSM, uint
 	
 	ATOMIC_BLOCK(ATOMIC_FORCEON)
 	{
-		// Get size of received response
+		/* Get size of received response */
 		u8ResponseSize = fifo_get_used_size(&fifo_receive_buffer_desc);
 	
-		// Check if expected data size was collected
-		if (MMSN_COMM_FRAME_SIZE == u8ResponseSize)
+		/* Check if expected data size was collected */
+		if (MMSNP_COMM_FRAME_SIZE == u8ResponseSize)
 		{
 			/* Complete response data frame was received */
 		
-			// Make a working copy of received data frame
+			/* Make a working copy of received data frame */
 			_copyDataFrame(&fifo_receive_buffer_desc, a_pFSM->ptrRxDataFrame);
 	
-			// Clear receiving FIFO
+			/* Clear receiving FIFO */
 			fifo_flush(&fifo_receive_buffer_desc);
 			
 			/* Calculate CRC-16 (CRC-CCITT) using XMEGA hardware CRC peripheral
@@ -1082,6 +1082,7 @@ uint8_t mmsn_ProcessResponse_FrameProcessEvent_Handler(MMSN_FSM_t * a_pFSM, uint
 				// Calculated and received CRC-16 value matched.
 
 				// TODO: what to do with a response?
+				// Compare received with originally sent data. Request retransmission if needed?
 			}
 			else
 			{
@@ -1178,7 +1179,7 @@ uint8_t mmsn_ProcessData_FrameProcess_Handler(MMSN_FSM_t * a_pFSM, uint8_t a_u8E
 		u8FrameSize = fifo_get_used_size(&fifo_receive_buffer_desc);
 
 		// Check if expected data size was collected
-		if (MMSN_COMM_FRAME_SIZE == u8FrameSize)
+		if (MMSNP_COMM_FRAME_SIZE == u8FrameSize)
 		{
 			/* Complete frame was received. */
 		
@@ -1283,7 +1284,7 @@ uint8_t mmsn_Idle_SendDataEvent_Handler(MMSN_FSM_t *a_pFSM, uint8_t a_u8Event, v
 		 * - send the first byte
 		 * - go to sending state
 		 */
-		if (MMSN_BUSY_BUS == a_pFSM->u8LineState)
+		if (MMSNP_BUSY_BUS == a_pFSM->u8LineState)
 		{
 			// Indicate that there is data waiting to be sent.
 			a_pFSM->u8IsDataToSend = true;
@@ -1340,7 +1341,7 @@ uint8_t mmsn_Idle_SendDataEvent_Handler(MMSN_FSM_t *a_pFSM, uint8_t a_u8Event, v
 void mmsn_Initialize(MMSN_FSM_t * a_pFSM)
 {
 	// Initialize network manager FSM
-	a_pFSM->u8LineState			= MMSN_FREE_BUS;		//! Set bus state to free
+	a_pFSM->u8LineState			= MMSNP_FREE_BUS;		//! Set bus state to free
 	a_pFSM->CurrentState		= MMSN_IDLE_STATE;		//! Set current state to \ref eSM_Initialize
 	a_pFSM->PreviousState		= MMSN_IDLE_STATE;		//! Set previous state to \ref eSM_Initialize
 	a_pFSM->ptrRxDataFrame		= &g_RxCommFrameBuffer;	//! Pointer to internal copy of received data frame
@@ -1362,7 +1363,7 @@ void mmsn_Initialize(MMSN_FSM_t * a_pFSM)
 	fsmReceiverInitialize(&a_pFSM->ReceiverFSM);
 	
 	/* Initialize sending and receiving FIFOs */
-	fifo_init(&fifo_receive_buffer_desc, &fifo_receive_buffer[0], FIFO_RECEIVE_BUFFER_SIZE);
+	fifo_init(&fifo_receive_buffer_desc, &fifo_receive_buffer[0], MMSNP_FIFO_RECEIVE_BUFFER_SIZE);
 	// fifo_init(&fifo_send_buffer_desc,	 &fifo_send_buffer[0],	  FIFO_SEND_BUFFER_SIZE);
 	
 	// Initialize Network Error Descriptor
@@ -1485,7 +1486,7 @@ uint8_t _composeSendDataFrame(const mmsn_receive_data_frame_t *a_pSrcBuf, mmsnp_
 	a_pDstBuf->u8SendDataBuffer[1] = FSMR_STX_BYTE_VALUE;
 	
 	// Do byte stuffing on source data starting after two leading special characters
-	u8MessageSize = doByteStuffing((a_pDstBuf->u8SendDataBuffer + 2), MMSN_COMM_SEND_DATA_SIZE, a_pSrcBuf->u8FrameBuffer, MMSN_COMM_FRAME_SIZE);
+	u8MessageSize = doByteStuffing((a_pDstBuf->u8SendDataBuffer + 2), MMSN_COMM_SEND_DATA_SIZE, a_pSrcBuf->u8FrameBuffer, MMSNP_COMM_FRAME_SIZE);
 	
 	// Increase sending message size after byte stuffing by two. Due to leading characters.
 	u8MessageSize += 2;
