@@ -130,7 +130,7 @@ struct mmsnp_Send_Data_Frame
 			uint8_t u8SendDataBuffer[MMSN_COMM_SEND_DATA_BUFFER_SIZE];
 		};
 		
-		// Complete frame buffer for data sending
+		/* Complete frame buffer for data transmission */
 		uint8_t u8SendDataFrameBuffer[MMSN_COMM_SEND_FRAME_BUFFER_SIZE];
 	};
 };
@@ -366,8 +366,8 @@ typedef struct MMSN_SEND_ATTRIBUTES
 typedef struct MMSN_FSM
 {
 	uint8_t						u8LineState;		//! Flag to indicate that the line is busy
-	MMSN_FSMState_t				CurrentState;
-	MMSN_FSMState_t				PreviousState;
+	MMSN_FSMState_t				CurrentState;		//! Current state
+	MMSN_FSMState_t				PreviousState;		//! Previous state
 	mmsn_receive_data_frame_t	*ptrRxDataFrame;	//! Pointer to structure holding frame being received
 	//mmsn_comm_data_frame_t	*ptrTxDataFrame;	//! Pointer to structure holding frame to be transmitted
 	uint8_t						u8RetriesCount;		//! Retransmission counter
