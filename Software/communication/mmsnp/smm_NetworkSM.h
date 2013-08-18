@@ -19,6 +19,10 @@
 #include <nvm_driver.h>
 #include "fsm_Receiver.h"
 
+/* Debug macros */
+#define dprintf(FORMAT, args...) printf_P(PSTR(FORMAT), ##args)
+#define NEWLINESTR "\r\n"
+
 /** EVENT definitions */
 
 /* Add event to the queue */
@@ -218,6 +222,17 @@ _u16Identifier = (_u16Identifier & (~MMSN_SYSCMD_bm)) | ((_u8SysCmd & 0x7F) << M
 #define set_MMSN_CTRLF(_u8CtrlF, _u16Identifier)	\
 	_u16Identifier = (_u16Identifier & (~MMSN_CTRLF_bm)) | (_u8CtrlF << MMSN_CTRLF_bp)
 
+/**
+ * \brief Macro to form 16bit value with 2 bytes.
+ *
+ * This macro is forming 16bit value using provided
+ * two bytes.
+ *
+ * \param _InByte1 input byte - higher 8 bits of 16bit value
+ * \param _InByte2 input byte - lower 8 bits of 16bit value
+ *
+ * \return _OutWord Output 16bit value
+ */
 #define MMSN_BYTES_2_WORD(_InByte1, _InByte2, _OutWord)		\
 do {														\
 	_OutWord = (((_InByte1 << 8) & 0xFF00) | (_InByte2));	\
