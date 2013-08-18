@@ -21,8 +21,8 @@ enum eFSMReceiverState
 {
 	FSMR_WAIT_FOR_DLE = 0,	// Waiting for Control Escape character (DLE)
 	FSMR_WAIT_FOR_STX,		// Waiting for STX (start) or ETX (end) flag
-	FSMR_PROCESS_DATA,			// Collecting data
-	FSMR_PROCESS_DLE				// Data Link Escape
+	FSMR_PROCESS_DATA,		// Collecting data
+	FSMR_PROCESS_DLE		// Data Link Escape
 };
 
 /* FSM Events */
