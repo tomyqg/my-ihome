@@ -51,7 +51,7 @@ void xmega_set_usart_mode(USART_t *a_pUsart, USART_CMODE_t usartmode)
  */
 void xmega_set_usart_rx_interrupt_level(USART_t *a_pUsart, enum USART_RXCINTLVL_enum level)
 {
-	(a_pUsart)->CTRLA = ((a_pUsart)->CTRLA & ~USART_RXCINTLVL_gm) |	(level << USART_RXCINTLVL_gp);
+	(a_pUsart)->CTRLA = (((a_pUsart)->CTRLA & ~USART_RXCINTLVL_gm) |	level);
 };
 
 /**
@@ -64,7 +64,7 @@ void xmega_set_usart_rx_interrupt_level(USART_t *a_pUsart, enum USART_RXCINTLVL_
  */
 void xmega_set_usart_tx_interrupt_level(USART_t *a_pUsart, enum USART_TXCINTLVL_enum level)
 {
-	(a_pUsart)->CTRLA = ((a_pUsart)->CTRLA & ~USART_TXCINTLVL_gm) | (level << USART_TXCINTLVL_gp);	
+	(a_pUsart)->CTRLA = (((a_pUsart)->CTRLA & ~USART_TXCINTLVL_gm) | level);	
 };
 
 /**
@@ -78,7 +78,7 @@ void xmega_set_usart_tx_interrupt_level(USART_t *a_pUsart, enum USART_TXCINTLVL_
  */
 void xmega_set_usart_dre_interrupt_level(USART_t *a_pUsart, enum USART_DREINTLVL_enum level)
 {
-	(a_pUsart)->CTRLA = ((a_pUsart)->CTRLA & ~USART_DREINTLVL_gm) |	(level << USART_DREINTLVL_gp);
+	(a_pUsart)->CTRLA = (((a_pUsart)->CTRLA & ~USART_DREINTLVL_gm) | level);
 };
 
 /**
