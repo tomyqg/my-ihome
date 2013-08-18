@@ -15,9 +15,10 @@ Serial Multi-Master Network State Machine
 #include <tc_driver.h>
 #include <usart_driver.h>
 #include <utils.h>
-#include <util/crc16.h>
 
-#include <util/delay.h>
+#ifdef __HAS_XMEGA_HARDWARE_CRC
+	#include <util/crc16.h>
+#endif
 
 /**
  * \brief Buffer to associate with receiving FIFO buffer
@@ -313,21 +314,6 @@ void _resetSendDataAttributes(MMSN_FSM_t * a_pFSM)
 	a_pFSM->SendDataAttr.u8DataCounter = 0;
 };
 
-/**
- * \brief Preprocessing data to be transmitted.
- *
- *  \param a_pFSM Pointer to Multi-master FSM.
- */
-void _processTransmissionData(MMSN_FSM_t * a_pFSM)
-{
-	
-	// Copy sending message to the internal structures.
-	
-	// Store data size
-	
-	// Store information if response is needed
-}
-
 /************************************************************************/
 /* EVENT HANDLERS                                                       */
 /************************************************************************/
@@ -605,7 +591,7 @@ uint8_t mmsn_Receive_DataReceived_Handler(MMSN_FSM_t * a_pFSM, uint8_t a_u8Event
 
 uint8_t	mmsn_ExecuteCommand_ExecuteCommandEvent_Handler(MMSN_FSM_t * a_pFSM, uint8_t a_u8Event, void * a_pEventArg)
 {
-	ATOMIC_BLOCK(ATOMIC_FORCEON)
+	// ATOMIC_BLOCK(ATOMIC_FORCEON)
 	{
 		/* Complete frame was received and is ready to be processed.
 		 * Check if this message is handled by this device.
@@ -626,11 +612,10 @@ uint8_t	mmsn_ExecuteCommand_ExecuteCommandEvent_Handler(MMSN_FSM_t * a_pFSM, uin
 		
 #ifdef MMSNP_DEBUG
 		// printf("\nExec:dev_typ = %d", u8DeviceType);
-		// printf("\nExec:dev_num = %d", u8DeviceNumber);
+		//printf("\nExec:dev_num = %d", u8DeviceNumber);
 #endif
 		/* Obtain appropriate function handler */
 		commandHandlerPtr = get_CommandFunctionHandler(u8DeviceNumber);
-		commandHandlerPtr = get_CommandFunctionHandler(0x01);
 		
 		// Execute if needed
 		if (NULL == commandHandlerPtr)
@@ -661,87 +646,81 @@ uint8_t	mmsn_ExecuteCommand_ExecuteCommandEvent_Handler(MMSN_FSM_t * a_pFSM, uin
 
 uint8_t mmsn_Send_DataRegEmptyEvent_Handler(MMSN_FSM_t *a_pFSM, uint8_t a_u8Event, void *a_pEventArg)
 {
-	ATOMIC_BLOCK(ATOMIC_FORCEON)
+	/* Check if any data is left by comparing actual counter value with data size */
+	if( a_pFSM->SendDataAttr.u8DataCounter < a_pFSM->SendDataAttr.u8DataSize)
 	{
-		// Check if any data is left by comparing actual counter value with data size
-		if( a_pFSM->SendDataAttr.u8DataCounter < a_pFSM->SendDataAttr.u8DataSize)
-		{
-			/* Data still waiting to be sent */
+		/* Data still waiting to be sent */
 		
-			/* Increase transmission counter */
-			a_pFSM->SendDataAttr.u8DataCounter++;
+		/* Increase transmission counter */
+		a_pFSM->SendDataAttr.u8DataCounter++;
 		
-			/* Get next data byte and put it to USART register for sending */
-			USART_COMMUNICATION_BUS.DATA = a_pFSM->SendDataAttr.pu8DataBuffer[a_pFSM->SendDataAttr.u8DataCounter];
+		/* Get next data byte and put it to USART register for sending */
+		USART_COMMUNICATION_BUS.DATA = a_pFSM->SendDataAttr.pu8DataBuffer[a_pFSM->SendDataAttr.u8DataCounter];	
+			
+		/* Do not change the state until any data left in transmission buffer */
+			
+		/* Update previous state */
+		a_pFSM->PreviousState = MMSN_SEND_STATE;
+		
+		/* Turn on DRE interrupt */
+		xmega_set_usart_dre_interrupt_level(&USART_COMMUNICATION_BUS, USART_DREINTLVL_HI_gc);
+	}
+	else
+	{
+		/* Complete frame was sent out */
+		
+		/* Wait until all data is shifted out.
+			* 1. Wait for TX complete.
+			* 2. Clear TX interrupt flag
+			*/
+		while(!(USART_COMMUNICATION_BUS.STATUS & USART_TXCIF_bm));
+		USART_COMMUNICATION_BUS.STATUS |= USART_TXCIF_bm;
+			
+		/* Turn off TXC and DRE interrupts */
+		// xmega_set_usart_tx_interrupt_level(&USART_COMMUNICATION_BUS, USART_TXCINTLVL_OFF_gc);
+		xmega_set_usart_dre_interrupt_level(&USART_COMMUNICATION_BUS, USART_DREINTLVL_OFF_gc);
+			
+		/* Set RS-485 transceiver for receiving */
+		RS485_RECEIVER_ENABLE();
+			
+		/* Turn on USART RXC interrupt */
+		xmega_set_usart_rx_interrupt_level(&USART_COMMUNICATION_BUS, USART_RXCINTLVL_HI_gc);
 
-			/* Turn on DRE interrupt */
-			xmega_set_usart_dre_interrupt_level(&USART_COMMUNICATION_BUS, USART_DREINTLVL_HI_gc);
+		/* If response is needed then
+			* - start timer waiting for a response
+			* - initialize receiver FSM
+			* - go to the \ref MMSN_WAIT_FOR_RESPONSE_STATE state
+			*
+			* Otherwise
+			* - clear things up
+			* - go to the \ref MMSN_IDLE_STATE state
+			*/
+		if (true == a_pFSM->SendDataAttr.u8IsResponseNeeded)
+		{
+			/* Start waiting for response timer */
+			xmega_tc_select_clock_source(&TIMER_NO_RESPONSE, TC_CLKSEL_DIV64_gc);
 			
-			/* Do not change the state until any data left in transmission buffer */
-			
+			/* Make transition to waiting for a response.
+				* State machine will be woken up after USART RXC IRQ.
+				*/
+			a_pFSM->CurrentState = MMSN_WAIT_FOR_RESPONSE_STATE;
 			/* Update previous state */
 			a_pFSM->PreviousState = MMSN_SEND_STATE;
 		}
 		else
 		{
-			/* Complete frame was sent out */
-		
-			/* Wait until all data is shifted out.
-			 * 1. Wait for TX complete.
-			 * 2. Clear TX interrupt flag
-			 */
-			while((USART_COMMUNICATION_BUS.STATUS & USART_TXCIF_bm) == 0);
-			USART_COMMUNICATION_BUS.STATUS |= USART_TXCIF_bm;
+			/* Reset transmission related resources */
+			_resetSendDataAttributes(a_pFSM);
 			
-			// Wait a while for data to bit shifted out from physical device
-			_delay_us(500);
-			
-			/* Turn off TXC and DRE interrupts */
-			// xmega_set_usart_tx_interrupt_level(&USART_COMMUNICATION_BUS, USART_TXCINTLVL_OFF_gc);
-			xmega_set_usart_dre_interrupt_level(&USART_COMMUNICATION_BUS, USART_DREINTLVL_OFF_gc);
-			
-			/* Set RS-485 transceiver for receiving */
-			RS485_RECEIVER_ENABLE();
-			
-			/* Turn on USART RXC interrupt */
-			xmega_set_usart_rx_interrupt_level(&USART_COMMUNICATION_BUS, USART_RXCINTLVL_HI_gc);
-
-			/* If response is needed then
-				* - start timer waiting for a response
-				* - initialize receiver FSM
-				* - go to the \ref MMSN_WAIT_FOR_RESPONSE_STATE state
-				*
-				* Otherwise
-				* - clear things up
-				* - go to the \ref MMSN_IDLE_STATE state
-				*/
-			if (true == a_pFSM->SendDataAttr.u8IsResponseNeeded)
-			{
-				/* Start waiting for response timer */
-				xmega_tc_select_clock_source(&TIMER_NO_RESPONSE, TC_CLKSEL_DIV64_gc);
-			
-				/* Make transition to waiting for a response.
-				 * State machine will be woken up after USART RXC IRQ.
-				 */
-				a_pFSM->CurrentState = MMSN_WAIT_FOR_RESPONSE_STATE;
-				/* Update previous state */
-				a_pFSM->PreviousState = MMSN_SEND_STATE;
-			}
-			else
-			{
-				/* Reset transmission related resources */
-				_resetSendDataAttributes(a_pFSM);
-			
-				/* Make transition to IDLE state. */
-				a_pFSM->CurrentState = MMSN_IDLE_STATE;
-				/* Update previous state */
-				a_pFSM->PreviousState = MMSN_SEND_STATE;
-			}
-
-			// Always clear receiver related resources
-			_ClearRxResources(a_pFSM);
+			/* Make transition to IDLE state. */
+			a_pFSM->CurrentState = MMSN_IDLE_STATE;
+			/* Update previous state */
+			a_pFSM->PreviousState = MMSN_SEND_STATE;
 		}
-	};
+
+		/* Always clear receiver related resources */
+		_ClearRxResources(a_pFSM);
+	}
 	
 	return MMSNP_OK;
 };
@@ -872,7 +851,7 @@ uint8_t mmsn_ReceiveResponse_DataReceivedEvent_Handler(MMSN_FSM_t * a_pFSM, uint
 						/* Update previous state */
 						a_pFSM->PreviousState = MMSN_RECEIVE_RESPONSE_STATE;
 					
-						// Add software event to queue. This will trigger immediate FSM run to handle error state.
+						/* Add software event to queue. This will trigger immediate FSM run to handle error state. */
 						ADD_EVENT_TO_QUEUE(a_pFSM->ptrEventQueueDesc, MMSN_RETRANSMISSION_EVENT);
 					}
 					else
@@ -1111,28 +1090,49 @@ uint8_t mmsn_ProcessResponse_FrameProcessEvent_Handler(MMSN_FSM_t * a_pFSM, uint
 			 * excluding last 2 bytes with CRC-16.
 			 * Not valid for A/B revision! Use AVR LibC function.
 			 */
-			// u16CalculatedCRC = xmega_calculate_checksum_crc16(a_pFSM->ptrRxDataFrame->u8FrameBuffer, MMSN_FRAME_NOCRC_LENGTH);
+#ifdef __HAS_XMEGA_HARDWARE_CRC
+			u16CalculatedCRC = xmega_calculate_checksum_crc16(a_pFSM->ptrRxDataFrame->u8FrameBuffer, MMSN_FRAME_NOCRC_LENGTH);
+#else
 			for( uint8_t u8idx = 0; u8idx < MMSN_FRAME_NOCRC_LENGTH; u8idx++)
 			{
 				u16CalculatedCRC = _crc_xmodem_update(u16CalculatedCRC, a_pFSM->ptrRxDataFrame->u8FrameBuffer[u8idx]);
 			};
-
+#endif
 			/* Retrieve CRC-16 from the response message.
 			 * Note that received CRC16 value is transmitted in big endian order.
 			 * AVR architecture is little endian, so received bytes should be changed.
 			 */
 			MMSN_BYTES_2_WORD(a_pFSM->ptrRxDataFrame->u8CRC16LoByte, a_pFSM->ptrRxDataFrame->u8CRC16HiByte, u16ResponseCRC);
 
-			// Check received data integrity
+			/* Check received data integrity */
 			if (u16CalculatedCRC == u16ResponseCRC)
 			{
-				// Calculated and received CRC-16 value matched.
+				/* Calculated and received CRC-16 value matched. */
 
-				// TODO: what to do with a response?
-				// Compare received with originally sent data. Request retransmission if needed?
-				// int iResult;
+				/* When Received data frame is an acknowledge type response then
+				 * received data must be exact match with the data being transmitted.
+				 * It is enough to check received CRC-16 value with previously 
+				 * transmitted data frame CRC-16 value.
+				 *
+				 * If values does not match then retransmission should be requested.
+				 * Otherwise communication block is finished.
+				 */
 				
-				//memcmp(a_pFSM->SendDataAttr.pu8DataBuffer, a_pFSM->ptrRxDataFrame->u8DataBuffer, MMSN
+				
+				/* Go to \ref MMSN_IDLE_STATE state */
+				a_pFSM->CurrentState = MMSN_IDLE_STATE;
+				/* Update previous state */
+				a_pFSM->PreviousState = MMSN_PROCESS_RESPONSE_STATE;
+				
+				/* Clear Rx resources */
+				_ClearRxResources(a_pFSM);
+				
+				/* Clear sending data attributes */
+				_resetSendDataAttributes(a_pFSM);
+				
+				/* Reset sending parameters */
+				a_pFSM->u8RetriesCount	= 0;
+				a_pFSM->u8IsDataToSend  = false;
 			}
 			else
 			{
@@ -1146,7 +1146,7 @@ uint8_t mmsn_ProcessResponse_FrameProcessEvent_Handler(MMSN_FSM_t * a_pFSM, uint
 				/* Update previous state */
 				a_pFSM->PreviousState = MMSN_PROCESS_RESPONSE_STATE;
 			
-				// Add software event to queue. This will trigger immediate FSM run to handle error state.
+				/* Add software event to queue. This will trigger immediate FSM run to handle error state. */
 				ADD_EVENT_TO_QUEUE(a_pFSM->ptrEventQueueDesc, MMSN_RETRANSMISSION_EVENT);
 			}
 		}
@@ -1162,7 +1162,7 @@ uint8_t mmsn_ProcessResponse_FrameProcessEvent_Handler(MMSN_FSM_t * a_pFSM, uint
 			/* Update previous state */
 			a_pFSM->PreviousState = MMSN_PROCESS_RESPONSE_STATE;
 		
-			// Add software event to queue. This will trigger immediate FSM run to handle error state.
+			/* Add software event to queue. This will trigger immediate FSM run to handle error state. */
 			ADD_EVENT_TO_QUEUE(a_pFSM->ptrEventQueueDesc, MMSN_RETRANSMISSION_EVENT);
 		}
 	};
@@ -1172,62 +1172,61 @@ uint8_t mmsn_ProcessResponse_FrameProcessEvent_Handler(MMSN_FSM_t * a_pFSM, uint
 
 uint8_t mmsn_Error_ErrorEvent_Handler(MMSN_FSM_t * a_pFSM, uint8_t a_u8Event, void * a_pEventArg)
 {
-	ATOMIC_BLOCK(ATOMIC_FORCEON)
-	{
-		/* Add current Network Error to the table */
-		add_commNetworkError(&g_NetworkErrorDesc);
+	/* Add current Network Error to the table */
+	add_commNetworkError(&g_NetworkErrorDesc);
 	
-		/* Perform suitable action */
-		switch (g_NetworkErrorDesc.currError)
-		{
-			case NE_USART_Receiver_Error:
-			case NE_Frame_CRC:
-			case NE_Frame_Malfunction_STX:
-			case NE_Frame_Malfunction_ETX:
-			case NE_ReceiverFSM_Malfunction:
-			case NE_ReceiverFSM_UnknownState:
-			case NE_ReceiverFSM_UndefinedFuncPtr:		
-			case NE_RX_Buffer_Overflow:
-			case NE_RX_Buffer_Underflow:
-				/* All errors are related to data receiving */
-			
-				// Reset Rx resources
-				_ClearRxResources(a_pFSM);
-			break;
+#ifdef MMSNP_DEBUG
+	dprintf(NEWLINESTR "Err: %u", g_NetworkErrorDesc.currError);
+#endif
+	
+	/* Perform suitable action */
+	switch (g_NetworkErrorDesc.currError)
+	{
+		case NE_USART_Receiver_Error:
+		case NE_Frame_CRC:
+		case NE_Frame_Malfunction_STX:
+		case NE_Frame_Malfunction_ETX:
+		case NE_ReceiverFSM_Malfunction:
+		case NE_ReceiverFSM_UnknownState:
+		case NE_ReceiverFSM_UndefinedFuncPtr:		
+		case NE_RX_Buffer_Overflow:
+		case NE_RX_Buffer_Underflow:
+			/* All errors are related to data receiving */
+			_ClearRxResources(a_pFSM);
+		break;
 		
-			case NE_MaximumRetries:
-				// Clear Rx resources
-				_ClearRxResources(a_pFSM);
+		case NE_MaximumRetries:
+			// Clear Rx resources
+			_ClearRxResources(a_pFSM);
 			
-				// Clear sending data attributes
-				_resetSendDataAttributes(a_pFSM);
+			// Clear sending data attributes
+			_resetSendDataAttributes(a_pFSM);
 			
-				// Reset sending parameters of MMSN
-				a_pFSM->u8RetriesCount	= 0;
-				a_pFSM->u8IsDataToSend  = false;
+			// Reset sending parameters of MMSN
+			a_pFSM->u8RetriesCount	= 0;
+			a_pFSM->u8IsDataToSend  = false;
 		
-			default:
-			/* Your code here */
-			break;
-		} 
+		default:
+		/* Your code here */
+		break;
+	} 
 
-		/* Clear network error descriptor */
-		g_NetworkErrorDesc.currError = NE_None;
+	/* Clear network error descriptor */
+	g_NetworkErrorDesc.currError = NE_None;
 
-		/* Set next state to \ref MMSN_IDLE_STATE state */
-		a_pFSM->CurrentState = MMSN_IDLE_STATE;
+	/* Set next state to \ref MMSN_IDLE_STATE state */
+	a_pFSM->CurrentState = MMSN_IDLE_STATE;
 		
-		/* Set previous state to \ref MMSN_IDLE_STATE state */
-		a_pFSM->PreviousState = MMSN_ERROR_STATE;
+	/* Set previous state to \ref MMSN_IDLE_STATE state */
+	a_pFSM->PreviousState = MMSN_ERROR_STATE;
 		
-		/* RS-485 physical device configuration
-		 * Initialize GPIO related to RS-485 interface.
-		 */
-		RS485_DRIVER_GPIO_INITIALIZE();
+	/* RS-485 physical device configuration
+		* Initialize GPIO related to RS-485 interface.
+		*/
+	RS485_DRIVER_GPIO_INITIALIZE();
 		
-		/* Enable RS-485 receiver */
-		RS485_RECEIVER_ENABLE();
-	};
+	/* Enable RS-485 receiver */
+	RS485_RECEIVER_ENABLE();
 	
 	return MMSNP_OK;
 };
@@ -1258,22 +1257,22 @@ uint8_t mmsn_ProcessData_FrameProcess_Handler(MMSN_FSM_t * a_pFSM, uint8_t a_u8E
 			 * excluding last 2 bytes with CRC-16.
 			 * Not valid for A/B revision! Use AVR LibC function.
 			 */
-			// u16CalculatedCRC = xmega_calculate_checksum_crc16(a_pFSM->ptrRxDataFrame->u8FrameBuffer, MMSN_FRAME_NOCRC_LENGTH);
+#ifdef __HAS_XMEGA_HARDWARE_CRC			
+			u16CalculatedCRC = xmega_calculate_checksum_crc16(a_pFSM->ptrRxDataFrame->u8FrameBuffer, MMSN_FRAME_NOCRC_LENGTH);
+#else
 			for( uint8_t u8idx = 0; u8idx < MMSN_FRAME_NOCRC_LENGTH; u8idx++)
 			{
 				u16CalculatedCRC = _crc_xmodem_update(u16CalculatedCRC, a_pFSM->ptrRxDataFrame->u8FrameBuffer[u8idx]);
 			};
-
-			/* Retrieve CRC-16 from the response message.
-			 * Note that received CRC16 value is transmitted in big endian order.
-			 * AVR architecture is little endian, so received bytes should be swapped.
-			 */
-			MMSN_BYTES_2_WORD(a_pFSM->ptrRxDataFrame->u8CRC16LoByte, a_pFSM->ptrRxDataFrame->u8CRC16HiByte, u16ReceivedCRC);
-		
+#endif
+			/* Retrieve CRC-16 from the response message. */
+			MMSN_BYTES_2_WORD(a_pFSM->ptrRxDataFrame->u8CRC16HiByte, a_pFSM->ptrRxDataFrame->u8CRC16LoByte, u16ReceivedCRC);
+			
 			// Check received data integrity
 			if (u16CalculatedCRC == u16ReceivedCRC)
 			{
-				// Calculated and received CRC-16 value matched. Go to command execution state.
+				/* printf("\ncrc ok\n"); */
+				/* Calculated and received CRC-16 value matched. Go to command execution state. */
 
 				/* Go to \ref eSM_ExecuteCommand state */
 				a_pFSM->CurrentState = MMSN_EXECUTE_COMMAND_STATE;
@@ -1285,6 +1284,9 @@ uint8_t mmsn_ProcessData_FrameProcess_Handler(MMSN_FSM_t * a_pFSM, uint8_t a_u8E
 			}
 			else
 			{
+				/* printf("\ncrc nok\n");
+				printf("\ncrc rx: %u-%u %u\n", a_pFSM->ptrRxDataFrame->u8CRC16LoByte, a_pFSM->ptrRxDataFrame->u8CRC16HiByte, u16ReceivedCRC);
+				printf("\ncrc calc: %u\n", u16CalculatedCRC); */
 				/* Received and calculated CRC-16 value does not match.
 				 * Report CRC integrity error.
 				 */
