@@ -192,3 +192,17 @@ void xmega_get_shortened_serial_num(struct nvm_device_serial *a_pInCompleteSeria
 	// Magic numbers left on purpose
 	// memcpy(&(a_pOutShortenedSerialNum->u8DataArray[0]), &(a_pInCompleteSerialNum->u8DataArray[4]), 7);
 };
+
+static __inline__ __attribute__((always_inline,noreturn)) 
+void xmega_software_reset(void)
+{
+    __asm volatile ("cli"                 "\n\t" 
+                    "out __CCP__, %[ccp]" "\n\t" 
+                    "st  %a[rst], %[swrst]" 
+        : 
+        : [ccp]   "r" ((uint8_t) CCP_IOREG_gc), 
+          [swrst] "r" ((uint8_t) RST_SWRST_bm), 
+          [rst]   "e" (&RST.CTRL) 
+        : "memory"); 
+    __builtin_unreachable(); 
+};
