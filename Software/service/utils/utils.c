@@ -39,6 +39,7 @@ void xmega_set_cpu_clock_to_8MHz(void)
 	CLK.CTRL = u8ClockControl;
 }
 
+#ifdef __HAS_XMEGA_HARDWARE_CRC
 // CRC-16(CRC-CCITT) Polynomial x^16 + x^12 + x^5 + 1 --> 0x1021
 uint16_t xmega_calculate_checksum_crc16(uint8_t *a_pData, uint8_t a_u8Count)
 {
@@ -75,7 +76,7 @@ uint16_t xmega_calculate_checksum_crc16(uint8_t *a_pData, uint8_t a_u8Count)
 	
 	return crc16_checksum;
 };
-
+#endif
 
 // Setup and enable ADC converter
 uint16_t xmega_adc_measure(ADC_t * a_pADC, ADC_REFSEL_t a_VoltageReference, ADC_CH_MUXPOS_t a_InputMux)
