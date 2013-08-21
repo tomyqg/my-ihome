@@ -16,7 +16,7 @@ Serial Multi-Master Network State Machine
 #include <usart_driver.h>
 #include <utils.h>
 
-#ifdef __HAS_XMEGA_HARDWARE_CRC
+#ifndef __HAS_XMEGA_HARDWARE_CRC
 	#include <util/crc16.h>
 #endif
 
